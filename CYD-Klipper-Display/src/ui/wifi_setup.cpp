@@ -1,4 +1,5 @@
 #include "lvgl.h"
+#include "wifi_setup.h"
 #include "../conf/global_config.h"
 
 #include "WiFi.h"
@@ -148,5 +149,11 @@ void wifi_init(){
     while (!global_config.wifiConfigured || WiFi.status() != WL_CONNECTED){
         lv_timer_handler();
         lv_task_handler();
+    }
+}
+
+void wifi_ok(){
+    if (WiFi.status() != WL_CONNECTED){
+        wifi_init();
     }
 }

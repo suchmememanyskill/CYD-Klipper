@@ -1,6 +1,8 @@
 #include "conf/global_config.h"
 #include "conf/screen_driver.h"
 #include "ui/wifi_setup.h"
+#include "ui/ip_setup.h"
+#include "core/websocket_setup.h"
 #include "lvgl.h"
 
 static void event_handler(lv_event_t * e){
@@ -22,6 +24,8 @@ void setup() {
     Serial.println("Screen init done");
     
     wifi_init();
+    ip_setup();
+    websocket_setup();
 
     lv_obj_clean(lv_scr_act());
 
@@ -34,9 +38,17 @@ void setup() {
     label = lv_label_create(btn1);
     lv_label_set_text(label, "Reset Configuration");
     lv_obj_center(label);
+
+    lv_obj_t * slider = lv_slider_create(lv_scr_act());
+    lv_obj_set_width(slider, 200);
+    lv_obj_align(slider, LV_ALIGN_CENTER, 0, 40);
+    lv_slider_set_range(slider, 0, 100);
+    lv_slider_set_value(slider, 50, LV_ANIM_OFF);
 }
 
 void loop(){
+    wifi_ok();
+    websocket_process();
     lv_timer_handler();
     lv_task_handler();
 }
