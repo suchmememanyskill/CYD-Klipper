@@ -1,0 +1,206 @@
+#include "screen_driver.h"
+#include <SPI.h>
+#include <TFT_eSPI.h>
+#include "global_config.h"
+#include "lvgl.h"
+
+SPIClass touchscreen_spi = SPIClass(HSPI);
+XPT2046_Touchscreen touchscreen(XPT2046_CS, XPT2046_IRQ);
+
+uint32_t LV_EVENT_GET_COMP_CHILD;
+
+static lv_disp_draw_buf_t draw_buf;
+static lv_color_t buf[TFT_WIDTH * TFT_HEIGHT / 10];
+
+TFT_eSPI tft = TFT_eSPI();
+
+bool isScreenInSleep = false;
+lv_timer_t *screenSleepTimer;
+
+TS_Point touchscreen_point(){
+    TS_Point p = touchscreen.getPoint();
+    p.x = round((p.x * global_config.screenCalXMult) + global_config.screenCalXOffset);
+    p.y = round((p.y * global_config.screenCalYMult) + global_config.screenCalYOffset);
+    return p;
+}
+
+void touchscreen_calibrate(bool force){
+    if (global_config.screenCalibrated && !force)
+        {
+            return;
+        }
+
+    tft.fillScreen(TFT_BLACK);
+    tft.setCursor(20, 140);
+    tft.setTextColor(TFT_WHITE, TFT_BLACK);
+    tft.setTextSize(2);
+    tft.println("Calibrate Screen");
+
+    TS_Point p;
+    int16_t x1, y1, x2, y2;
+
+    while (touchscreen.touched())
+        ;
+    tft.drawFastHLine(0, 10, 20, ILI9341_WHITE);
+    tft.drawFastVLine(10, 0, 20, ILI9341_WHITE);
+    while (!touchscreen.touched())
+        ;
+    delay(50);
+    p = touchscreen.getPoint();
+    x1 = p.x;
+    y1 = p.y;
+    tft.drawFastHLine(0, 10, 20, ILI9341_BLACK);
+    tft.drawFastVLine(10, 0, 20, ILI9341_BLACK);
+    delay(500);
+
+    while (touchscreen.touched())
+        ;
+    tft.drawFastHLine(300, 230, 20, ILI9341_WHITE);
+    tft.drawFastVLine(310, 220, 20, ILI9341_WHITE);
+
+    while (!touchscreen.touched())
+        ;
+    delay(50);
+    p = touchscreen.getPoint();
+    x2 = p.x;
+    y2 = p.y;
+    tft.drawFastHLine(300, 230, 20, ILI9341_BLACK);
+    tft.drawFastVLine(310, 220, 20, ILI9341_BLACK);
+
+    int16_t xDist = 320 - 40;
+    int16_t yDist = 240 - 40;
+
+    global_config.screenCalXMult = (float)xDist / (float)(x2 - x1);
+    global_config.screenCalXOffset = 20.0 - ((float)x1 * global_config.screenCalXMult);
+
+    global_config.screenCalYMult = (float)yDist / (float)(y2 - y1);
+    global_config.screenCalYOffset = 20.0 - ((float)y1 * global_config.screenCalYMult);
+
+    global_config.screenCalibrated = true;
+    WriteGlobalConfig();
+}
+
+void screen_setBrightness(byte brightness)
+{
+    analogWrite(TFT_BL, brightness);
+}
+
+void screen_timer_wake()
+{
+    lv_timer_reset(screenSleepTimer);
+    isScreenInSleep = false;
+    screen_setBrightness(255);
+}
+
+void screen_timer_sleep(lv_timer_t *timer)
+{
+    screen_setBrightness(0);
+    isScreenInSleep = true;
+}
+
+void screen_timer_setup()
+{
+    screenSleepTimer = lv_timer_create(screen_timer_sleep, 1 * 1000 * 60, NULL);
+    lv_timer_pause(screenSleepTimer);
+}
+
+void screen_timer_start()
+{
+    lv_timer_resume(screenSleepTimer);
+}
+
+void screen_timer_stop()
+{
+    lv_timer_pause(screenSleepTimer);
+}
+
+void screen_timer_period(uint32_t period)
+{
+    lv_timer_set_period(screenSleepTimer, period);
+}
+
+void screen_lv_flush(lv_disp_drv_t *disp, const lv_area_t *area, lv_color_t *color_p)
+{
+    uint32_t w = (area->x2 - area->x1 + 1);
+    uint32_t h = (area->y2 - area->y1 + 1);
+
+    tft.startWrite();
+    tft.setAddrWindow(area->x1, area->y1, w, h);
+    tft.pushColors((uint16_t *)&color_p->full, w * h, true);
+    tft.endWrite();
+
+    lv_disp_flush_ready(disp);
+}
+
+void screen_lv_touchRead(lv_indev_drv_t *indev_driver, lv_indev_data_t *data)
+{
+
+    if (touchscreen.tirqTouched() && touchscreen.touched())
+    {
+        lv_timer_reset(screenSleepTimer);
+        // dont pass first touch after power on
+        if (isScreenInSleep)
+        {
+            screen_timer_wake();
+            while (touchscreen.touched())
+                ;
+            return;
+        }
+
+        TS_Point p = touchscreen_point();
+        data->state = LV_INDEV_STATE_PR;
+        data->point.x = p.x;
+        data->point.y = p.y;
+    }
+    else
+    {
+        data->state = LV_INDEV_STATE_REL;
+    }
+}
+
+void screen_setup()
+{
+    touchscreen_spi.begin(XPT2046_CLK, XPT2046_MISO, XPT2046_MOSI, XPT2046_CS);
+    touchscreen.begin(touchscreen_spi);
+    touchscreen.setRotation(1);
+
+    lv_init();
+
+    tft.init();
+    tft.setRotation(1);
+    tft.fillScreen(TFT_BLACK);
+
+    touchscreen_spi.begin(XPT2046_CLK, XPT2046_MISO, XPT2046_MOSI, XPT2046_CS);
+    touchscreen.begin(touchscreen_spi);
+
+    touchscreen_calibrate();
+
+    lv_disp_draw_buf_init(&draw_buf, buf, NULL, TFT_WIDTH * TFT_HEIGHT / 10);
+
+    /*Initialize the display*/
+    static lv_disp_drv_t disp_drv;
+    lv_disp_drv_init(&disp_drv);
+    disp_drv.hor_res = TFT_HEIGHT;
+    disp_drv.ver_res = TFT_WIDTH;
+    disp_drv.flush_cb = screen_lv_flush;
+    disp_drv.draw_buf = &draw_buf;
+    lv_disp_drv_register(&disp_drv);
+
+
+    /*Initialize the (dummy) input device driver*/
+    static lv_indev_drv_t indev_drv;
+    lv_indev_drv_init(&indev_drv);
+    indev_drv.type = LV_INDEV_TYPE_POINTER;
+    indev_drv.read_cb = screen_lv_touchRead;
+    lv_indev_drv_register(&indev_drv);
+
+    screen_timer_setup();
+    screen_timer_start();
+
+    /*Initialize the graphics library */
+    LV_EVENT_GET_COMP_CHILD = lv_event_register_id();
+
+    lv_disp_t *dispp = lv_disp_get_default();
+    lv_theme_t *theme = lv_theme_default_init(dispp, lv_palette_main(LV_PALETTE_BLUE), lv_palette_main(LV_PALETTE_RED), true, LV_FONT_DEFAULT);
+    lv_disp_set_theme(dispp, theme);
+}
