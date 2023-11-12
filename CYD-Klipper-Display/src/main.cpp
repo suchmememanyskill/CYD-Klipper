@@ -4,6 +4,8 @@
 #include "ui/ip_setup.h"
 #include "core/websocket_setup.h"
 #include "lvgl.h"
+#include "core/data_setup.h"
+#include "ui/main_ui.h"
 
 static void event_handler(lv_event_t * e){
     lv_event_code_t code = lv_event_get_code(e);
@@ -26,9 +28,14 @@ void setup() {
     wifi_init();
     ip_setup();
     websocket_setup();
+    data_setup();
+    main_ui_setup();
 
+    
+    
+    /*
     lv_obj_clean(lv_scr_act());
-
+    
     lv_obj_t * label;
 
     lv_obj_t * btn1 = lv_btn_create(lv_scr_act());
@@ -44,11 +51,12 @@ void setup() {
     lv_obj_align(slider, LV_ALIGN_CENTER, 0, 40);
     lv_slider_set_range(slider, 0, 100);
     lv_slider_set_value(slider, 50, LV_ANIM_OFF);
+    */
 }
 
 void loop(){
     wifi_ok();
-    websocket_process();
+    data_loop();
     lv_timer_handler();
     lv_task_handler();
 }

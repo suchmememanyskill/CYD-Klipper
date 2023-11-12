@@ -100,7 +100,7 @@ void screen_timer_sleep(lv_timer_t *timer)
 
 void screen_timer_setup()
 {
-    screenSleepTimer = lv_timer_create(screen_timer_sleep, 1 * 1000 * 60, NULL);
+    screenSleepTimer = lv_timer_create(screen_timer_sleep, 5 * 1000 * 60, NULL);
     lv_timer_pause(screenSleepTimer);
 }
 

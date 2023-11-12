@@ -66,7 +66,7 @@ void ip_setup_inner(){
 
     ipEntry = lv_textarea_create(lv_scr_act());
     lv_textarea_set_one_line(ipEntry, true);
-    lv_textarea_set_max_length(ipEntry, 57);
+    lv_textarea_set_max_length(ipEntry, 63);
     lv_textarea_set_text(ipEntry, "");
     lv_obj_align(ipEntry, LV_ALIGN_TOP_LEFT, 10, 40);
     lv_obj_add_event_cb(ipEntry, ta_event_cb, LV_EVENT_ALL, keyboard);

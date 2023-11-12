@@ -519,7 +519,7 @@
 
 #define LV_USE_SPINNER    0
 
-#define LV_USE_TABVIEW    1
+#define LV_USE_TABVIEW    0
 
 #define LV_USE_TILEVIEW   0
 
