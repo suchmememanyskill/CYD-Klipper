@@ -5,6 +5,7 @@
 #define _SCREEN_DRIVER_INIT
 
 #include <XPT2046_Touchscreen.h>
+#include <TFT_eSPI.h>
 
 #define XPT2046_IRQ 36
 #define XPT2046_MOSI 32
@@ -19,6 +20,10 @@ void screen_timer_setup();
 void screen_timer_start();
 void screen_timer_stop();
 void screen_timer_period(uint32_t period);
+void set_color_scheme();
 void screen_setup();
+void set_invert_display();
+
+extern TFT_eSPI tft;
 
 #endif // _SCREEN_DRIVER_INIT

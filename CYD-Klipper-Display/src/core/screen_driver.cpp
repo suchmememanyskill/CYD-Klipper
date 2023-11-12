@@ -158,6 +158,16 @@ void screen_lv_touchRead(lv_indev_drv_t *indev_driver, lv_indev_data_t *data)
     }
 }
 
+void set_color_scheme(){
+    lv_disp_t *dispp = lv_disp_get_default();
+    lv_theme_t *theme = lv_theme_default_init(dispp, lv_palette_main(color_defs[global_config.color_scheme].primary_color), lv_palette_main(color_defs[global_config.color_scheme].secondary_color), !global_config.lightMode, LV_FONT_DEFAULT);
+    lv_disp_set_theme(dispp, theme);
+}
+
+void set_invert_display(){
+    tft.invertDisplay(global_config.invertColors);
+}
+
 void screen_setup()
 {
     touchscreen_spi.begin(XPT2046_CLK, XPT2046_MISO, XPT2046_MOSI, XPT2046_CS);
@@ -169,6 +179,7 @@ void screen_setup()
     tft.init();
     tft.setRotation(1);
     tft.fillScreen(TFT_BLACK);
+    set_invert_display();
 
     touchscreen_spi.begin(XPT2046_CLK, XPT2046_MISO, XPT2046_MOSI, XPT2046_CS);
     touchscreen.begin(touchscreen_spi);
@@ -199,8 +210,5 @@ void screen_setup()
 
     /*Initialize the graphics library */
     LV_EVENT_GET_COMP_CHILD = lv_event_register_id();
-
-    lv_disp_t *dispp = lv_disp_get_default();
-    lv_theme_t *theme = lv_theme_default_init(dispp, lv_palette_main(LV_PALETTE_BLUE), lv_palette_main(LV_PALETTE_RED), true, LV_FONT_DEFAULT);
-    lv_disp_set_theme(dispp, theme);
+    set_color_scheme();
 }

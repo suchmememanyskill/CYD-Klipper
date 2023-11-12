@@ -4,11 +4,12 @@ enum {
     PRINTER_STATE_ERROR = 0,
     PRINTER_STATE_IDLE = 1,
     PRINTER_STATE_PRINTING = 2,
+    PRINTER_STATE_PAUSED = 3,
 };
 
 extern const char* printer_state_messages[];
 
-typedef struct Printer {
+typedef struct _Printer {
     unsigned char state;
     char* state_message;
     float extruder_temp;
@@ -19,7 +20,12 @@ typedef struct Printer {
     unsigned char can_extrude;
     unsigned char homed_axis;
     unsigned char absolute_coords;
-} _Printer;
+    float elapsed_time_s;
+    float remaining_time_s;
+    float filament_used_mm;
+    char* print_filename; // 0 -> 1
+    float print_progress;
+} Printer;
 
 extern Printer printer;
 

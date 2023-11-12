@@ -8,6 +8,7 @@ static lv_style_t nav_button_style;
 
 static char temp_buffer[10];
 static char z_pos_buffer[10];
+static char time_buffer[10];
 
 static lv_style_t nav_button_text_style;
 
@@ -23,6 +24,39 @@ static void update_printer_data_temp(lv_event_t * e) {
 
     sprintf(temp_buffer, "%.0f/%.0f", printer.extruder_temp, printer.bed_temp);
     lv_label_set_text(label, temp_buffer);
+}
+
+static void update_printer_data_time(lv_event_t * e){
+    lv_obj_t * label = lv_event_get_target(e);
+
+    if (printer.state == PRINTER_STATE_IDLE){
+        lv_label_set_text(label, "Idle");
+        return;
+    }
+
+    if (printer.state == PRINTER_STATE_PAUSED){
+        lv_label_set_text(label, "Paused");
+        return;
+    }
+
+    unsigned long time = printer.remaining_time_s;
+    unsigned long hours = time / 3600;
+    unsigned long minutes = (time % 3600) / 60;
+    unsigned long seconds = (time % 3600) % 60;
+
+    if (hours > 99){
+        lv_label_set_text(label, ">99h");
+        return;
+    }
+
+    if (hours >= 1){
+        sprintf(time_buffer, "%02luh%02lum", hours, minutes);
+    } else {
+        sprintf(time_buffer, "%02lum%02lus", minutes, seconds);
+    }
+
+    lv_label_set_text(label, time_buffer);
+
 }
 
 static void btn_click_files(lv_event_t * e){
@@ -66,6 +100,8 @@ void nav_buttons_setup(unsigned char active_panel){
     lv_label_set_text(label, "Idle");
     lv_obj_align(label, LV_ALIGN_CENTER, 0, icon_text_spacing);
     lv_obj_add_style(label, &nav_button_text_style, 0);
+    lv_obj_add_event_cb(label, update_printer_data_time, LV_EVENT_MSG_RECEIVED, NULL);
+    lv_msg_subsribe_obj(DATA_PRINTER_STATE, label, NULL);
 
     // Move
     btn = lv_btn_create(lv_scr_act());

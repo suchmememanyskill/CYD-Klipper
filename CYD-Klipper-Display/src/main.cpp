@@ -17,7 +17,6 @@ static void event_handler(lv_event_t * e){
     }
 }
 
-
 void setup() {
     Serial.begin(115200);
     Serial.println("Hello World");

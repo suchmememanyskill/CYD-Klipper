@@ -98,7 +98,7 @@ static void on_state_change(void * s, lv_msg_t * m){
         error_ui();
     }
     else {
-        nav_buttons_setup(1);
+        nav_buttons_setup(0);
     }
 }
 

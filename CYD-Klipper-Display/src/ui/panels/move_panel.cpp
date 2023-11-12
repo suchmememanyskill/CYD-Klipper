@@ -18,7 +18,7 @@ static void move_printer(const char* axis, float amount) {
 
     const char * space = "%20";
 
-    sprintf(gcode, "G1%s%s%s%.1f", space, axis, extra, amount);
+    sprintf(gcode, "G1%s%s%s%.1f%sF6000", space, axis, extra, amount, space);
     send_gcode(true, gcode);
 
     if (absolute_coords) {
