@@ -44,19 +44,15 @@ static void update_printer_data_time(lv_event_t * e){
     unsigned long minutes = (time % 3600) / 60;
     unsigned long seconds = (time % 3600) % 60;
 
-    if (hours > 99){
-        lv_label_set_text(label, ">99h");
-        return;
-    }
-
-    if (hours >= 1){
-        sprintf(time_buffer, "%02luh%02lum", hours, minutes);
+    if (hours >= 10){
+        sprintf(time_buffer, "%luh", hours);
+    } else if (hours >= 1){
+        sprintf(time_buffer, "%luh%02lum", hours, minutes);
     } else {
-        sprintf(time_buffer, "%02lum%02lus", minutes, seconds);
+        sprintf(time_buffer, "%02lum", minutes);
     }
 
     lv_label_set_text(label, time_buffer);
-
 }
 
 static void btn_click_files(lv_event_t * e){

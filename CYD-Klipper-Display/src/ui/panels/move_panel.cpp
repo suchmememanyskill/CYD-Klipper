@@ -107,7 +107,7 @@ static void stepper_state_update(lv_event_t * e){
     lv_label_set_text(label, printer.homed_axis ? LV_SYMBOL_HOME " Steppers locked" : LV_SYMBOL_EYE_CLOSE " Steppers unlocked");
 }
 
-void move_panel_data(lv_obj_t* panel){
+void move_panel_init(lv_obj_t* panel){
     lv_obj_clear_flag(panel, LV_OBJ_FLAG_SCROLLABLE);
     const int button_size = 40;
     const int button_size_vertical = 40;
@@ -205,11 +205,5 @@ void move_panel_data(lv_obj_t* panel){
         y_pos += 60;
     }
 
-
-    
-
-}
-
-void move_panel_init(lv_obj_t* panel){
-    move_panel_data(panel);
+    lv_msg_send(DATA_PRINTER_DATA, &printer);
 }

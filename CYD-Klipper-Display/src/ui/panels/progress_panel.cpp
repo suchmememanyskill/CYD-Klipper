@@ -35,15 +35,15 @@ static void update_printer_data_percentage(lv_event_t * e){
 }
 
 static void btn_click_stop(lv_event_t * e){
-    // TODO: Implement
+    send_gcode(true, "CANCEL_PRINT");
 }
 
 static void btn_click_pause(lv_event_t * e){
-    // TODO: Implement
+    send_gcode(true, "PAUSE");
 }
 
 static void btn_click_resume(lv_event_t * e){
-    // TODO: Implement
+    send_gcode(true, "RESUME");
 }
 
 void progress_panel_init(lv_obj_t* panel){
@@ -117,4 +117,6 @@ void progress_panel_init(lv_obj_t* panel){
         lv_label_set_text(label, LV_SYMBOL_PAUSE);
         lv_obj_center(label);
     }
+
+    lv_msg_send(DATA_PRINTER_DATA, &printer);
 }

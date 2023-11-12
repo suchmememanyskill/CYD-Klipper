@@ -79,16 +79,28 @@ static void show_keyboard_with_bed(lv_event_t * e){
 }
 
 static void cooldown_temp(lv_event_t * e){
+    if (printer.state == PRINTER_STATE_PRINTING){
+        return;
+    }
+    
     send_gcode(true, "M104%20S0");
     send_gcode(true, "M140%20S0");
 }
 
 static void btn_extrude(lv_event_t * e){
+    if (printer.state == PRINTER_STATE_PRINTING){
+        return;
+    }
+
     send_gcode(true, "M83");
     send_gcode(true, "G1%20E25%20F300");
 }
 
 static void btn_retract(lv_event_t * e){
+    if (printer.state == PRINTER_STATE_PRINTING){
+        return;
+    }
+
     send_gcode(true, "M83");
     send_gcode(true, "G1%20E-25%20F300");
 }
@@ -148,4 +160,6 @@ void temp_panel_init(lv_obj_t* panel){
     label = lv_label_create(btn);
     lv_label_set_text(label, LV_SYMBOL_UP " Retract");
     lv_obj_center(label);
+
+    lv_msg_send(DATA_PRINTER_DATA, &printer);
 }
