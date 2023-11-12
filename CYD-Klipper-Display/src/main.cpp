@@ -1,11 +1,11 @@
 #include "conf/global_config.h"
-#include "conf/screen_driver.h"
+#include "core/screen_driver.h"
 #include "ui/wifi_setup.h"
 #include "ui/ip_setup.h"
-#include "core/websocket_setup.h"
 #include "lvgl.h"
 #include "core/data_setup.h"
 #include "ui/main_ui.h"
+#include "ui/nav_buttons.h"
 
 static void event_handler(lv_event_t * e){
     lv_event_code_t code = lv_event_get_code(e);
@@ -27,8 +27,9 @@ void setup() {
     
     wifi_init();
     ip_setup();
-    websocket_setup();
     data_setup();
+
+    nav_style_setup();
     main_ui_setup();
 
     

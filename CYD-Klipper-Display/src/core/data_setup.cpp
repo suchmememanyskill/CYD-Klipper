@@ -13,6 +13,24 @@ const char * printer_state_messages[] = {
 
 Printer printer = {0};
 
+void send_gcode(bool wait, const char* gcode){
+    char buff[256] = {};
+    sprintf(buff, "http://%s:%d/printer/gcode/script?script=%s", global_config.klipperHost, global_config.klipperPort, gcode);
+    HTTPClient client;
+    client.begin(buff);
+
+    if (!wait){
+        client.setTimeout(1000);
+    }
+
+    try {
+        client.GET();
+    }
+    catch (...){
+        Serial.println("Failed to send gcode");
+    }
+}
+
 void fetch_printer_state(){
     char buff[91] = {};
     sprintf(buff, "http://%s:%d/printer/info", global_config.klipperHost, global_config.klipperPort);
@@ -21,7 +39,6 @@ void fetch_printer_state(){
     int httpCode = client.GET();
     if (httpCode == 200) {
         String payload = client.getString();
-        Serial.println(payload);
         DynamicJsonDocument doc(1024);
         deserializeJson(doc, payload);
         auto result = doc["result"];
@@ -59,19 +76,20 @@ void fetch_printer_state(){
 
 void fetch_printer_data(){
     char buff[256] = {};
-    sprintf(buff, "http://%s:%d/printer/objects/query?extruder&heater_bed&toolhead", global_config.klipperHost, global_config.klipperPort);
+    sprintf(buff, "http://%s:%d/printer/objects/query?extruder&heater_bed&toolhead&gcode_move", global_config.klipperHost, global_config.klipperPort);
     HTTPClient client;
     client.begin(buff);
     int httpCode = client.GET();
     if (httpCode == 200) {
         String payload = client.getString();
-        Serial.println(payload);
         DynamicJsonDocument doc(2048);
         deserializeJson(doc, payload);
         auto status = doc["result"]["status"];
         if (status.containsKey("extruder")){
             printer.extruder_temp = status["extruder"]["temperature"];
             printer.extruder_target_temp = status["extruder"]["target"];
+            bool can_extrude = status["extruder"]["can_extrude"];
+            printer.can_extrude = can_extrude == true;
         }
 
         if (status.containsKey("heater_bed")){
@@ -83,6 +101,13 @@ void fetch_printer_data(){
             printer.position[0] = status["toolhead"]["position"][0];
             printer.position[1] = status["toolhead"]["position"][1];
             printer.position[2] = status["toolhead"]["position"][2];
+            const char * homed_axis = status["toolhead"]["homed_axes"];
+            printer.homed_axis = strcmp(homed_axis, "xyz") == 0;
+        }
+
+        if (status.containsKey("gcode_move")){
+            bool absolute_coords = status["gcode_move"]["absolute_coordinates"];
+            printer.absolute_coords = absolute_coords == true;
         }
 
         lv_msg_send(DATA_PRINTER_DATA, &printer);
@@ -92,8 +117,15 @@ void fetch_printer_data(){
     }
 }
 
+long last_data_update = 0;
+const long data_update_interval = 1500;
+
 void data_loop(){
-    // TODO: slow down requests
+    if (millis() - last_data_update < data_update_interval)
+        return;
+
+    last_data_update = millis();
+
     fetch_printer_state();
     if (printer.state != PRINTER_STATE_ERROR)
         fetch_printer_data();

@@ -1,7 +1,7 @@
 #include "screen_driver.h"
 #include <SPI.h>
 #include <TFT_eSPI.h>
-#include "global_config.h"
+#include "../conf/global_config.h"
 #include "lvgl.h"
 
 SPIClass touchscreen_spi = SPIClass(HSPI);
