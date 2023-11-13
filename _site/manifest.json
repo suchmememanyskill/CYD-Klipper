@@ -1,6 +1,6 @@
 {
-    "name": "CYD-Klipper-Display",
-    "new_install_prompt_erase": false,
+    "name": "CYD-Klipper",
+    "new_install_prompt_erase": true,
     "builds": [
         {
             "chipFamily": "ESP32",

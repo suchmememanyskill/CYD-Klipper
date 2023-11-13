@@ -1,12 +1,32 @@
-<script
-  type="module"
-  src="https://unpkg.com/esp-web-tools@9/dist/web/install-button.js?module"
-></script>
+<!DOCTYPE html>
 
-<esp-web-install-button
-  manifest="https://firmware.esphome.io/esphome-web/manifest.json"
-></esp-web-install-button>
+<head>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Roboto&display=swap');
 
-<esp-web-install-button
-  manifest="https://firmware.esphome.io/esphome-web/manifest.json"
-></esp-web-install-button>
+    * {
+      font-family: 'Roboto', sans-serif;
+    }
+
+    .main {
+      width: fit-content;
+      margin: auto;
+    }
+  </style>
+  <script type="module" src="https://unpkg.com/esp-web-tools@9/dist/web/install-button.js?module"></script>
+</head>
+
+<body>
+  <section class="main">
+    <h2>CYD-Klipper</h2>
+    <p>An implementation of a Klipper status display on an ESP32 + screen.<br>Uses Moonraker to fetch data.</p>
+    <img alt="GitHub release (with filter)" src="https://img.shields.io/github/v/release/suchmememanyskill/CYD-Klipper">
+    <a href="https://github.com/suchmememanyskill/CYD-Klipper"><img alt="GitHub repo" src="https://img.shields.io/badge/Source-Github-blue.svg"></a>
+    <section class="install">
+      <h3>Install</h3>
+      <p>Note: You may need to hold the 'BOOT' button on the device while pressing install</p>
+      <esp-web-install-button
+        manifest="https://suchmememanyskill.github.io/CYD-Klipper/manifest.json"></esp-web-install-button>
+    </section>
+  </section>
+</body>
