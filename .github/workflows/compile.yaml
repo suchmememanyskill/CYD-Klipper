@@ -1,0 +1,45 @@
+name: PlatformIO CI
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cache/pip
+            ~/.platformio/.cache
+          key: ${{ runner.os }}-pio
+
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+
+      - name: Install PlatformIO Core
+        run: pip install --upgrade platformio esptool
+
+      - name: Build PlatformIO Project
+        run: |
+          cd CYD-Klipper-Display
+          pio run
+
+      - name: Make output dir
+        run: mkdir -p output
+      
+      - name: Build Binary
+        run: |
+          cp ./CYD-Klipper-Display/.pio/build/esp32dev/bootloader.bin output
+          cp ./CYD-Klipper-Display/.pio/build/esp32dev/partitions.bin output
+          cp ./CYD-Klipper-Display/.pio/build/esp32dev/firmware.bin output
+          cp ~/platformio/packages/framework-arduinoespressif32/tools/partitions/boot_app0.bin output
+          esptool --chip esp32 merge_bin -o ./output/merged-firmware.bin --flash_mode dio --flash_freq 40m --flash_size 4MB 0x1000 ./output/bootloader.bin 0x8000 ./output/partitions.bin 0xe000 ./output/boot_app0.bin 0x10000 ./output/firmware.bin
+      
+      - name: Upload artefact 
+        uses: actions/upload-artifact@v3
+        with:
+          name: firmware
+          path: ./output
