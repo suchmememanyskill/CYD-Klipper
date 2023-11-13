@@ -97,15 +97,15 @@ void fetch_printer_data()
 
             if (status.containsKey("toolhead"))
             {
-                printer.position[0] = status["toolhead"]["position"][0];
-                printer.position[1] = status["toolhead"]["position"][1];
-                printer.position[2] = status["toolhead"]["position"][2];
                 const char *homed_axis = status["toolhead"]["homed_axes"];
                 printer.homed_axis = strcmp(homed_axis, "xyz") == 0;
             }
 
             if (status.containsKey("gcode_move"))
             {
+                printer.position[0] = status["gcode_move"]["gcode_position"][0];
+                printer.position[1] = status["gcode_move"]["gcode_position"][1];
+                printer.position[2] = status["gcode_move"]["gcode_position"][2];
                 bool absolute_coords = status["gcode_move"]["absolute_coordinates"];
                 printer.absolute_coords = absolute_coords == true;
             }
