@@ -1,0 +1,10 @@
+{
+    "name": "CYD-Klipper-Display",
+    "new_install_prompt_erase": false,
+    "builds": [
+        {
+            "path": "output/merged-firmware.bin",
+            "offset": 0
+        }
+    ]
+}
