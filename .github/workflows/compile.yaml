@@ -1,5 +1,9 @@
 name: PlatformIO CI
 
+permissions:
+    pages: write
+    id-token: write
+
 on: [push, pull_request]
 
 jobs:
@@ -56,6 +60,11 @@ jobs:
     runs-on: ubuntu-latest
     needs: build
     steps:
+      - name: Print GitHub event name
+        run: |
+          echo "${{ github.event_name }}"
+
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v2
+  
