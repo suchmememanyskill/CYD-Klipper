@@ -39,11 +39,11 @@ void VerifyVersion(){
 
 void LoadGlobalConfig() {
     global_config.version = CONFIG_VERSION;
+    global_config.brightness = 255;
+    global_config.screenTimeout = 5;
     VerifyVersion();
     Preferences preferences;
     preferences.begin("global_config", true);
     preferences.getBytes("global_config", &global_config, sizeof(global_config));
     preferences.end();
-
-    Serial.printf("Touch: %d\n", global_config.screenCalibrated);
 }

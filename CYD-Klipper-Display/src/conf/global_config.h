@@ -3,7 +3,7 @@
 
 #include "lvgl.h"
 
-#define CONFIG_VERSION 80
+#define CONFIG_VERSION 2
 
 typedef struct _GLOBAL_CONFIG {
     unsigned char version;
@@ -15,6 +15,8 @@ typedef struct _GLOBAL_CONFIG {
             bool ipConfigured : 1;
             bool lightMode : 1;
             bool invertColors : 1;
+            bool rotateScreen : 1;
+            bool onDuringPrint : 1;
         };
     };
     float screenCalXOffset;
@@ -29,6 +31,8 @@ typedef struct _GLOBAL_CONFIG {
     unsigned short klipperPort;
     
     unsigned char color_scheme;
+    unsigned char brightness;
+    unsigned char screenTimeout;
 } GLOBAL_CONFIG;
     
 typedef struct _COLOR_DEF {

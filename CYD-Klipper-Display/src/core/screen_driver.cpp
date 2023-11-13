@@ -17,14 +17,16 @@ TFT_eSPI tft = TFT_eSPI();
 bool isScreenInSleep = false;
 lv_timer_t *screenSleepTimer;
 
-TS_Point touchscreen_point(){
+TS_Point touchscreen_point()
+{
     TS_Point p = touchscreen.getPoint();
     p.x = round((p.x * global_config.screenCalXMult) + global_config.screenCalXOffset);
     p.y = round((p.y * global_config.screenCalYMult) + global_config.screenCalYOffset);
     return p;
 }
 
-void touchscreen_calibrate(bool force){
+void touchscreen_calibrate(bool force)
+{
     if (global_config.screenCalibrated && !force)
         {
             return;
@@ -85,11 +87,19 @@ void screen_setBrightness(byte brightness)
     analogWrite(TFT_BL, brightness);
 }
 
+void set_screen_brightness()
+{
+    if (global_config.brightness < 32)
+        screen_setBrightness(255);
+    else
+        screen_setBrightness(global_config.brightness);
+}
+
 void screen_timer_wake()
 {
     lv_timer_reset(screenSleepTimer);
     isScreenInSleep = false;
-    screen_setBrightness(255);
+    set_screen_brightness();
 }
 
 void screen_timer_sleep(lv_timer_t *timer)
@@ -100,7 +110,7 @@ void screen_timer_sleep(lv_timer_t *timer)
 
 void screen_timer_setup()
 {
-    screenSleepTimer = lv_timer_create(screen_timer_sleep, 5 * 1000 * 60, NULL);
+    screenSleepTimer = lv_timer_create(screen_timer_sleep, global_config.screenTimeout * 1000 * 60, NULL);
     lv_timer_pause(screenSleepTimer);
 }
 
@@ -117,6 +127,11 @@ void screen_timer_stop()
 void screen_timer_period(uint32_t period)
 {
     lv_timer_set_period(screenSleepTimer, period);
+}
+
+void set_screen_timer_period()
+{
+    screen_timer_period(global_config.screenTimeout * 1000 * 60);
 }
 
 void screen_lv_flush(lv_disp_drv_t *disp, const lv_area_t *area, lv_color_t *color_p)
@@ -172,13 +187,14 @@ void screen_setup()
 {
     touchscreen_spi.begin(XPT2046_CLK, XPT2046_MISO, XPT2046_MOSI, XPT2046_CS);
     touchscreen.begin(touchscreen_spi);
-    touchscreen.setRotation(1);
+    touchscreen.setRotation(global_config.rotateScreen ? 3 : 1);
 
     lv_init();
 
     tft.init();
-    tft.setRotation(1);
+    tft.setRotation(global_config.rotateScreen ? 3 : 1);
     tft.fillScreen(TFT_BLACK);
+    set_screen_brightness();
     set_invert_display();
 
     touchscreen_spi.begin(XPT2046_CLK, XPT2046_MISO, XPT2046_MOSI, XPT2046_CS);

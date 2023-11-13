@@ -154,6 +154,6 @@ void wifi_init(){
 
 void wifi_ok(){
     if (WiFi.status() != WL_CONNECTED){
-        wifi_init();
+        ESP.restart();
     }
 }

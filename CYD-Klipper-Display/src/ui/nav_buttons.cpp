@@ -97,7 +97,7 @@ void nav_buttons_setup(unsigned char active_panel){
     lv_obj_align(label, LV_ALIGN_CENTER, 0, icon_text_spacing);
     lv_obj_add_style(label, &nav_button_text_style, 0);
     lv_obj_add_event_cb(label, update_printer_data_time, LV_EVENT_MSG_RECEIVED, NULL);
-    lv_msg_subsribe_obj(DATA_PRINTER_STATE, label, NULL);
+    lv_msg_subsribe_obj(DATA_PRINTER_DATA, label, NULL);
 
     // Move
     btn = lv_btn_create(lv_scr_act());

@@ -23,6 +23,9 @@ void screen_timer_period(uint32_t period);
 void set_color_scheme();
 void screen_setup();
 void set_invert_display();
+void screen_timer_wake();
+void set_screen_timer_period();
+void set_screen_brightness();
 
 extern TFT_eSPI tft;
 
