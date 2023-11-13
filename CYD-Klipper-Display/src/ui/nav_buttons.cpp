@@ -49,7 +49,7 @@ static void update_printer_data_time(lv_event_t * e){
     } else if (hours >= 1){
         sprintf(time_buffer, "%luh%02lum", hours, minutes);
     } else {
-        sprintf(time_buffer, "%02lum", minutes);
+        sprintf(time_buffer, "%lum", minutes);
     }
 
     lv_label_set_text(label, time_buffer);
