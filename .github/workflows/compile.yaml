@@ -28,18 +28,42 @@ jobs:
           pio run
 
       - name: Make output dir
-        run: mkdir -p output
+        run: |
+          mkdir -p output
+          mkdir -p _site
       
       - name: Build Binary
         run: |
           cp ./CYD-Klipper-Display/.pio/build/esp32dev/bootloader.bin output
           cp ./CYD-Klipper-Display/.pio/build/esp32dev/partitions.bin output
           cp ./CYD-Klipper-Display/.pio/build/esp32dev/firmware.bin output
-          cp ~/platformio/packages/framework-arduinoespressif32/tools/partitions/boot_app0.bin output
+          cp ~/.platformio/packages/framework-arduinoespressif32/tools/partitions/boot_app0.bin output
           esptool --chip esp32 merge_bin -o ./output/merged-firmware.bin --flash_mode dio --flash_freq 40m --flash_size 4MB 0x1000 ./output/bootloader.bin 0x8000 ./output/partitions.bin 0xe000 ./output/boot_app0.bin 0x10000 ./output/firmware.bin
       
-      - name: Upload artefact 
+      - name: Upload artifact 
         uses: actions/upload-artifact@v3
         with:
           name: firmware
           path: ./output
+      
+      - name: Make webpage
+        run: |
+          cp -r ./output ./_site
+          python3 generate_manifest.py
+          cp manifest.json ./_site
+          cp manifest_wipe.json ./_site
+          cp index.html ./_site
+
+      - name: Upload GitHub Page Artifact
+        uses: actions/upload-pages-artifact@v2
+
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v2
