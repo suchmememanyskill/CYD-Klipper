@@ -147,11 +147,29 @@ void wifi_init_inner(){
     }
 }
 
+const char* errs[] = {
+    "Idle",
+    "No SSID Available",
+    "Scan Completed",
+    "Connected",
+    "Connection Failed",
+    "Connection Lost",
+    "Disconnected"
+};
+
+const int print_freq = 1000;
+int print_timer = 0;
+
 void wifi_init(){
     WiFi.mode(WIFI_STA);
     wifi_init_inner();
 
     while (!global_config.wifiConfigured || WiFi.status() != WL_CONNECTED){
+        if (millis() - print_timer > print_freq){
+            print_timer = millis();
+            Serial.printf("WiFi Status: %s\n", errs[WiFi.status()]);
+        }
+        
         lv_timer_handler();
         lv_task_handler();
     }

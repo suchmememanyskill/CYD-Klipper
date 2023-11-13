@@ -26,11 +26,11 @@ bool verify_ip(){
 }
 
 bool retry_ip_verify(){
-    for (int i = 0; i < 3; i++){
+    for (int i = 0; i < 5; i++){
         if (verify_ip()){
             return true;
         }
-        delay(500);
+        delay(1000);
     }
 
     return false;
