@@ -108,8 +108,6 @@ void wifi_init_inner(){
     lv_task_handler();
     lv_refr_now(NULL);
 
-    int n = WiFi.scanNetworks();
-
     lv_obj_clean(lv_scr_act());
 
     lv_obj_t * refreshBtn = lv_btn_create(lv_scr_act());
@@ -128,15 +126,22 @@ void wifi_init_inner(){
     lv_obj_align(list, LV_ALIGN_TOP_LEFT, 10, 40);
     lv_obj_set_size(list, TFT_HEIGHT - 20, TFT_WIDTH - 40 - 5);
 
+    int n = WiFi.scanNetworks();
+
     for (int i = 0; i < n; ++i) {
-        const char* ssid = WiFi.SSID(i).c_str();
-        int len = strlen(ssid);
+        String ssid = WiFi.SSID(i);
+        char* ssid_copy = (char*)malloc(ssid.length() + 1);
+        int j = 0;
 
-        if (len == 0)
-            continue;
+        for (; j < ssid.length(); ++j){
+            if (ssid[j] == '\0')
+                continue;
 
-        const char* ssid_copy = (const char*)malloc(len + 1);
-        strcpy((char*)ssid_copy, ssid);
+            ssid_copy[j] = ssid[j];
+        }
+
+        ssid_copy[j] = '\0';
+
         lv_obj_t * btn = lv_list_add_btn(list, LV_SYMBOL_WIFI, ssid_copy);
         lv_obj_add_event_cb(btn, wifi_btn_event_handler, LV_EVENT_ALL, (void*)ssid_copy);
     }

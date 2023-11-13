@@ -25,6 +25,17 @@ bool verify_ip(){
     }
 }
 
+bool retry_ip_verify(){
+    for (int i = 0; i < 3; i++){
+        if (verify_ip()){
+            return true;
+        }
+        delay(500);
+    }
+
+    return false;
+}
+
 static void ta_event_cb(lv_event_t * e) {
     lv_event_code_t code = lv_event_get_code(e);
     lv_obj_t * ta = lv_event_get_target(e);
@@ -87,7 +98,7 @@ void ip_setup_inner(){
 void ip_setup(){
     connect_ok = false;
 
-    if (global_config.ipConfigured && verify_ip()){
+    if (global_config.ipConfigured && retry_ip_verify()){
         return;
     }
 
