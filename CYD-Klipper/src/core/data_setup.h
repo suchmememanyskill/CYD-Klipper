@@ -31,6 +31,7 @@ extern Printer printer;
 
 #define DATA_PRINTER_STATE 1
 #define DATA_PRINTER_DATA 2
+#define DATA_PRINTER_TEMP_PRESET 3
 
 void data_loop();
 void data_setup();
