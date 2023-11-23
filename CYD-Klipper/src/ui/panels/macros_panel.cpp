@@ -41,6 +41,8 @@ void create_macro_widget(const char* macro, lv_obj_t* root_panel){
     lv_obj_t * label = lv_label_create(panel);
     lv_label_set_text(label, macro);
     lv_obj_align(label, LV_ALIGN_LEFT_MID, 0, 0);
+    lv_label_set_long_mode(label, LV_LABEL_LONG_SCROLL_CIRCULAR);
+    lv_obj_set_width(label, (TFT_HEIGHT - 40) * 0.75f);
 
     lv_obj_t * btn = lv_btn_create(panel);
     lv_obj_align(btn, LV_ALIGN_RIGHT_MID, 0, 0);
