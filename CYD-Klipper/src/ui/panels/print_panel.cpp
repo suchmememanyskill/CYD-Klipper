@@ -12,8 +12,27 @@ static void btn_print_file(lv_event_t * e){
     lv_obj_t * panel = (lv_obj_t*)lv_event_get_user_data(e);
     lv_obj_del(panel);
 
-    char* buff = (char*)malloc(128 + strlen(selected_file->name));
-    sprintf(buff, "http://%s:%d/printer/print/start?filename=%s", global_config.klipperHost, global_config.klipperPort, selected_file->name);
+    char* buff = (char*)malloc(128 + (strlen(selected_file->name) * 3));
+    sprintf(buff, "http://%s:%d/printer/print/start?filename=", global_config.klipperHost, global_config.klipperPort);
+
+    char* ptr = buff + strlen(buff);
+    int filename_length = strlen(selected_file->name);
+    for (int i = 0; i < filename_length; i++){
+        char c = selected_file->name[i];
+        if (c == ' '){
+            *ptr = '%';
+            ptr++;
+            *ptr = '2';
+            ptr++;
+            *ptr = '0';
+        } else {
+            *ptr = c;
+        }
+        ptr++;
+    }
+
+    *ptr = 0;
+
     HTTPClient client;
     client.begin(buff);
     int httpCode = client.POST("");
