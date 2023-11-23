@@ -41,6 +41,12 @@ void LoadGlobalConfig() {
     global_config.version = CONFIG_VERSION;
     global_config.brightness = 255;
     global_config.screenTimeout = 5;
+    global_config.hotend_presets[0] = 0;
+    global_config.hotend_presets[1] = 200;
+    global_config.hotend_presets[2] = 240;
+    global_config.bed_presets[0] = 0;
+    global_config.bed_presets[1] = 60;
+    global_config.bed_presets[2] = 70;
     VerifyVersion();
     Preferences preferences;
     preferences.begin("global_config", true);

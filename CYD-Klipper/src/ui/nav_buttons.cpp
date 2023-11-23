@@ -71,6 +71,10 @@ static void btn_click_settings(lv_event_t * e){
     nav_buttons_setup(3);
 }
 
+static void btn_click_macros(lv_event_t * e){
+    nav_buttons_setup(4);
+}
+
 void nav_buttons_setup(unsigned char active_panel){
     lv_obj_clean(lv_scr_act());
     lv_obj_clear_flag(lv_scr_act(), LV_OBJ_FLAG_SCROLLABLE);
@@ -140,14 +144,14 @@ void nav_buttons_setup(unsigned char active_panel){
     lv_obj_set_size(btn, button_width, button_height);
     lv_obj_align(btn, LV_ALIGN_TOP_LEFT, 0, button_height * 3);
     lv_obj_add_style(btn, &nav_button_style, 0);
-    lv_obj_add_event_cb(btn, btn_click_settings, LV_EVENT_CLICKED, NULL);
+    lv_obj_add_event_cb(btn, btn_click_macros, LV_EVENT_CLICKED, NULL);
 
     label = lv_label_create(btn);
-    lv_label_set_text(label, LV_SYMBOL_SETTINGS);
+    lv_label_set_text(label, LV_SYMBOL_GPS);
     lv_obj_align(label, LV_ALIGN_CENTER, 0, -1 * icon_text_spacing);
 
     label = lv_label_create(btn);
-    lv_label_set_text(label, "Screen");
+    lv_label_set_text(label, "Macro");
     lv_obj_align(label, LV_ALIGN_CENTER, 0, icon_text_spacing);
     lv_obj_add_style(label, &nav_button_text_style, 0);
 
@@ -170,6 +174,9 @@ void nav_buttons_setup(unsigned char active_panel){
             break;
         case 3:
             settings_panel_init(panel);
+            break;
+        case 4:
+            macros_panel_init(panel);
             break;
     }
 }
