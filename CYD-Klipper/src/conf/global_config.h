@@ -3,7 +3,7 @@
 
 #include "lvgl.h"
 
-#define CONFIG_VERSION 2
+#define CONFIG_VERSION 3
 
 typedef struct _GLOBAL_CONFIG {
     unsigned char version;
@@ -33,6 +33,9 @@ typedef struct _GLOBAL_CONFIG {
     unsigned char color_scheme;
     unsigned char brightness;
     unsigned char screenTimeout;
+
+    unsigned short hotend_presets[3];
+    unsigned short bed_presets[3];
 } GLOBAL_CONFIG;
     
 typedef struct _COLOR_DEF {

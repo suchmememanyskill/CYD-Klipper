@@ -4,6 +4,7 @@
 #include "../conf/global_config.h"
 #include <HTTPClient.h>
 #include <ArduinoJson.h>
+#include "macros_query.h"
 
 const char *printer_state_messages[] = {
     "Error",
@@ -179,4 +180,5 @@ void data_setup()
 {
     printer.print_filename = filename_buff;
     fetch_printer_data();
+    macros_query_setup();
 }
