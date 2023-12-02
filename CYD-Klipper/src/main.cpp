@@ -25,7 +25,7 @@ void setup() {
     Serial.println("Screen init done");
     
     wifi_init();
-    ip_setup();
+    ip_init();
     data_setup();
 
     nav_style_setup();

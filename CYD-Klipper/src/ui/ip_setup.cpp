@@ -95,7 +95,7 @@ void ip_setup_inner(){
     lv_keyboard_set_textarea(keyboard, ipEntry);
 }
 
-void ip_setup(){
+void ip_init(){
     connect_ok = false;
 
     if (global_config.ipConfigured && retry_ip_verify()){
