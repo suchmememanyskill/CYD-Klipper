@@ -9,12 +9,15 @@ lv_obj_t * ipEntry;
 lv_obj_t * portEntry;
 lv_obj_t * label = NULL;
 
+void ip_init_inner();
+
 bool verify_ip(){
     HTTPClient client;
     String url = "http://" + String(global_config.klipperHost) + ":" + String(global_config.klipperPort) + "/printer/info";
     int httpCode;
     try {
         Serial.println(url);
+        client.setTimeout(500);
         client.begin(url.c_str());
         httpCode = client.GET();
         return httpCode == 200;
@@ -23,17 +26,6 @@ bool verify_ip(){
         Serial.println("Failed to connect");
         return false;
     }
-}
-
-bool retry_ip_verify(){
-    for (int i = 0; i < 5; i++){
-        if (verify_ip()){
-            return true;
-        }
-        delay(1000);
-    }
-
-    return false;
 }
 
 static void ta_event_cb(lv_event_t * e) {
@@ -53,8 +45,8 @@ static void ta_event_cb(lv_event_t * e) {
     {
         strcpy(global_config.klipperHost, lv_textarea_get_text(ipEntry));
         global_config.klipperPort = atoi(lv_textarea_get_text(portEntry));
-        bool result = verify_ip();
-        if (result)
+
+        if (verify_ip())
         {
             global_config.ipConfigured = true;
             WriteGlobalConfig();
@@ -67,8 +59,32 @@ static void ta_event_cb(lv_event_t * e) {
     }
 }
 
-void ip_setup_inner(){
+static void reset_btn_event_handler(lv_event_t * e){
+    lv_event_code_t code = lv_event_get_code(e);
+
+    if(code == LV_EVENT_CLICKED) {
+        global_config.ipConfigured = false;
+        ip_init_inner();
+    }
+}
+
+void ip_init_inner(){
     lv_obj_clean(lv_scr_act());
+
+    if (global_config.ipConfigured) {
+        label = lv_label_create(lv_scr_act());
+        lv_label_set_text(label, "Connecting to Klipper");
+        lv_obj_align(label, LV_ALIGN_CENTER, 0, 0);
+
+        lv_obj_t * resetBtn = lv_btn_create(lv_scr_act());
+        lv_obj_add_event_cb(resetBtn, reset_btn_event_handler, LV_EVENT_ALL, NULL);
+        lv_obj_align(resetBtn, LV_ALIGN_CENTER, 0, 40);
+
+        lv_obj_t * btnLabel = lv_label_create(resetBtn);
+        lv_label_set_text(btnLabel, "Reset");
+        lv_obj_center(btnLabel);
+        return;
+    }
 
     lv_obj_t * keyboard = lv_keyboard_create(lv_scr_act());
     label = lv_label_create(lv_scr_act());
@@ -95,18 +111,26 @@ void ip_setup_inner(){
     lv_keyboard_set_textarea(keyboard, ipEntry);
 }
 
+long last_data_update_ip = -10000;
+const long data_update_interval_ip = 10000;
+int retry_count = 0;
+
 void ip_init(){
     connect_ok = false;
 
-    if (global_config.ipConfigured && retry_ip_verify()){
-        return;
-    }
-
-    ip_setup_inner();
+    ip_init_inner();
 
     while (!connect_ok)
     {
         lv_timer_handler();
         lv_task_handler();
+
+        if (!connect_ok && global_config.ipConfigured && (millis() - last_data_update_ip) > data_update_interval_ip){
+            connect_ok = verify_ip();
+            last_data_update_ip = millis();
+            retry_count++;
+            String retry_count_text = "Connecting to Klipper (Try " + String(retry_count + 1) + ")";
+            lv_label_set_text(label, retry_count_text.c_str());
+        }
     }
 }
