@@ -4,6 +4,9 @@
 #ifndef _SCREEN_DRIVER_INIT
 #define _SCREEN_DRIVER_INIT
 
+#define CPU_FREQ_HIGH 240
+#define CPU_FREQ_LOW 80
+
 #include <XPT2046_Touchscreen.h>
 #include <TFT_eSPI.h>
 

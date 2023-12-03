@@ -77,12 +77,11 @@ static void wifi_btn_event_handler(lv_event_t * e){
 
 void wifi_init_inner(){
     WiFi.disconnect();
+    lv_obj_clean(lv_scr_act());
 
     if (global_config.wifiConfigured){
         WiFi.begin(global_config.wifiSSID, global_config.wifiPassword);
         
-        lv_obj_clean(lv_scr_act());
-
         lv_obj_t * label = lv_label_create(lv_scr_act());
         lv_label_set_text(label, "Connecting to WiFi");
         lv_obj_align(label, LV_ALIGN_CENTER, 0, 0);
@@ -97,8 +96,6 @@ void wifi_init_inner(){
 
         return;
     } 
-
-    lv_obj_clean(lv_scr_act());
 
     lv_obj_t * label = lv_label_create(lv_scr_act());
     lv_label_set_text(label, "Scanning for networks...");

@@ -1,1 +1,1 @@
-void ip_setup();
+void ip_init();
