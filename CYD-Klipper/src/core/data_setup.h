@@ -28,6 +28,7 @@ typedef struct _Printer {
 } Printer;
 
 extern Printer printer;
+extern int klipper_request_consecutive_fail_count;
 
 #define DATA_PRINTER_STATE 1
 #define DATA_PRINTER_DATA 2

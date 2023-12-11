@@ -12,6 +12,7 @@ const char *printer_state_messages[] = {
     "Printing"};
 
 Printer printer = {0};
+int klipper_request_consecutive_fail_count = 0;
 
 void send_gcode(bool wait, const char *gcode)
 {
@@ -46,6 +47,7 @@ void fetch_printer_data()
     int httpCode = client.GET();
     if (httpCode == 200)
     {
+        klipper_request_consecutive_fail_count = 0;
         String payload = client.getString();
         DynamicJsonDocument doc(4096);
         deserializeJson(doc, payload);
@@ -159,6 +161,7 @@ void fetch_printer_data()
     }
     else
     {
+        klipper_request_consecutive_fail_count++;
         Serial.printf("Failed to fetch printer data: %d\n", httpCode);
     }
 }
@@ -171,9 +174,8 @@ void data_loop()
     if (millis() - last_data_update < data_update_interval)
         return;
 
-    last_data_update = millis();
-
     fetch_printer_data();
+    last_data_update = millis();
 }
 
 void data_setup()
