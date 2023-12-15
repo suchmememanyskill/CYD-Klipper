@@ -37,3 +37,6 @@ extern int klipper_request_consecutive_fail_count;
 void data_loop();
 void data_setup();
 void send_gcode(bool wait, const char* gcode);
+
+void freeze_request_thread();
+void unfreeze_request_thread();
