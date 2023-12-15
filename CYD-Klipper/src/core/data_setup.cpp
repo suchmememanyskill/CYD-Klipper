@@ -189,6 +189,8 @@ void fetch_printer_data()
             printer.state = printer_state;
             lv_msg_send(DATA_PRINTER_STATE, &printer);
         }
+
+        unfreeze_render_thread();
     }
     else
     {
@@ -198,8 +200,6 @@ void fetch_printer_data()
 
     if (frozen)
         unfreeze_request_thread();
-
-    unfreeze_render_thread();
 }
 
 void data_loop()
