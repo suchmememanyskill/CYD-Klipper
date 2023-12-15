@@ -13,6 +13,33 @@ const char *printer_state_messages[] = {
 
 Printer printer = {0};
 int klipper_request_consecutive_fail_count = 0;
+char filename_buff[512] = {0};
+SemaphoreHandle_t freezeRenderThreadSemaphore, freezeRequestThreadSemaphore;
+long last_data_update = 0;
+const long data_update_interval = 800;
+
+void semaphore_init(){
+    freezeRenderThreadSemaphore = xSemaphoreCreateMutex();
+    freezeRequestThreadSemaphore = xSemaphoreCreateMutex();
+    xSemaphoreGive(freezeRenderThreadSemaphore);
+    xSemaphoreGive(freezeRequestThreadSemaphore);
+}
+
+void freeze_request_thread(){
+    xSemaphoreTake(freezeRequestThreadSemaphore, portMAX_DELAY);
+}
+
+void unfreeze_request_thread(){
+    xSemaphoreGive(freezeRequestThreadSemaphore);
+}
+
+void freeze_render_thread(){
+    xSemaphoreTake(freezeRenderThreadSemaphore, portMAX_DELAY);
+}
+
+void unfreeze_render_thread(){
+    xSemaphoreGive(freezeRenderThreadSemaphore);
+}
 
 void send_gcode(bool wait, const char *gcode)
 {
@@ -36,10 +63,10 @@ void send_gcode(bool wait, const char *gcode)
     }
 }
 
-char filename_buff[512] = {0};
-
 void fetch_printer_data()
 {
+    bool frozen = true;
+    freeze_request_thread();
     char buff[256] = {};
     sprintf(buff, "http://%s:%d/printer/objects/query?extruder&heater_bed&toolhead&gcode_move&virtual_sdcard&print_stats&webhooks", global_config.klipperHost, global_config.klipperPort);
     HTTPClient client;
@@ -54,6 +81,10 @@ void fetch_printer_data()
         auto status = doc["result"]["status"];
         bool emit_state_update = false;
         int printer_state = printer.state;
+
+        unfreeze_request_thread();
+        frozen = false;
+        freeze_render_thread();
 
         if (status.containsKey("webhooks"))
         {
@@ -164,23 +195,40 @@ void fetch_printer_data()
         klipper_request_consecutive_fail_count++;
         Serial.printf("Failed to fetch printer data: %d\n", httpCode);
     }
-}
 
-long last_data_update = 0;
-const long data_update_interval = 1500;
+    if (frozen)
+        unfreeze_request_thread();
+
+    unfreeze_render_thread();
+}
 
 void data_loop()
 {
-    if (millis() - last_data_update < data_update_interval)
-        return;
-
-    fetch_printer_data();
-    last_data_update = millis();
+    // Causes other threads that are trying to lock the thread to actually lock it
+    unfreeze_render_thread();
+    delay(1);
+    freeze_render_thread();
 }
+
+void data_loop_background(void * param){
+    while (true){
+        delay(100);
+        if (millis() - last_data_update < data_update_interval)
+            continue;
+
+        fetch_printer_data();
+        last_data_update = millis();
+    }
+}
+
+TaskHandle_t background_loop;
 
 void data_setup()
 {
+    semaphore_init();
     printer.print_filename = filename_buff;
     fetch_printer_data();
     macros_query_setup();
+    freeze_render_thread();
+    xTaskCreatePinnedToCore(data_loop_background, "data_loop_background", 5000, NULL, 1, &background_loop, 0);
 }
