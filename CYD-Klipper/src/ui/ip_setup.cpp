@@ -3,6 +3,7 @@
 #include "lvgl.h"
 #include <TFT_eSPI.h>
 #include <HTTPClient.h>
+#include "core/data_setup.h"
 
 bool connect_ok = false;
 lv_obj_t * ipEntry;
@@ -117,6 +118,7 @@ int retry_count = 0;
 
 void ip_init(){
     connect_ok = false;
+    retry_count = 0;
 
     ip_init_inner();
 
@@ -132,5 +134,15 @@ void ip_init(){
             String retry_count_text = "Connecting to Klipper (Try " + String(retry_count + 1) + ")";
             lv_label_set_text(label, retry_count_text.c_str());
         }
+    }
+}
+
+void ip_ok(){
+    if (klipper_request_consecutive_fail_count > 5){
+        freeze_request_thread();
+        ip_init();
+        unfreeze_request_thread();
+        klipper_request_consecutive_fail_count = 0;
+        lv_msg_send(DATA_PRINTER_STATE, &printer);
     }
 }

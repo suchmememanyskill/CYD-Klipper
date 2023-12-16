@@ -1,6 +1,7 @@
 #include <list>
 #include "files_query.h"
 #include "../conf/global_config.h"
+#include "data_setup.h"
 #include <HTTPClient.h>
 #include <ArduinoJson.h>
 #include <HardwareSerial.h>
@@ -9,6 +10,8 @@
 FILESYSTEM_FILE* last_query = NULL;
 
 FILESYSTEM_FILE* get_files(){
+    freeze_request_thread();
+
     if (last_query != NULL){
         FILESYSTEM_FILE* current = last_query;
 
@@ -59,5 +62,6 @@ FILESYSTEM_FILE* get_files(){
         result += 1;
     }
 
+    unfreeze_request_thread();
     return last_query;
 }

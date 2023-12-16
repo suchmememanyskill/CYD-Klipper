@@ -28,6 +28,7 @@ typedef struct _Printer {
 } Printer;
 
 extern Printer printer;
+extern int klipper_request_consecutive_fail_count;
 
 #define DATA_PRINTER_STATE 1
 #define DATA_PRINTER_DATA 2
@@ -36,3 +37,6 @@ extern Printer printer;
 void data_loop();
 void data_setup();
 void send_gcode(bool wait, const char* gcode);
+
+void freeze_request_thread();
+void unfreeze_request_thread();
