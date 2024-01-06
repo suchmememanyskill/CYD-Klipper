@@ -15,12 +15,12 @@ static void on_state_change(void * s, lv_msg_t * m) {
 
     String url = "http://" + String(global_config.klipperHost) + ":" + String(global_config.klipperPort) + "/printer/gcode/help";
     HTTPClient client;
+    client.useHTTP10(true);
     client.begin(url.c_str());
     int httpCode = client.GET();
     if (httpCode == 200){
-        String payload = client.getString();
-        DynamicJsonDocument doc(16384);
-        deserializeJson(doc, payload);
+        JsonDocument doc;
+        deserializeJson(doc, client.getStream());
         auto result = doc["result"].as<JsonObject>();
 
         for (int i = 0; i < macros_count; i++){
