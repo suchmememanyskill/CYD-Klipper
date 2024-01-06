@@ -70,14 +70,14 @@ void fetch_printer_data()
     char buff[256] = {};
     sprintf(buff, "http://%s:%d/printer/objects/query?extruder&heater_bed&toolhead&gcode_move&virtual_sdcard&print_stats&webhooks", global_config.klipperHost, global_config.klipperPort);
     HTTPClient client;
+    client.useHTTP10(true);
     client.begin(buff);
     int httpCode = client.GET();
     if (httpCode == 200)
     {
         klipper_request_consecutive_fail_count = 0;
-        String payload = client.getString();
-        DynamicJsonDocument doc(4096);
-        deserializeJson(doc, payload);
+        JsonDocument doc;
+        deserializeJson(doc, client.getStream());
         auto status = doc["result"]["status"];
         bool emit_state_update = false;
         int printer_state = printer.state;

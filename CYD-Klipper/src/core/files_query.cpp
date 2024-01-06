@@ -22,24 +22,28 @@ FILESYSTEM_FILE* get_files(){
 
         free(last_query);
     }
-
+    Serial.printf("Heap space pre-file-parse: %d bytes\n", esp_get_free_heap_size());
     std::list<FILESYSTEM_FILE> files;
     char buff[256] = {};
     sprintf(buff, "http://%s:%d/server/files/list", global_config.klipperHost, global_config.klipperPort);
     HTTPClient client;
+    client.useHTTP10(true);
     client.begin(buff);
     int httpCode = client.GET();
     int count = 0;
     if (httpCode == 200){
-        String payload = client.getString();
-        DynamicJsonDocument doc(60000);
-        auto a = deserializeJson(doc, payload);
-        Serial.printf("JSON PARSE: %s\n", a.c_str());
+        JsonDocument doc;
+        auto parseResult = deserializeJson(doc, client.getStream());
+        Serial.printf("Json parse: %s\n", parseResult.c_str());
         auto result = doc["result"].as<JsonArray>();
         for (auto file : result){
             FILESYSTEM_FILE f = {0};
             const char* path = file["path"];
             f.name = (char*)malloc(strlen(path) + 1);
+            if (f.name == NULL){
+                Serial.println("Failed to allocate memory");
+                continue;
+            }
             strcpy(f.name, path);
             f.modified = file["modified"];
             files.push_back(f);
@@ -62,6 +66,7 @@ FILESYSTEM_FILE* get_files(){
         result += 1;
     }
 
+    Serial.printf("Heap space post-file-parse: %d bytes\n", esp_get_free_heap_size());
     unfreeze_request_thread();
     return last_query;
 }
