@@ -15,7 +15,6 @@ Printer printer = {0};
 int klipper_request_consecutive_fail_count = 0;
 char filename_buff[512] = {0};
 SemaphoreHandle_t freezeRenderThreadSemaphore, freezeRequestThreadSemaphore;
-long last_data_update = 0;
 const long data_update_interval = 800;
 
 void semaphore_init(){
@@ -212,12 +211,8 @@ void data_loop()
 
 void data_loop_background(void * param){
     while (true){
-        delay(100);
-        if (millis() - last_data_update < data_update_interval)
-            continue;
-
+        delay(data_update_interval);
         fetch_printer_data();
-        last_data_update = millis();
     }
 }
 
@@ -230,5 +225,5 @@ void data_setup()
     fetch_printer_data();
     macros_query_setup();
     freeze_render_thread();
-    xTaskCreatePinnedToCore(data_loop_background, "data_loop_background", 5000, NULL, 1, &background_loop, 0);
+    xTaskCreatePinnedToCore(data_loop_background, "data_loop_background", 5000, NULL, 0, &background_loop, 0);
 }
