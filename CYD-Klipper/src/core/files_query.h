@@ -19,4 +19,4 @@ typedef struct _FILESYSTEM_FILE {
     float modified;
 } FILESYSTEM_FILE;
 
-FILESYSTEM_FILE* get_files();
+FILESYSTEM_FILE* get_files(int limit);
