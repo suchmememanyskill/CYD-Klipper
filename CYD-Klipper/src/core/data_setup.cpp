@@ -15,7 +15,7 @@ Printer printer = {0};
 int klipper_request_consecutive_fail_count = 0;
 char filename_buff[512] = {0};
 SemaphoreHandle_t freezeRenderThreadSemaphore, freezeRequestThreadSemaphore;
-const long data_update_interval = 800;
+const long data_update_interval = 780;
 
 void semaphore_init(){
     freezeRenderThreadSemaphore = xSemaphoreCreateMutex();
@@ -72,6 +72,7 @@ void fetch_printer_data()
     client.useHTTP10(true);
     client.begin(buff);
     int httpCode = client.GET();
+    delay(10);
     if (httpCode == 200)
     {
         klipper_request_consecutive_fail_count = 0;
@@ -80,7 +81,7 @@ void fetch_printer_data()
         auto status = doc["result"]["status"];
         bool emit_state_update = false;
         int printer_state = printer.state;
-
+        delay(10);
         unfreeze_request_thread();
         frozen = false;
         freeze_render_thread();
