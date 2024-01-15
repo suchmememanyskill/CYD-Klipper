@@ -10,9 +10,12 @@ typedef struct _GLOBAL_CONFIG {
     union {
         unsigned char raw;
         struct {
+            // Internal
             bool screenCalibrated : 1;
             bool wifiConfigured : 1;
             bool ipConfigured : 1;
+
+            // External
             bool lightMode : 1;
             bool invertColors : 1;
             bool rotateScreen : 1;
@@ -40,6 +43,7 @@ typedef struct _GLOBAL_CONFIG {
     
 typedef struct _COLOR_DEF {
     lv_palette_t primary_color;
+    short primary_color_light;
     lv_palette_t secondary_color;
 } COLOR_DEF;
 
