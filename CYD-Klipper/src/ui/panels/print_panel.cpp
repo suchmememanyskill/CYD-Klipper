@@ -95,13 +95,20 @@ void print_panel_init(lv_obj_t* panel){
     lv_obj_set_size(list, panel_width_margin, panel_height_margin);
     lv_obj_align(list, LV_ALIGN_CENTER, 0, 0);
 
-    FILESYSTEM_FILE* files = get_files();
+    FILESYSTEM_FILE* files = get_files(25);
     int count = 0;
-    while (files->name != NULL && count <= 20){
+    while (files != NULL && files->name != NULL && count <= 20){
         lv_obj_t * btn = lv_list_add_btn(list, LV_SYMBOL_FILE, files->name);
         lv_obj_add_event_cb(btn, btn_print_file_verify, LV_EVENT_CLICKED, (void*)files);
 
         files += 1;
         count++;
+    }
+
+    if (count <= 0){
+        lv_obj_del(list);
+        lv_obj_t * label = lv_label_create(panel);
+        lv_label_set_text(label, "Failed to read files.");
+        lv_obj_align(label, LV_ALIGN_CENTER, 0, 0);
     }
 }

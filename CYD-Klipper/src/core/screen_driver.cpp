@@ -183,7 +183,20 @@ void screen_lv_touchRead(lv_indev_drv_t *indev_driver, lv_indev_data_t *data)
 
 void set_color_scheme(){
     lv_disp_t *dispp = lv_disp_get_default();
-    lv_theme_t *theme = lv_theme_default_init(dispp, lv_palette_main(color_defs[global_config.color_scheme].primary_color), lv_palette_main(color_defs[global_config.color_scheme].secondary_color), !global_config.lightMode, LV_FONT_DEFAULT);
+    lv_color_t main_color = {0};
+    COLOR_DEF color_def = color_defs[global_config.color_scheme];
+
+    if (color_defs[global_config.color_scheme].primary_color_light > 0){
+        main_color = lv_palette_lighten(color_def.primary_color, color_def.primary_color_light);
+    }
+    else if (color_defs[global_config.color_scheme].primary_color_light < 0) {
+        main_color = lv_palette_darken(color_def.primary_color, color_def.primary_color_light * -1);
+    }
+    else {
+        main_color = lv_palette_main(color_defs[global_config.color_scheme].primary_color);
+    }
+
+    lv_theme_t *theme = lv_theme_default_init(dispp, main_color, lv_palette_main(color_def.secondary_color), !global_config.lightMode, LV_FONT_DEFAULT);
     lv_disp_set_theme(dispp, theme);
 }
 

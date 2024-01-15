@@ -15,8 +15,7 @@ Printer printer = {0};
 int klipper_request_consecutive_fail_count = 0;
 char filename_buff[512] = {0};
 SemaphoreHandle_t freezeRenderThreadSemaphore, freezeRequestThreadSemaphore;
-long last_data_update = 0;
-const long data_update_interval = 800;
+const long data_update_interval = 780;
 
 void semaphore_init(){
     freezeRenderThreadSemaphore = xSemaphoreCreateMutex();
@@ -70,18 +69,19 @@ void fetch_printer_data()
     char buff[256] = {};
     sprintf(buff, "http://%s:%d/printer/objects/query?extruder&heater_bed&toolhead&gcode_move&virtual_sdcard&print_stats&webhooks", global_config.klipperHost, global_config.klipperPort);
     HTTPClient client;
+    client.useHTTP10(true);
     client.begin(buff);
     int httpCode = client.GET();
+    delay(10);
     if (httpCode == 200)
     {
         klipper_request_consecutive_fail_count = 0;
-        String payload = client.getString();
-        DynamicJsonDocument doc(4096);
-        deserializeJson(doc, payload);
+        JsonDocument doc;
+        deserializeJson(doc, client.getStream());
         auto status = doc["result"]["status"];
         bool emit_state_update = false;
         int printer_state = printer.state;
-
+        delay(10);
         unfreeze_request_thread();
         frozen = false;
         freeze_render_thread();
@@ -212,12 +212,8 @@ void data_loop()
 
 void data_loop_background(void * param){
     while (true){
-        delay(100);
-        if (millis() - last_data_update < data_update_interval)
-            continue;
-
+        delay(data_update_interval);
         fetch_printer_data();
-        last_data_update = millis();
     }
 }
 
@@ -230,5 +226,5 @@ void data_setup()
     fetch_printer_data();
     macros_query_setup();
     freeze_render_thread();
-    xTaskCreatePinnedToCore(data_loop_background, "data_loop_background", 5000, NULL, 1, &background_loop, 0);
+    xTaskCreatePinnedToCore(data_loop_background, "data_loop_background", 5000, NULL, 0, &background_loop, 0);
 }
