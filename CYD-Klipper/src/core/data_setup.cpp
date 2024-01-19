@@ -4,6 +4,7 @@
 #include "../conf/global_config.h"
 #include <HTTPClient.h>
 #include <ArduinoJson.h>
+#include <esp_task_wdt.h>
 #include "macros_query.h"
 
 const char *printer_state_messages[] = {
@@ -64,7 +65,6 @@ void send_gcode(bool wait, const char *gcode)
 
 void fetch_printer_data()
 {
-    bool frozen = true;
     freeze_request_thread();
     char buff[256] = {};
     sprintf(buff, "http://%s:%d/printer/objects/query?extruder&heater_bed&toolhead&gcode_move&virtual_sdcard&print_stats&webhooks", global_config.klipperHost, global_config.klipperPort);
@@ -83,7 +83,6 @@ void fetch_printer_data()
         int printer_state = printer.state;
         delay(10);
         unfreeze_request_thread();
-        frozen = false;
         freeze_render_thread();
 
         if (status.containsKey("webhooks"))
@@ -196,10 +195,8 @@ void fetch_printer_data()
     {
         klipper_request_consecutive_fail_count++;
         Serial.printf("Failed to fetch printer data: %d\n", httpCode);
-    }
-
-    if (frozen)
         unfreeze_request_thread();
+    }
 }
 
 void data_loop()
@@ -211,6 +208,7 @@ void data_loop()
 }
 
 void data_loop_background(void * param){
+    esp_task_wdt_init(10, true);
     while (true){
         delay(data_update_interval);
         fetch_printer_data();
