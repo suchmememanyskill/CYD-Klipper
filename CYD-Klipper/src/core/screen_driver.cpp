@@ -84,7 +84,11 @@ void touchscreen_calibrate(bool force)
 
 void screen_setBrightness(byte brightness)
 {
-    analogWrite(TFT_BL, brightness);
+    // calculate duty, 4095 from 2 ^ 12 - 1
+    uint32_t duty = (4095 / 255) * brightness;
+
+    // write duty to LEDC
+    ledcWrite(0, duty);
 }
 
 void set_screen_brightness()
@@ -213,6 +217,10 @@ void screen_setup()
     lv_init();
 
     tft.init();
+
+    ledcSetup(0, 5000, 12);
+    ledcAttachPin(21, 0);
+
     tft.setRotation(global_config.rotateScreen ? 3 : 1);
     tft.fillScreen(TFT_BLACK);
     set_screen_brightness();
