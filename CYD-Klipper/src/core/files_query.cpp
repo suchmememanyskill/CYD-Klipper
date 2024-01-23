@@ -53,8 +53,10 @@ FILESYSTEM_FILE* get_files(int limit){
 
                 file_iter++;
             }
+
+            if (file_iter == files.end() && files.size() >= limit)
+                continue;
             
-            // Little inefficient as it always allocates a string, even if it doesn't have to
             f.name = (char*)malloc(strlen(path) + 1);
             if (f.name == NULL){
                 Serial.println("Failed to allocate memory");
