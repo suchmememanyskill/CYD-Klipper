@@ -1,8 +1,19 @@
-#include "screen_driver.h"
+#include "ESP32-2432S028R.h"
+
 #include <SPI.h>
 #include <TFT_eSPI.h>
-#include "../conf/global_config.h"
+#include "../../conf/global_config.h"
 #include "lvgl.h"
+#include <XPT2046_Touchscreen.h>
+#include <TFT_eSPI.h>
+
+#define XPT2046_IRQ 36
+#define XPT2046_MOSI 32
+#define XPT2046_MISO 39
+#define XPT2046_CLK 25
+#define XPT2046_CS 33
+#define CPU_FREQ_HIGH 240
+#define CPU_FREQ_LOW 80
 
 SPIClass touchscreen_spi = SPIClass(HSPI);
 XPT2046_Touchscreen touchscreen(XPT2046_CS, XPT2046_IRQ);
@@ -229,7 +240,7 @@ void screen_setup()
     touchscreen_spi.begin(XPT2046_CLK, XPT2046_MISO, XPT2046_MOSI, XPT2046_CS);
     touchscreen.begin(touchscreen_spi);
 
-    touchscreen_calibrate();
+    touchscreen_calibrate(false);
 
     lv_disp_draw_buf_init(&draw_buf, buf, NULL, TFT_WIDTH * TFT_HEIGHT / 10);
 

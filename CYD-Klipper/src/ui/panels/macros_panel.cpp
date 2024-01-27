@@ -3,15 +3,10 @@
 #include "../nav_buttons.h"
 #include "../../core/data_setup.h"
 #include "../../core/macros_query.h"
+#include "../ui_utils.h"
 #include <HardwareSerial.h>
 
-int y_offset_macros = 40;
-const int y_element_size = 50;
-const int y_seperator_size = 1;
-const int y_seperator_x_padding = 50;
-const int panel_width = TFT_HEIGHT - 40;
-const int y_element_x_padding = 30;
-const static lv_point_t line_points[] = { {0, 0}, {panel_width - y_seperator_x_padding, 0} };
+const static lv_point_t line_points[] = { {0, 0}, {(short int)((CYD_SCREEN_PANEL_WIDTH - CYD_SCREEN_BIG_GAP_PX * 2) * 0.85f), 0} };
 
 static void btn_press(lv_event_t * e){
     lv_obj_t * btn = lv_event_get_target(e);
@@ -24,44 +19,11 @@ static void btn_goto_settings(lv_event_t * e){
     nav_buttons_setup(3);
 }
 
-void create_macro_widget(const char* macro, lv_obj_t* root_panel){
-    lv_obj_t * panel = lv_obj_create(root_panel);
-    lv_obj_set_style_border_width(panel, 0, 0);
-    lv_obj_set_style_bg_opa(panel, LV_OPA_TRANSP, 0);
-    lv_obj_set_style_pad_all(panel, 0, 0);
-    lv_obj_align(panel, LV_ALIGN_TOP_MID, 0, y_offset_macros);
-    lv_obj_set_size(panel, panel_width - y_element_x_padding, y_element_size);
-
-    lv_obj_t * line = lv_line_create(panel);
-    lv_line_set_points(line, line_points, 2);
-    lv_obj_set_style_line_width(line, y_seperator_size, 0);
-    lv_obj_set_style_line_color(line, lv_color_hex(0xAAAAAA), 0);
-    lv_obj_align(line, LV_ALIGN_BOTTOM_MID, 0, 0);
-
-    lv_obj_t * label = lv_label_create(panel);
-    lv_label_set_text(label, macro);
-    lv_obj_align(label, LV_ALIGN_LEFT_MID, 0, 0);
-    lv_label_set_long_mode(label, LV_LABEL_LONG_SCROLL_CIRCULAR);
-    lv_obj_set_width(label, (TFT_HEIGHT - 40) * 0.75f);
-
-    lv_obj_t * btn = lv_btn_create(panel);
-    lv_obj_align(btn, LV_ALIGN_RIGHT_MID, 0, 0);
-    lv_obj_add_event_cb(btn, btn_press, LV_EVENT_CLICKED, (void*)macro);
-
-    label = lv_label_create(btn);
-    lv_label_set_text(label, "Run");
-    lv_obj_center(label);
-
-    y_offset_macros += y_element_size;
-}
-
 void macros_panel_init(lv_obj_t* panel) {
-    y_offset_macros = 40;
-
     lv_obj_t * btn = lv_btn_create(panel);
     lv_obj_add_event_cb(btn, btn_goto_settings, LV_EVENT_CLICKED, NULL);
-    lv_obj_set_size(btn, TFT_HEIGHT - 40 - 20, 30);
-    lv_obj_align(btn, LV_ALIGN_TOP_MID, 0, 5);
+    lv_obj_set_size(btn, CYD_SCREEN_PANEL_WIDTH - CYD_SCREEN_BIG_GAP_PX * 2, CYD_SCREEN_MIN_BUTTON_HEIGHT);
+    lv_obj_align(btn, LV_ALIGN_TOP_MID, 0, CYD_SCREEN_BIG_GAP_PX);
 
     lv_obj_t * label = lv_label_create(btn);
     lv_label_set_text(label, LV_SYMBOL_SETTINGS " Screen Settings");
@@ -75,7 +37,42 @@ void macros_panel_init(lv_obj_t* panel) {
         return;
     }
 
+    lv_obj_t * root_panel = lv_create_empty_panel(panel);
+    lv_obj_set_size(root_panel, CYD_SCREEN_PANEL_WIDTH, CYD_SCREEN_HEIGHT - CYD_SCREEN_MIN_BUTTON_HEIGHT - CYD_SCREEN_BIG_GAP_PX); 
+    lv_obj_align(root_panel, LV_ALIGN_TOP_MID, 0, CYD_SCREEN_MIN_BUTTON_HEIGHT + CYD_SCREEN_BIG_GAP_PX);
+    lv_obj_set_layout(root_panel, LV_LAYOUT_FLEX);
+    lv_obj_set_flex_flow(root_panel, LV_FLEX_FLOW_COLUMN);
+    lv_obj_set_flex_align(root_panel, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
+    lv_obj_set_style_pad_column(root_panel, 0, 0);
+    lv_obj_set_style_pad_row(root_panel, 0, 0);
+
+    for (int j = 0; j < 2; j++)
     for (int i = 0; i < query.count; i++){
-        create_macro_widget(query.macros[i], panel);
+        const char* macro = query.macros[i];
+        
+        lv_obj_t * panel = lv_create_empty_panel(root_panel);
+        lv_obj_set_size(panel, CYD_SCREEN_PANEL_WIDTH - CYD_SCREEN_BIG_GAP_PX * 3, CYD_SCREEN_MIN_BUTTON_HEIGHT + CYD_SCREEN_BIG_GAP_PX * 2);
+
+        lv_obj_t * line = lv_line_create(panel);
+        lv_line_set_points(line, line_points, 2);
+        lv_obj_set_style_line_width(line, 1, 0);
+        lv_obj_set_style_line_color(line, lv_color_hex(0xAAAAAA), 0);
+        lv_obj_align(line, LV_ALIGN_BOTTOM_MID, 0, 0);
+
+        lv_obj_t * label = lv_label_create(panel);
+        lv_label_set_text(label, macro);
+        lv_obj_align(label, LV_ALIGN_LEFT_MID, 0, 0);
+        lv_label_set_long_mode(label, LV_LABEL_LONG_SCROLL_CIRCULAR);
+        // TODO: Hack. Needs to be fixed for proper porting
+        lv_obj_set_width(label, CYD_SCREEN_PANEL_WIDTH * 0.75f);
+
+        lv_obj_t * btn = lv_btn_create(panel);
+        lv_obj_set_height(btn, CYD_SCREEN_MIN_BUTTON_HEIGHT);
+        lv_obj_align(btn, LV_ALIGN_RIGHT_MID, 0, 0);
+        lv_obj_add_event_cb(btn, btn_press, LV_EVENT_CLICKED, (void*)macro);
+
+        label = lv_label_create(btn);
+        lv_label_set_text(label, "Run");
+        lv_obj_center(label);
     }
 }
