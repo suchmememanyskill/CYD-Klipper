@@ -85,13 +85,13 @@ static void on_during_print_switch(lv_event_t* e){
 const static lv_point_t line_points[] = { {0, 0}, {(short int)((CYD_SCREEN_PANEL_WIDTH - CYD_SCREEN_BIG_GAP_PX * 2) * 0.85f), 0} };
 
 void create_settings_widget(const char* label_text, lv_obj_t* object, lv_obj_t* root_panel){
-    lv_obj_set_height(object, CYD_SCREEN_MIN_BUTTON_HEIGHT);
+    lv_obj_set_height(object, CYD_SCREEN_MIN_BUTTON_HEIGHT_PX);
 
     lv_obj_t * panel = lv_obj_create(root_panel);
     lv_obj_set_style_border_width(panel, 0, 0);
     lv_obj_set_style_bg_opa(panel, LV_OPA_TRANSP, 0);
     lv_obj_set_style_pad_all(panel, 0, 0);
-    lv_obj_set_size(panel, CYD_SCREEN_PANEL_WIDTH - CYD_SCREEN_BIG_GAP_PX * 3, CYD_SCREEN_MIN_BUTTON_HEIGHT + CYD_SCREEN_BIG_GAP_PX * 2);
+    lv_obj_set_size(panel, CYD_SCREEN_PANEL_WIDTH - CYD_SCREEN_BIG_GAP_PX * 3, CYD_SCREEN_MIN_BUTTON_HEIGHT_PX + CYD_SCREEN_BIG_GAP_PX * 2);
 
     lv_obj_t * line = lv_line_create(panel);
     lv_line_set_points(line, line_points, 2);

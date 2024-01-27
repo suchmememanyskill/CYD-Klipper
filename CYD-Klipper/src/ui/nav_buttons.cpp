@@ -101,7 +101,7 @@ void nav_buttons_setup(unsigned char active_panel){
     lv_obj_clear_flag(lv_scr_act(), LV_OBJ_FLAG_SCROLLABLE);
 
     lv_obj_t * root_panel = lv_create_empty_panel(lv_scr_act());
-    lv_obj_set_size(root_panel, CYD_SCREEN_SIDEBAR_SIZE_PX, CYD_SCREEN_HEIGHT); 
+    lv_obj_set_size(root_panel, CYD_SCREEN_SIDEBAR_SIZE_PX, CYD_SCREEN_HEIGHT_PX); 
     lv_obj_align(root_panel, LV_ALIGN_TOP_LEFT, 0, 0);
     lv_obj_set_layout(root_panel, LV_LAYOUT_FLEX);
     lv_obj_set_flex_flow(root_panel, LV_FLEX_FLOW_COLUMN);
@@ -122,7 +122,7 @@ void nav_buttons_setup(unsigned char active_panel){
     create_button(LV_SYMBOL_GPS, "Macro", btn_click_macros, NULL, root_panel);
 
     lv_obj_t * panel = lv_create_empty_panel(lv_scr_act());
-    lv_obj_set_size(panel, CYD_SCREEN_PANEL_WIDTH, CYD_SCREEN_HEIGHT);
+    lv_obj_set_size(panel, CYD_SCREEN_PANEL_WIDTH, CYD_SCREEN_HEIGHT_PX);
     lv_obj_align(panel, LV_ALIGN_TOP_RIGHT, 0, 0);
 
     switch (active_panel){
