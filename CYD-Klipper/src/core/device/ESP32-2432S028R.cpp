@@ -211,7 +211,7 @@ void set_color_scheme(){
         main_color = lv_palette_main(color_defs[global_config.color_scheme].primary_color);
     }
 
-    lv_theme_t *theme = lv_theme_default_init(dispp, main_color, lv_palette_main(color_def.secondary_color), !global_config.lightMode, LV_FONT_DEFAULT);
+    lv_theme_t *theme = lv_theme_default_init(dispp, main_color, lv_palette_main(color_def.secondary_color), !global_config.lightMode, CYD_SCREEN_FONT);
     lv_disp_set_theme(dispp, theme);
 }
 
