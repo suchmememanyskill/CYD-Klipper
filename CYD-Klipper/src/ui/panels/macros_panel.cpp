@@ -46,7 +46,6 @@ void macros_panel_init(lv_obj_t* panel) {
     lv_obj_set_style_pad_column(root_panel, 0, 0);
     lv_obj_set_style_pad_row(root_panel, 0, 0);
 
-    for (int j = 0; j < 2; j++)
     for (int i = 0; i < query.count; i++){
         const char* macro = query.macros[i];
         
