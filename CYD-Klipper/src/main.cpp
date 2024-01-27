@@ -6,6 +6,7 @@
 #include "core/data_setup.h"
 #include "ui/main_ui.h"
 #include "ui/nav_buttons.h"
+#include <Esp.h>
 
 static void event_handler(lv_event_t * e){
     lv_event_code_t code = lv_event_get_code(e);
