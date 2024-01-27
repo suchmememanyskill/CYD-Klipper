@@ -186,5 +186,5 @@ void nav_style_setup(){
     lv_style_set_radius(&nav_button_style, 0);
 
     lv_style_init(&nav_button_text_style);
-    lv_style_set_text_font(&nav_button_text_style, &lv_font_montserrat_10);
+    lv_style_set_text_font(&nav_button_text_style, CYD_SCREEN_FONT_SMALL);
 }
