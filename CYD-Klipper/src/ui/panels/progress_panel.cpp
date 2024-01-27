@@ -117,6 +117,4 @@ void progress_panel_init(lv_obj_t* panel){
         lv_label_set_text(label, LV_SYMBOL_PAUSE);
         lv_obj_center(label);
     }
-
-    lv_msg_send(DATA_PRINTER_DATA, &printer);
 }

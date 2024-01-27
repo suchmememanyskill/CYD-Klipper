@@ -302,6 +302,5 @@ void temp_panel_init(lv_obj_t* panel){
     lv_label_set_text(label, LV_SYMBOL_UP " Retract");
     lv_obj_center(label);
 
-    lv_msg_send(DATA_PRINTER_DATA, &printer);
     lv_msg_send(DATA_PRINTER_TEMP_PRESET, &printer);
 }

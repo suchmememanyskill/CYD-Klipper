@@ -204,6 +204,4 @@ void move_panel_init(lv_obj_t* panel){
 
         y_pos += 60;
     }
-
-    lv_msg_send(DATA_PRINTER_DATA, &printer);
 }
