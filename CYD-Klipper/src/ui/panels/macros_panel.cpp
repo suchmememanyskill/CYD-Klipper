@@ -55,6 +55,7 @@ void macros_panel_init(lv_obj_t* panel) {
         lv_obj_set_flex_grow(label, 1);
 
         lv_obj_t * btn = lv_btn_create(panel);
+        lv_obj_add_event_cb(btn, btn_press, LV_EVENT_CLICKED, (void*)macro);
         lv_obj_set_height(btn, CYD_SCREEN_MIN_BUTTON_HEIGHT_PX);
 
         label = lv_label_create(btn);
