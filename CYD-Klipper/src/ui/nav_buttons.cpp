@@ -103,11 +103,7 @@ void nav_buttons_setup(unsigned char active_panel){
     lv_obj_t * root_panel = lv_create_empty_panel(lv_scr_act());
     lv_obj_set_size(root_panel, CYD_SCREEN_SIDEBAR_SIZE_PX, CYD_SCREEN_HEIGHT_PX); 
     lv_obj_align(root_panel, LV_ALIGN_TOP_LEFT, 0, 0);
-    lv_obj_set_layout(root_panel, LV_LAYOUT_FLEX);
-    lv_obj_set_flex_flow(root_panel, LV_FLEX_FLOW_COLUMN);
-    lv_obj_set_flex_align(root_panel, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
-    lv_obj_set_style_pad_column(root_panel, 0, 0);
-    lv_obj_set_style_pad_row(root_panel, 0, 0);
+    lv_layout_flex_column(root_panel, LV_FLEX_ALIGN_START, 0, 0);
 
     // Files/Print
     create_button(LV_SYMBOL_COPY, "Idle", btn_click_files, update_printer_data_time, root_panel);
