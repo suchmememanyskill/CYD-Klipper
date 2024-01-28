@@ -5,6 +5,7 @@
 #include "../../conf/global_config.h"
 #include <HardwareSerial.h>
 #include <HTTPClient.h>
+#include "../ui_utils.h"
 
 FILESYSTEM_FILE* selected_file = NULL;
 
@@ -49,7 +50,8 @@ static void btn_print_file_verify(lv_event_t * e){
     selected_file = (FILESYSTEM_FILE*)lv_event_get_user_data(e);
     
     lv_obj_t * panel = lv_obj_create(lv_scr_act());
-    lv_obj_set_size(panel, TFT_HEIGHT - 40, TFT_WIDTH - 30);
+    lv_obj_set_style_pad_all(panel, CYD_SCREEN_BIG_GAP_PX * 2, 0);
+    lv_obj_set_size(panel, CYD_SCREEN_WIDTH_PX - CYD_SCREEN_BIG_GAP_PX * 4, CYD_SCREEN_HEIGHT_PX - CYD_SCREEN_BIG_GAP_PX * 3);
     lv_obj_align(panel, LV_ALIGN_CENTER, 0, 0);
 
     lv_obj_t * label = lv_label_create(panel);
@@ -59,12 +61,12 @@ static void btn_print_file_verify(lv_event_t * e){
     label = lv_label_create(panel);
     lv_label_set_text(label, selected_file->name);
     lv_obj_align(label, LV_ALIGN_CENTER, 0, -20);
-    lv_obj_set_width(label, TFT_HEIGHT - 90);
+    lv_obj_set_width(label, CYD_SCREEN_WIDTH_PX - CYD_SCREEN_BIG_GAP_PX * 10);
     lv_label_set_long_mode(label, LV_LABEL_LONG_WRAP);
 
     btn = lv_btn_create(panel);
-    lv_obj_align(btn, LV_ALIGN_BOTTOM_LEFT, 10, -10);
-    lv_obj_set_size(btn, 40, 40);
+    lv_obj_align(btn, LV_ALIGN_BOTTOM_LEFT, 0, 0);
+    lv_obj_set_size(btn, CYD_SCREEN_MIN_BUTTON_WIDTH_PX, CYD_SCREEN_MIN_BUTTON_HEIGHT_PX);
     lv_obj_add_event_cb(btn, btn_print_back, LV_EVENT_CLICKED, panel);
 
     label = lv_label_create(btn);
@@ -72,8 +74,8 @@ static void btn_print_file_verify(lv_event_t * e){
     lv_obj_center(label);
 
     btn = lv_btn_create(panel);
-    lv_obj_align(btn, LV_ALIGN_BOTTOM_RIGHT, -10, -10);
-    lv_obj_set_size(btn, 40, 40);
+    lv_obj_align(btn, LV_ALIGN_BOTTOM_RIGHT, 0, 0);
+    lv_obj_set_size(btn, CYD_SCREEN_MIN_BUTTON_WIDTH_PX, CYD_SCREEN_MIN_BUTTON_HEIGHT_PX);
     lv_obj_add_event_cb(btn, btn_print_file, LV_EVENT_CLICKED, panel);
     
     label = lv_label_create(btn);
@@ -87,12 +89,8 @@ void print_panel_init(lv_obj_t* panel){
         return;
     }
 
-    auto panel_width = TFT_HEIGHT - 40;
-    auto panel_height_margin = TFT_WIDTH - 10;
-    auto panel_width_margin = panel_width - 10;
-
     lv_obj_t * list = lv_list_create(panel);
-    lv_obj_set_size(list, panel_width_margin, panel_height_margin);
+    lv_obj_set_size(list, CYD_SCREEN_PANEL_WIDTH_PX - CYD_SCREEN_BIG_GAP_PX * 2, CYD_SCREEN_HEIGHT_PX - CYD_SCREEN_BIG_GAP_PX * 2);
     lv_obj_align(list, LV_ALIGN_CENTER, 0, 0);
 
     FILESYSTEM_FILE* files = get_files(25);
