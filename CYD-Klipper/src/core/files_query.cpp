@@ -31,6 +31,7 @@ FILESYSTEM_FILE* get_files(int limit){
     sprintf(buff, "http://%s:%d/server/files/list", global_config.klipperHost, global_config.klipperPort);
     HTTPClient client;
     client.useHTTP10(true);
+    client.setTimeout(5000);
     client.begin(buff);
     int httpCode = client.GET();
     auto timer_parse = millis();
