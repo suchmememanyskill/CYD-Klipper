@@ -6,7 +6,7 @@
 #include "../ui_utils.h"
 #include <HardwareSerial.h>
 
-const static lv_point_t line_points[] = { {0, 0}, {(short int)((CYD_SCREEN_PANEL_WIDTH - CYD_SCREEN_BIG_GAP_PX * 2) * 0.85f), 0} };
+const static lv_point_t line_points[] = { {0, 0}, {(short int)((CYD_SCREEN_PANEL_WIDTH_PX - CYD_SCREEN_BIG_GAP_PX * 2) * 0.85f), 0} };
 
 static void btn_press(lv_event_t * e){
     lv_obj_t * btn = lv_event_get_target(e);
@@ -22,7 +22,7 @@ static void btn_goto_settings(lv_event_t * e){
 void macros_panel_init(lv_obj_t* panel) {
     lv_obj_t * btn = lv_btn_create(panel);
     lv_obj_add_event_cb(btn, btn_goto_settings, LV_EVENT_CLICKED, NULL);
-    lv_obj_set_size(btn, CYD_SCREEN_PANEL_WIDTH - CYD_SCREEN_BIG_GAP_PX * 2, CYD_SCREEN_MIN_BUTTON_HEIGHT_PX);
+    lv_obj_set_size(btn, CYD_SCREEN_PANEL_WIDTH_PX - CYD_SCREEN_BIG_GAP_PX * 2, CYD_SCREEN_MIN_BUTTON_HEIGHT_PX);
     lv_obj_align(btn, LV_ALIGN_TOP_MID, 0, CYD_SCREEN_BIG_GAP_PX);
 
     lv_obj_t * label = lv_label_create(btn);
@@ -38,17 +38,16 @@ void macros_panel_init(lv_obj_t* panel) {
     }
 
     lv_obj_t * root_panel = lv_create_empty_panel(panel);
-    lv_obj_set_size(root_panel, CYD_SCREEN_PANEL_WIDTH, CYD_SCREEN_HEIGHT_PX - CYD_SCREEN_MIN_BUTTON_HEIGHT_PX - CYD_SCREEN_BIG_GAP_PX * 2); 
+    lv_obj_set_size(root_panel, CYD_SCREEN_PANEL_WIDTH_PX, CYD_SCREEN_HEIGHT_PX - CYD_SCREEN_MIN_BUTTON_HEIGHT_PX - CYD_SCREEN_BIG_GAP_PX * 2); 
     lv_obj_align(root_panel, LV_ALIGN_TOP_MID, 0, CYD_SCREEN_MIN_BUTTON_HEIGHT_PX + CYD_SCREEN_BIG_GAP_PX * 2);
     lv_layout_flex_column(root_panel);
 
-    for (int j = 0; j < 2; j++)
     for (int i = 0; i < query.count; i++){
         const char* macro = query.macros[i];
         
         lv_obj_t * panel = lv_create_empty_panel(root_panel);
         lv_layout_flex_row(panel, LV_FLEX_ALIGN_END);
-        lv_obj_set_size(panel, CYD_SCREEN_PANEL_WIDTH - CYD_SCREEN_BIG_GAP_PX * 3, CYD_SCREEN_MIN_BUTTON_HEIGHT_PX);
+        lv_obj_set_size(panel, CYD_SCREEN_PANEL_WIDTH_PX - CYD_SCREEN_BIG_GAP_PX * 3, CYD_SCREEN_MIN_BUTTON_HEIGHT_PX);
 
         lv_obj_t * label = lv_label_create(panel);
         lv_label_set_text(label, macro);

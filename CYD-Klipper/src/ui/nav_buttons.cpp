@@ -118,7 +118,7 @@ void nav_buttons_setup(unsigned char active_panel){
     create_button(LV_SYMBOL_GPS, "Macro", btn_click_macros, NULL, root_panel);
 
     lv_obj_t * panel = lv_create_empty_panel(lv_scr_act());
-    lv_obj_set_size(panel, CYD_SCREEN_PANEL_WIDTH, CYD_SCREEN_HEIGHT_PX);
+    lv_obj_set_size(panel, CYD_SCREEN_PANEL_WIDTH_PX, CYD_SCREEN_HEIGHT_PX);
     lv_obj_align(panel, LV_ALIGN_TOP_RIGHT, 0, 0);
 
     switch (active_panel){

@@ -82,13 +82,13 @@ static void on_during_print_switch(lv_event_t* e){
     WriteGlobalConfig();
 }
 
-const static lv_point_t line_points[] = { {0, 0}, {(short int)((CYD_SCREEN_PANEL_WIDTH - CYD_SCREEN_BIG_GAP_PX * 2) * 0.85f), 0} };
+const static lv_point_t line_points[] = { {0, 0}, {(short int)((CYD_SCREEN_PANEL_WIDTH_PX - CYD_SCREEN_BIG_GAP_PX * 2) * 0.85f), 0} };
 
 void create_settings_widget(const char* label_text, lv_obj_t* object, lv_obj_t* root_panel){
     lv_obj_set_height(object, CYD_SCREEN_MIN_BUTTON_HEIGHT_PX);
 
     lv_obj_t * panel = lv_create_empty_panel(root_panel);
-    lv_obj_set_size(panel, CYD_SCREEN_PANEL_WIDTH - CYD_SCREEN_BIG_GAP_PX * 3, CYD_SCREEN_MIN_BUTTON_HEIGHT_PX);
+    lv_obj_set_size(panel, CYD_SCREEN_PANEL_WIDTH_PX - CYD_SCREEN_BIG_GAP_PX * 3, CYD_SCREEN_MIN_BUTTON_HEIGHT_PX);
 
     lv_obj_t * label = lv_label_create(panel);
     lv_label_set_text(label, label_text);
