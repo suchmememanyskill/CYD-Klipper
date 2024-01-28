@@ -46,6 +46,8 @@ static void btn_print_back(lv_event_t * e){
 }
 
 static void btn_print_file_verify(lv_event_t * e){
+    const auto button_size_mult = 1.3f;
+
     lv_obj_t * btn = lv_event_get_target(e);
     selected_file = (FILESYSTEM_FILE*)lv_event_get_user_data(e);
     
@@ -66,7 +68,7 @@ static void btn_print_file_verify(lv_event_t * e){
 
     btn = lv_btn_create(panel);
     lv_obj_align(btn, LV_ALIGN_BOTTOM_LEFT, 0, 0);
-    lv_obj_set_size(btn, CYD_SCREEN_MIN_BUTTON_WIDTH_PX, CYD_SCREEN_MIN_BUTTON_HEIGHT_PX);
+    lv_obj_set_size(btn, CYD_SCREEN_MIN_BUTTON_WIDTH_PX * button_size_mult, CYD_SCREEN_MIN_BUTTON_HEIGHT_PX * button_size_mult);
     lv_obj_add_event_cb(btn, btn_print_back, LV_EVENT_CLICKED, panel);
 
     label = lv_label_create(btn);
@@ -75,7 +77,7 @@ static void btn_print_file_verify(lv_event_t * e){
 
     btn = lv_btn_create(panel);
     lv_obj_align(btn, LV_ALIGN_BOTTOM_RIGHT, 0, 0);
-    lv_obj_set_size(btn, CYD_SCREEN_MIN_BUTTON_WIDTH_PX, CYD_SCREEN_MIN_BUTTON_HEIGHT_PX);
+    lv_obj_set_size(btn, CYD_SCREEN_MIN_BUTTON_WIDTH_PX * button_size_mult, CYD_SCREEN_MIN_BUTTON_HEIGHT_PX * button_size_mult);
     lv_obj_add_event_cb(btn, btn_print_file, LV_EVENT_CLICKED, panel);
     
     label = lv_label_create(btn);
