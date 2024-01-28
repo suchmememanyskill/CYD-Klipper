@@ -87,17 +87,8 @@ const static lv_point_t line_points[] = { {0, 0}, {(short int)((CYD_SCREEN_PANEL
 void create_settings_widget(const char* label_text, lv_obj_t* object, lv_obj_t* root_panel){
     lv_obj_set_height(object, CYD_SCREEN_MIN_BUTTON_HEIGHT_PX);
 
-    lv_obj_t * panel = lv_obj_create(root_panel);
-    lv_obj_set_style_border_width(panel, 0, 0);
-    lv_obj_set_style_bg_opa(panel, LV_OPA_TRANSP, 0);
-    lv_obj_set_style_pad_all(panel, 0, 0);
-    lv_obj_set_size(panel, CYD_SCREEN_PANEL_WIDTH - CYD_SCREEN_BIG_GAP_PX * 3, CYD_SCREEN_MIN_BUTTON_HEIGHT_PX + CYD_SCREEN_BIG_GAP_PX * 2);
-
-    lv_obj_t * line = lv_line_create(panel);
-    lv_line_set_points(line, line_points, 2);
-    lv_obj_set_style_line_width(line, 1, 0);
-    lv_obj_set_style_line_color(line, lv_color_hex(0xAAAAAA), 0);
-    lv_obj_align(line, LV_ALIGN_BOTTOM_MID, 0, 0);
+    lv_obj_t * panel = lv_create_empty_panel(root_panel);
+    lv_obj_set_size(panel, CYD_SCREEN_PANEL_WIDTH - CYD_SCREEN_BIG_GAP_PX * 3, CYD_SCREEN_MIN_BUTTON_HEIGHT_PX);
 
     lv_obj_t * label = lv_label_create(panel);
     lv_label_set_text(label, label_text);
@@ -105,15 +96,16 @@ void create_settings_widget(const char* label_text, lv_obj_t* object, lv_obj_t* 
 
     lv_obj_set_parent(object, panel);
     lv_obj_align(object, LV_ALIGN_RIGHT_MID, 0, 0);
+
+    lv_obj_t * line = lv_line_create(root_panel);
+    lv_line_set_points(line, line_points, 2);
+    lv_obj_set_style_line_width(line, 1, 0);
+    lv_obj_set_style_line_color(line, lv_color_hex(0xAAAAAA), 0);
 }
 
 void settings_panel_init(lv_obj_t* panel){
-
-    lv_obj_set_layout(panel, LV_LAYOUT_FLEX);
-    lv_obj_set_flex_flow(panel, LV_FLEX_FLOW_COLUMN);
-    lv_obj_set_flex_align(panel, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
-    lv_obj_set_style_pad_column(panel, 0, 0);
-    lv_obj_set_style_pad_row(panel, 0, 0);
+    lv_obj_set_style_pad_all(panel, CYD_SCREEN_BIG_GAP_PX, 0);
+    lv_layout_flex_column(panel);
 
     lv_obj_t * btn = lv_btn_create(panel);
     lv_obj_add_event_cb(btn, reset_wifi_click, LV_EVENT_CLICKED, NULL);
