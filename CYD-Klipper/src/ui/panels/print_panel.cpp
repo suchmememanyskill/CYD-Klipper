@@ -90,13 +90,17 @@ void print_panel_init(lv_obj_t* panel){
     }
 
     lv_obj_t * list = lv_list_create(panel);
-    lv_obj_set_size(list, CYD_SCREEN_PANEL_WIDTH_PX - CYD_SCREEN_BIG_GAP_PX * 2, CYD_SCREEN_HEIGHT_PX - CYD_SCREEN_BIG_GAP_PX * 2);
+    lv_obj_set_style_radius(list, 0, 0);
+    lv_obj_set_style_border_width(list, 0, 0); 
+    lv_obj_set_style_bg_opa(list, LV_OPA_TRANSP, 0); 
+    lv_obj_set_size(list, CYD_SCREEN_PANEL_WIDTH_PX, CYD_SCREEN_HEIGHT_PX);
     lv_obj_align(list, LV_ALIGN_CENTER, 0, 0);
 
     FILESYSTEM_FILE* files = get_files(25);
     int count = 0;
     while (files != NULL && files->name != NULL && count <= 20){
         lv_obj_t * btn = lv_list_add_btn(list, LV_SYMBOL_FILE, files->name);
+        lv_obj_set_style_bg_opa(btn, LV_OPA_TRANSP, 0); 
         lv_obj_add_event_cb(btn, btn_print_file_verify, LV_EVENT_CLICKED, (void*)files);
 
         files += 1;
