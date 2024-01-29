@@ -24,7 +24,7 @@ void error_ui(){
     lv_obj_t * panel = lv_create_empty_panel(lv_scr_act());
     lv_layout_flex_column(panel);
     lv_obj_set_size(panel, CYD_SCREEN_WIDTH_PX, CYD_SCREEN_HEIGHT_PX);
-    lv_obj_set_style_pad_all(panel, CYD_SCREEN_BIG_GAP_PX, 0);
+    lv_obj_set_style_pad_all(panel, CYD_SCREEN_GAP_PX, 0);
     lv_obj_set_flex_align(panel, LV_FLEX_ALIGN_SPACE_BETWEEN, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START);
     
     lv_obj_t * label;
@@ -33,12 +33,12 @@ void error_ui(){
 
     label = lv_label_create(panel);
     lv_label_set_text(label, printer.state_message);
-    lv_obj_set_width(label, CYD_SCREEN_WIDTH_PX - CYD_SCREEN_BIG_GAP_PX * 2);
+    lv_obj_set_width(label, CYD_SCREEN_WIDTH_PX - CYD_SCREEN_GAP_PX * 2);
     lv_obj_clear_flag(label, LV_OBJ_FLAG_SCROLLABLE);
     lv_label_set_long_mode(label, LV_LABEL_LONG_WRAP);
 
     lv_obj_t * button_row = lv_create_empty_panel(panel);
-    lv_obj_set_size(button_row, CYD_SCREEN_WIDTH_PX - CYD_SCREEN_BIG_GAP_PX * 2, CYD_SCREEN_MIN_BUTTON_HEIGHT_PX);
+    lv_obj_set_size(button_row, CYD_SCREEN_WIDTH_PX - CYD_SCREEN_GAP_PX * 2, CYD_SCREEN_MIN_BUTTON_HEIGHT_PX);
     lv_layout_flex_row(button_row);
 
     lv_obj_t * btn = lv_btn_create(button_row);

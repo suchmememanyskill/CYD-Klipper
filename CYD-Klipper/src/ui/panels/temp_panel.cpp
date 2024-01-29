@@ -205,14 +205,14 @@ static void btn_retract(lv_event_t * e){
 }
 
 void temp_panel_init(lv_obj_t * panel){
-    const auto element_width = CYD_SCREEN_PANEL_WIDTH_PX - CYD_SCREEN_BIG_GAP_PX * 2;
+    const auto element_width = CYD_SCREEN_PANEL_WIDTH_PX - CYD_SCREEN_GAP_PX * 2;
     root_panel = panel;
     edit_mode = false;
 
     lv_obj_t * root_temp_panel = lv_create_empty_panel(panel);
     lv_obj_set_size(root_temp_panel, CYD_SCREEN_PANEL_WIDTH_PX, LV_SIZE_CONTENT);
     lv_obj_align(root_temp_panel, LV_ALIGN_TOP_RIGHT, 0, 0);
-    lv_obj_set_style_pad_all(root_temp_panel, CYD_SCREEN_BIG_GAP_PX, 0);
+    lv_obj_set_style_pad_all(root_temp_panel, CYD_SCREEN_GAP_PX, 0);
     lv_layout_flex_column(root_temp_panel);
 
     lv_obj_t * temp_rows[2] = {0};
@@ -258,12 +258,12 @@ void temp_panel_init(lv_obj_t * panel){
 
     lv_obj_t * bottom_panel = lv_create_empty_panel(panel);
     lv_obj_set_size(bottom_panel, element_width, CYD_SCREEN_MIN_BUTTON_HEIGHT_PX);
-    lv_obj_align(bottom_panel, LV_ALIGN_BOTTOM_MID, 0, -1 * CYD_SCREEN_BIG_GAP_PX);
+    lv_obj_align(bottom_panel, LV_ALIGN_BOTTOM_MID, 0, -1 * CYD_SCREEN_GAP_PX);
     lv_layout_flex_row(bottom_panel, LV_FLEX_ALIGN_SPACE_EVENLY);
 
     lv_obj_t * one_above_bottom_panel = lv_create_empty_panel(panel);
     lv_obj_set_size(one_above_bottom_panel, element_width, CYD_SCREEN_MIN_BUTTON_HEIGHT_PX);
-    lv_obj_align(one_above_bottom_panel, LV_ALIGN_BOTTOM_MID, 0, -1 * CYD_SCREEN_MIN_BUTTON_HEIGHT_PX - CYD_SCREEN_BIG_GAP_PX * 2);
+    lv_obj_align(one_above_bottom_panel, LV_ALIGN_BOTTOM_MID, 0, -1 * CYD_SCREEN_MIN_BUTTON_HEIGHT_PX - CYD_SCREEN_GAP_PX * 2);
     lv_layout_flex_row(one_above_bottom_panel, LV_FLEX_ALIGN_SPACE_EVENLY);
 
     lv_obj_t * btn = lv_btn_create(bottom_panel);

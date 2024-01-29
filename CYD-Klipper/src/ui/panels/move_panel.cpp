@@ -106,11 +106,11 @@ static void disable_steppers_click(lv_event_t * e) {
 } 
 
 inline void root_panel_steppers_locked(lv_obj_t * root_panel){
-    const auto width = CYD_SCREEN_PANEL_WIDTH_PX - CYD_SCREEN_BIG_GAP_PX * 2;
+    const auto width = CYD_SCREEN_PANEL_WIDTH_PX - CYD_SCREEN_GAP_PX * 2;
 
     lv_obj_t * panel = lv_create_empty_panel(root_panel);
     lv_obj_set_size(panel, CYD_SCREEN_PANEL_WIDTH_PX, CYD_SCREEN_HEIGHT_PX);
-    lv_obj_set_style_pad_all(panel, CYD_SCREEN_BIG_GAP_PX, 0);
+    lv_obj_set_style_pad_all(panel, CYD_SCREEN_GAP_PX, 0);
     lv_layout_flex_column(panel, LV_FLEX_ALIGN_SPACE_BETWEEN, 0, 0);
 
     lv_obj_t * home_button_row = lv_create_empty_panel(panel);
@@ -164,7 +164,7 @@ inline void root_panel_steppers_locked(lv_obj_t * root_panel){
 inline void root_panel_steppers_unlocked(lv_obj_t * root_panel){
     lv_obj_t * panel = lv_create_empty_panel(root_panel);
     lv_obj_set_size(panel, CYD_SCREEN_PANEL_WIDTH_PX, CYD_SCREEN_HEIGHT_PX);
-    lv_obj_set_style_pad_all(panel, CYD_SCREEN_BIG_GAP_PX, 0);
+    lv_obj_set_style_pad_all(panel, CYD_SCREEN_GAP_PX, 0);
     lv_layout_flex_column(panel, LV_FLEX_ALIGN_CENTER);
 
     lv_obj_t * label = lv_label_create(panel);

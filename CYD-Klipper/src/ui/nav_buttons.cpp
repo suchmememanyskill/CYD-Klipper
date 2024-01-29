@@ -86,11 +86,11 @@ void create_button(const char* icon, const char* name, lv_event_cb_t button_clic
 
     lv_obj_t* label = lv_label_create(btn);
     lv_label_set_text(label, icon);
-    lv_obj_align(label, LV_ALIGN_CENTER, 0, -1 * CYD_SCREEN_BIG_GAP_PX);
+    lv_obj_align(label, LV_ALIGN_CENTER, 0, -1 * CYD_SCREEN_GAP_PX);
     
     label = lv_label_create(btn);
     lv_label_set_text(label, name);
-    lv_obj_align(label, LV_ALIGN_CENTER, 0, CYD_SCREEN_BIG_GAP_PX);
+    lv_obj_align(label, LV_ALIGN_CENTER, 0, CYD_SCREEN_GAP_PX);
     lv_obj_add_event_cb(label, label_update, LV_EVENT_MSG_RECEIVED, NULL);
     lv_msg_subsribe_obj(DATA_PRINTER_DATA, label, NULL);
     lv_obj_add_style(label, &nav_button_text_style, 0);
