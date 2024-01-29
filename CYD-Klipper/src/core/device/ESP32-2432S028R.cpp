@@ -21,7 +21,7 @@ XPT2046_Touchscreen touchscreen(XPT2046_CS, XPT2046_IRQ);
 uint32_t LV_EVENT_GET_COMP_CHILD;
 
 static lv_disp_draw_buf_t draw_buf;
-static lv_color_t buf[TFT_WIDTH * TFT_HEIGHT / 10];
+static lv_color_t buf[CYD_SCREEN_HEIGHT_PX * CYD_SCREEN_WIDTH_PX / 10];
 
 TFT_eSPI tft = TFT_eSPI();
 
@@ -242,13 +242,13 @@ void screen_setup()
 
     touchscreen_calibrate(false);
 
-    lv_disp_draw_buf_init(&draw_buf, buf, NULL, TFT_WIDTH * TFT_HEIGHT / 10);
+    lv_disp_draw_buf_init(&draw_buf, buf, NULL, CYD_SCREEN_HEIGHT_PX * CYD_SCREEN_WIDTH_PX / 10);
 
     /*Initialize the display*/
     static lv_disp_drv_t disp_drv;
     lv_disp_drv_init(&disp_drv);
-    disp_drv.hor_res = TFT_HEIGHT;
-    disp_drv.ver_res = TFT_WIDTH;
+    disp_drv.hor_res = CYD_SCREEN_WIDTH_PX;
+    disp_drv.ver_res = CYD_SCREEN_HEIGHT_PX;
     disp_drv.flush_cb = screen_lv_flush;
     disp_drv.draw_buf = &draw_buf;
     lv_disp_drv_register(&disp_drv);
