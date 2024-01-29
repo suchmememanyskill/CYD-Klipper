@@ -48,7 +48,7 @@ static void btn_click_resume(lv_event_t * e){
 }
 
 void progress_panel_init(lv_obj_t* panel){
-    auto panel_width = CYD_SCREEN_PANEL_WIDTH_PX - CYD_SCREEN_BIG_GAP_PX * 3;
+    auto panel_width = CYD_SCREEN_PANEL_WIDTH_PX - CYD_SCREEN_GAP_PX * 3;
     const auto button_size_mult = 1.3f;
 
     lv_obj_t * center_panel = lv_create_empty_panel(panel);
@@ -95,7 +95,7 @@ void progress_panel_init(lv_obj_t* panel){
 
     // Stop Button
     lv_obj_t * btn = lv_btn_create(panel);
-    lv_obj_align(btn, LV_ALIGN_BOTTOM_RIGHT, -1 * CYD_SCREEN_BIG_GAP_PX, -1 * CYD_SCREEN_BIG_GAP_PX);
+    lv_obj_align(btn, LV_ALIGN_BOTTOM_RIGHT, -1 * CYD_SCREEN_GAP_PX, -1 * CYD_SCREEN_GAP_PX);
     lv_obj_set_size(btn, CYD_SCREEN_MIN_BUTTON_WIDTH_PX * button_size_mult, CYD_SCREEN_MIN_BUTTON_HEIGHT_PX * button_size_mult);
     lv_obj_add_event_cb(btn, btn_click_stop, LV_EVENT_CLICKED, NULL);
 
@@ -122,6 +122,6 @@ void progress_panel_init(lv_obj_t* panel){
         lv_obj_center(label);
     }
 
-    lv_obj_align(btn, LV_ALIGN_BOTTOM_RIGHT, -2 * CYD_SCREEN_BIG_GAP_PX - CYD_SCREEN_MIN_BUTTON_WIDTH_PX * button_size_mult, -1 * CYD_SCREEN_BIG_GAP_PX);
+    lv_obj_align(btn, LV_ALIGN_BOTTOM_RIGHT, -2 * CYD_SCREEN_GAP_PX - CYD_SCREEN_MIN_BUTTON_WIDTH_PX * button_size_mult, -1 * CYD_SCREEN_GAP_PX);
     lv_obj_set_size(btn, CYD_SCREEN_MIN_BUTTON_WIDTH_PX * button_size_mult, CYD_SCREEN_MIN_BUTTON_HEIGHT_PX * button_size_mult);
 }

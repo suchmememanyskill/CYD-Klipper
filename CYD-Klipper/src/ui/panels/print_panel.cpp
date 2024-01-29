@@ -52,8 +52,8 @@ static void btn_print_file_verify(lv_event_t * e){
     selected_file = (FILESYSTEM_FILE*)lv_event_get_user_data(e);
     
     lv_obj_t * panel = lv_obj_create(lv_scr_act());
-    lv_obj_set_style_pad_all(panel, CYD_SCREEN_BIG_GAP_PX * 2, 0);
-    lv_obj_set_size(panel, CYD_SCREEN_WIDTH_PX - CYD_SCREEN_BIG_GAP_PX * 4, CYD_SCREEN_HEIGHT_PX - CYD_SCREEN_BIG_GAP_PX * 3);
+    lv_obj_set_style_pad_all(panel, CYD_SCREEN_GAP_PX * 2, 0);
+    lv_obj_set_size(panel, CYD_SCREEN_WIDTH_PX - CYD_SCREEN_GAP_PX * 4, CYD_SCREEN_HEIGHT_PX - CYD_SCREEN_GAP_PX * 3);
     lv_obj_align(panel, LV_ALIGN_CENTER, 0, 0);
 
     lv_obj_t * label = lv_label_create(panel);
@@ -63,7 +63,7 @@ static void btn_print_file_verify(lv_event_t * e){
     label = lv_label_create(panel);
     lv_label_set_text(label, selected_file->name);
     lv_obj_align(label, LV_ALIGN_CENTER, 0, -20);
-    lv_obj_set_width(label, CYD_SCREEN_WIDTH_PX - CYD_SCREEN_BIG_GAP_PX * 10);
+    lv_obj_set_width(label, CYD_SCREEN_WIDTH_PX - CYD_SCREEN_GAP_PX * 10);
     lv_label_set_long_mode(label, LV_LABEL_LONG_WRAP);
 
     btn = lv_btn_create(panel);

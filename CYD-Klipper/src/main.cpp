@@ -8,16 +8,6 @@
 #include "ui/nav_buttons.h"
 #include <Esp.h>
 
-static void event_handler(lv_event_t * e){
-    lv_event_code_t code = lv_event_get_code(e);
-
-    if(code == LV_EVENT_CLICKED) {
-        global_config.version = 0;
-        WriteGlobalConfig();
-        ESP.restart();
-    }
-}
-
 void setup() {
     Serial.begin(115200);
     Serial.println("Hello World");
