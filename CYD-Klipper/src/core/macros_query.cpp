@@ -42,7 +42,7 @@ static void on_state_change(void * s, lv_msg_t * m) {
 }
 
 MACROSQUERY macros_query() {
-    return {(const char**)macros, macros_count};
+    return {(const char**)macros, (unsigned int)macros_count};
 }
 
 void macros_query_setup(){
