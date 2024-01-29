@@ -72,7 +72,6 @@ static void on_state_change(void * s, lv_msg_t * m){
     }
 }
 
-
 void main_ui_setup(){
     lv_msg_subscribe(DATA_PRINTER_STATE, on_state_change, NULL);
     on_state_change(NULL, NULL);
