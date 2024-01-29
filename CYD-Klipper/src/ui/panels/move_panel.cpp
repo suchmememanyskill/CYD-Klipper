@@ -105,11 +105,6 @@ static void disable_steppers_click(lv_event_t * e) {
     send_gcode(true, "M18");
 } 
 
-static void stepper_state_update(lv_event_t * e){
-    lv_obj_t * label = lv_event_get_target(e);
-    lv_label_set_text(label, printer.homed_axis ? LV_SYMBOL_HOME " Steppers locked" : LV_SYMBOL_EYE_CLOSE " Steppers unlocked");
-}
-
 inline void root_panel_steppers_locked(lv_obj_t * root_panel){
     const auto width = CYD_SCREEN_PANEL_WIDTH_PX - CYD_SCREEN_BIG_GAP_PX * 2;
 
@@ -204,103 +199,4 @@ void move_panel_init(lv_obj_t* panel){
 
     lv_obj_add_event_cb(panel, root_panel_state_update, LV_EVENT_MSG_RECEIVED, NULL);
     lv_msg_subsribe_obj(DATA_PRINTER_DATA, panel, NULL);
-
-    return;
-
-    lv_obj_clear_flag(panel, LV_OBJ_FLAG_SCROLLABLE);
-    const int button_size = 40;
-    const int button_size_vertical = 40;
-    const int button_padding = 2;
-    const int x_offset = 15;
-    int y_pos = 75;
-
-    auto panel_width = TFT_HEIGHT - 40;
-
-    lv_obj_t * home_button = lv_btn_create(panel);
-    lv_obj_align(home_button, LV_ALIGN_TOP_LEFT, 10, 5);
-    lv_obj_add_event_cb(home_button, home_button_click, LV_EVENT_CLICKED, NULL);
-    lv_obj_set_size(home_button, panel_width / 2 - 15, 30);
-
-    lv_obj_t * home_label = lv_label_create(home_button);
-    lv_label_set_text(home_label, LV_SYMBOL_HOME "Home Axis");
-    lv_obj_center(home_label);
-
-    lv_obj_t * disable_steppers_button = lv_btn_create(panel);
-    lv_obj_align(disable_steppers_button, LV_ALIGN_TOP_RIGHT, -10, 5);
-    lv_obj_add_event_cb(disable_steppers_button, disable_steppers_click, LV_EVENT_CLICKED, NULL);
-    lv_obj_set_size(disable_steppers_button, panel_width / 2 - 15, 30);
-
-    lv_obj_t * disable_steppers_label = lv_label_create(disable_steppers_button);
-    lv_label_set_text(disable_steppers_label, LV_SYMBOL_EYE_CLOSE "Disable Step");
-    lv_obj_center(disable_steppers_label);
-
-    lv_obj_t * label = lv_label_create(panel);
-    lv_label_set_text(label, "???");
-    lv_obj_align(label, LV_ALIGN_TOP_MID, 0, 40);
-    lv_obj_add_event_cb(label, stepper_state_update, LV_EVENT_MSG_RECEIVED, NULL);
-    lv_msg_subsribe_obj(DATA_PRINTER_DATA, label, NULL);
-
-    for (int i = 0; i < 3; i++) {
-        lv_obj_t * btn = lv_btn_create(panel);
-        lv_obj_set_size(btn, button_size, button_size_vertical);
-        lv_obj_align(btn, LV_ALIGN_TOP_LEFT, x_offset, y_pos);
-        lv_obj_add_event_cb(btn, button_callbacks[i], LV_EVENT_CLICKED, (void*)(offsets[i]));
-
-        lv_obj_t * label = lv_label_create(btn);
-        lv_label_set_text(label, offset_labels[i][0]);
-        lv_obj_center(label);
-
-        btn = lv_btn_create(panel);
-        lv_obj_set_size(btn, button_size, button_size_vertical);
-        lv_obj_align(btn, LV_ALIGN_TOP_LEFT, x_offset + (button_size + button_padding) * 1, y_pos);
-        lv_obj_add_event_cb(btn, button_callbacks[i], LV_EVENT_CLICKED, (void*)(offsets[i] + 1));
-
-        label = lv_label_create(btn);
-        lv_label_set_text(label, offset_labels[i][1]);
-        lv_obj_center(label);
-
-        btn = lv_btn_create(panel);
-        lv_obj_set_size(btn, button_size, button_size_vertical);
-        lv_obj_align(btn, LV_ALIGN_TOP_LEFT, x_offset + (button_size + button_padding) * 2, y_pos);
-        lv_obj_add_event_cb(btn, button_callbacks[i], LV_EVENT_CLICKED, (void*)(offsets[i] + 2));
-
-        label = lv_label_create(btn);
-        lv_label_set_text(label, offset_labels[i][2]);
-        lv_obj_center(label);
-
-        btn = lv_btn_create(panel);
-        lv_obj_set_size(btn, button_size, button_size_vertical);
-        lv_obj_align(btn, LV_ALIGN_TOP_LEFT, x_offset + (button_size + button_padding) * 3, y_pos);
-        lv_obj_add_event_cb(btn, button_callbacks[i], LV_EVENT_CLICKED, (void*)(offsets[i] + 3));
-
-        label = lv_label_create(btn);
-        lv_label_set_text(label, offset_labels[i][3]);
-        lv_obj_center(label);
-
-        btn = lv_btn_create(panel);
-        lv_obj_set_size(btn, button_size, button_size_vertical);
-        lv_obj_align(btn, LV_ALIGN_TOP_LEFT, x_offset + (button_size + button_padding) * 4, y_pos);
-        lv_obj_add_event_cb(btn, button_callbacks[i], LV_EVENT_CLICKED, (void*)(offsets[i] + 4));
-
-        label = lv_label_create(btn);
-        lv_label_set_text(label, offset_labels[i][4]);
-        lv_obj_center(label);
-
-        btn = lv_btn_create(panel);
-        lv_obj_set_size(btn, button_size, button_size_vertical);
-        lv_obj_align(btn, LV_ALIGN_TOP_LEFT, x_offset + (button_size + button_padding) * 5, y_pos);
-        lv_obj_add_event_cb(btn, button_callbacks[i], LV_EVENT_CLICKED, (void*)(offsets[i] + 5));
-        
-        label = lv_label_create(btn);
-        lv_label_set_text(label, offset_labels[i][5]);
-        lv_obj_center(label);
-
-        label = lv_label_create(panel);
-        lv_label_set_text(label, "???");
-        lv_obj_align(label, LV_ALIGN_TOP_LEFT, x_offset, y_pos - 15);\
-        lv_obj_add_event_cb(label, position_callbacks[i], LV_EVENT_MSG_RECEIVED, NULL);
-        lv_msg_subsribe_obj(DATA_PRINTER_DATA, label, NULL);
-
-        y_pos += 60;
-    }
 }
