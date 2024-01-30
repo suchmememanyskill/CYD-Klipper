@@ -4,6 +4,7 @@
 #include <TFT_eSPI.h>
 #include <HTTPClient.h>
 #include "core/data_setup.h"
+#include "ui_utils.h"
 
 bool connect_ok = false;
 lv_obj_t * ipEntry;
@@ -87,29 +88,42 @@ void ip_init_inner(){
         return;
     }
 
-    lv_obj_t * keyboard = lv_keyboard_create(lv_scr_act());
-    label = lv_label_create(lv_scr_act());
-    lv_label_set_text(label, "Enter Klipper IP and Port");
-    lv_obj_align(label, LV_ALIGN_TOP_LEFT, 10, 10 + 2);
+    lv_obj_t * root = lv_create_empty_panel(lv_scr_act());
+    lv_obj_set_size(root, CYD_SCREEN_WIDTH_PX, CYD_SCREEN_HEIGHT_PX);
+    lv_layout_flex_column(root);
 
-    ipEntry = lv_textarea_create(lv_scr_act());
+    lv_obj_t * top_root = lv_create_empty_panel(root);
+    lv_obj_set_width(top_root, CYD_SCREEN_WIDTH_PX);
+    lv_layout_flex_column(top_root);
+    lv_obj_set_flex_grow(top_root, 1);
+    lv_obj_set_style_pad_all(top_root, CYD_SCREEN_GAP_PX, 0);
+
+    label = lv_label_create(top_root);
+    lv_label_set_text(label, "Enter Klipper IP and Port");
+    lv_obj_set_width(label, CYD_SCREEN_WIDTH_PX - CYD_SCREEN_GAP_PX * 2);
+
+    lv_obj_t * textbow_row = lv_create_empty_panel(top_root);
+    lv_obj_set_width(textbow_row, CYD_SCREEN_WIDTH_PX - CYD_SCREEN_GAP_PX * 2);
+    lv_obj_set_flex_grow(textbow_row, 1);
+    lv_layout_flex_row(textbow_row);
+
+    ipEntry = lv_textarea_create(textbow_row);
     lv_textarea_set_one_line(ipEntry, true);
     lv_textarea_set_max_length(ipEntry, 63);
     lv_textarea_set_text(ipEntry, "");
-    lv_obj_align(ipEntry, LV_ALIGN_TOP_LEFT, 10, 40);
-    lv_obj_add_event_cb(ipEntry, ta_event_cb, LV_EVENT_ALL, keyboard);
-    lv_obj_set_size(ipEntry, TFT_HEIGHT - 20 - 100, 60);
+    lv_obj_set_flex_grow(ipEntry, 3);
 
-    portEntry = lv_textarea_create(lv_scr_act());
+    portEntry = lv_textarea_create(textbow_row);
     lv_textarea_set_one_line(portEntry, true);
     lv_textarea_set_max_length(portEntry, 5);
     lv_textarea_set_text(portEntry, "80");
-    lv_obj_align(portEntry, LV_ALIGN_TOP_LEFT, TFT_HEIGHT - 20 - 80, 40);
-    lv_obj_add_event_cb(portEntry, ta_event_cb, LV_EVENT_ALL, keyboard);
-    lv_obj_set_size(portEntry, 90, 60);
+    lv_obj_set_flex_grow(portEntry, 1);
     
+    lv_obj_t * keyboard = lv_keyboard_create(root);
     lv_keyboard_set_mode(keyboard, LV_KEYBOARD_MODE_NUMBER);
     lv_keyboard_set_textarea(keyboard, ipEntry);
+    lv_obj_add_event_cb(ipEntry, ta_event_cb, LV_EVENT_ALL, keyboard);
+    lv_obj_add_event_cb(portEntry, ta_event_cb, LV_EVENT_ALL, keyboard);
 }
 
 long last_data_update_ip = -10000;
