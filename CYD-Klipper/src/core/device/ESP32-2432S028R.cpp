@@ -1,4 +1,5 @@
-#include "ESP32-2432S028R.h"
+#ifdef CYD_SCREEN_DRIVER_ESP32_2432S028R
+#include "../screen_driver.h"
 
 #include <SPI.h>
 #include <TFT_eSPI.h>
@@ -268,3 +269,5 @@ void screen_setup()
     LV_EVENT_GET_COMP_CHILD = lv_event_register_id();
     set_color_scheme();
 }
+
+#endif // CYD_SCREEN_DRIVER_ESP32_2432S028R

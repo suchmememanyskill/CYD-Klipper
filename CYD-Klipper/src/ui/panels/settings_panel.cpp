@@ -126,6 +126,7 @@ void settings_panel_init(lv_obj_t* panel){
     create_settings_widget("Calibrate Touch", btn, panel);
 
     lv_obj_t * toggle = lv_switch_create(panel);
+    lv_obj_set_width(toggle, CYD_SCREEN_MIN_BUTTON_WIDTH_PX * 2);
     lv_obj_add_event_cb(toggle, invert_color_switch, LV_EVENT_VALUE_CHANGED, NULL);
 
     if (global_config.invertColors)
@@ -135,6 +136,7 @@ void settings_panel_init(lv_obj_t* panel){
 
 
     toggle = lv_switch_create(panel);
+    lv_obj_set_width(toggle, CYD_SCREEN_MIN_BUTTON_WIDTH_PX * 2);
     lv_obj_add_event_cb(toggle, light_mode_switch, LV_EVENT_VALUE_CHANGED, NULL);
 
     if (global_config.lightMode)
@@ -176,6 +178,7 @@ void settings_panel_init(lv_obj_t* panel){
     create_settings_widget("Wake Timeout", dropdown, panel);
 
     toggle = lv_switch_create(panel);
+    lv_obj_set_width(toggle, CYD_SCREEN_MIN_BUTTON_WIDTH_PX * 2);
     lv_obj_add_event_cb(toggle, rotate_screen_switch, LV_EVENT_VALUE_CHANGED, NULL);
 
     if (global_config.rotateScreen)
@@ -184,6 +187,7 @@ void settings_panel_init(lv_obj_t* panel){
     create_settings_widget("Rotate Screen", toggle, panel);
 
     toggle = lv_switch_create(panel);
+    lv_obj_set_width(toggle, CYD_SCREEN_MIN_BUTTON_WIDTH_PX * 2);
     lv_obj_add_event_cb(toggle, on_during_print_switch, LV_EVENT_VALUE_CHANGED, NULL);
 
     if (global_config.onDuringPrint)
