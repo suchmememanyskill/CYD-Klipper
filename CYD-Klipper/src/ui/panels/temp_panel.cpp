@@ -80,15 +80,14 @@ static void keyboard_callback(lv_event_t * e){
         }
 
         char gcode[64];
-        const char* space = "%20";
         
         switch (keyboard_target){
             case TARGET_HOTEND:
-                sprintf(gcode, "M104%sS%d", space, temp);
+                sprintf(gcode, "M104 S%d", temp);
                 send_gcode(true, gcode);
                 break;
             case TARGET_BED:
-                sprintf(gcode, "M140%sS%d", space, temp);
+                sprintf(gcode, "M140 S%d", temp);
                 send_gcode(true, gcode);
                 break;
             case TARGET_HOTEND_CONFIG_1:
@@ -156,8 +155,8 @@ static void cooldown_temp(lv_event_t * e){
         return;
     }
     
-    send_gcode(true, "M104%20S0");
-    send_gcode(true, "M140%20S0");
+    send_gcode(true, "M104 S0");
+    send_gcode(true, "M140 S0");
 }
 
 static void btn_extrude(lv_event_t * e){
@@ -166,7 +165,7 @@ static void btn_extrude(lv_event_t * e){
     }
 
     send_gcode(true, "M83");
-    send_gcode(true, "G1%20E25%20F300");
+    send_gcode(true, "G1 E25 F300");
 }
 
 static void set_temp_via_preset(lv_event_t * e){
@@ -180,11 +179,10 @@ static void set_temp_via_preset(lv_event_t * e){
     }
 
     char gcode[64];
-    const char* space = "%20";
     if (target <= TARGET_HOTEND_CONFIG_3)
-        sprintf(gcode, "M104%sS%d", space, value);
+        sprintf(gcode, "M104 S%d", value);
     else 
-        sprintf(gcode, "M140%sS%d", space, value);
+        sprintf(gcode, "M140 S%d", value);
     
     send_gcode(true, gcode);
 }
@@ -201,7 +199,7 @@ static void btn_retract(lv_event_t * e){
     }
 
     send_gcode(true, "M83");
-    send_gcode(true, "G1%20E-25%20F300");
+    send_gcode(true, "G1 E-25 F300");
 }
 
 void temp_panel_init(lv_obj_t * panel){

@@ -19,9 +19,7 @@ static void move_printer(const char* axis, float amount) {
         send_gcode(true, "G91");
     }
 
-    const char * space = "%20";
-
-    sprintf(gcode, "G1%s%s%s%.1f%sF6000", space, axis, extra, amount, space);
+    sprintf(gcode, "G1 %s%s%.1f F6000", axis, extra, amount);
     send_gcode(true, gcode);
 
     if (absolute_coords) {
@@ -195,6 +193,11 @@ static void root_panel_state_update(lv_event_t * e){
 }
 
 void move_panel_init(lv_obj_t* panel){
+    if (printer.state == PRINTER_STATE_PRINTING){
+        stats_panel_init(panel);
+        return;
+    }
+
     last_homing_state = !printer.homed_axis;
 
     lv_obj_add_event_cb(panel, root_panel_state_update, LV_EVENT_MSG_RECEIVED, NULL);
