@@ -29,6 +29,10 @@ typedef struct _Printer {
     float gcode_offset[3];
     float speed_mult;
     float extrude_mult;
+    int total_layers;
+    int current_layer;
+    float pressure_advance;
+    int feedrate_mm_per_s;
 } Printer;
 
 extern Printer printer;
