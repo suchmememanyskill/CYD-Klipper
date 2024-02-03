@@ -14,3 +14,4 @@ lv_obj_t* lv_create_empty_panel(lv_obj_t* root);
 void lv_layout_flex_column(lv_obj_t* obj, lv_flex_align_t allign = LV_FLEX_ALIGN_START, lv_coord_t pad_column = CYD_SCREEN_GAP_PX, lv_coord_t pad_row = CYD_SCREEN_GAP_PX);
 void lv_layout_flex_row(lv_obj_t* obj, lv_flex_align_t allign = LV_FLEX_ALIGN_START, lv_coord_t pad_column = CYD_SCREEN_GAP_PX, lv_coord_t pad_row = CYD_SCREEN_GAP_PX);
 void lv_create_fullscreen_button_matrix_popup(lv_obj_t * root, lv_event_cb_t title, lv_button_column_t* columns, int column_count);
+void destroy_event_user_data(lv_event_t * e);

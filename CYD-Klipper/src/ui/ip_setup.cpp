@@ -5,6 +5,8 @@
 #include <HTTPClient.h>
 #include "core/data_setup.h"
 #include "ui_utils.h"
+#include "../core/macros_query.h"
+#include "panels/panel.h"
 
 bool connect_ok = false;
 lv_obj_t * ipEntry;
@@ -70,24 +72,62 @@ static void reset_btn_event_handler(lv_event_t * e){
     }
 }
 
-void ip_init_inner(){
+static void power_devices_button(lv_event_t * e) {
+    lv_obj_t * panel = lv_create_empty_panel(lv_scr_act());
+    lv_obj_set_style_bg_opa(panel, LV_OPA_COVER, 0); 
+    lv_layout_flex_column(panel);
+    lv_obj_set_size(panel, CYD_SCREEN_WIDTH_PX, CYD_SCREEN_HEIGHT_PX - CYD_SCREEN_GAP_PX);
+    lv_obj_align(panel, LV_ALIGN_TOP_LEFT, 0, CYD_SCREEN_GAP_PX);
+
+    lv_obj_t * button = lv_btn_create(panel);
+    lv_obj_set_size(button, CYD_SCREEN_WIDTH_PX - CYD_SCREEN_GAP_PX * 2, CYD_SCREEN_MIN_BUTTON_HEIGHT_PX);
+    lv_obj_add_event_cb(button, destroy_event_user_data, LV_EVENT_CLICKED, panel);
+
+    lv_obj_t * label = lv_label_create(button);
+    lv_label_set_text(label, LV_SYMBOL_CLOSE " Close");
+    lv_obj_center(label);
+
+    macros_panel_add_power_devices_to_panel(panel, power_devices_query()); 
+}
+
+void redraw_connect_screen(){
     lv_obj_clean(lv_scr_act());
 
+    label = lv_label_create(lv_scr_act());
+    lv_label_set_text(label, "Connecting to Klipper");
+    lv_obj_align(label, LV_ALIGN_CENTER, 0, 0);
+
+    lv_obj_t * button_row = lv_create_empty_panel(lv_scr_act());
+    lv_obj_set_size(button_row, CYD_SCREEN_WIDTH_PX, CYD_SCREEN_MIN_BUTTON_HEIGHT_PX);
+    lv_layout_flex_row(button_row, LV_FLEX_ALIGN_CENTER);
+    lv_obj_align(button_row, LV_ALIGN_CENTER, 0, CYD_SCREEN_GAP_PX + CYD_SCREEN_MIN_BUTTON_HEIGHT_PX);
+
+    lv_obj_t * reset_btn = lv_btn_create(button_row);
+    lv_obj_add_event_cb(reset_btn, reset_btn_event_handler, LV_EVENT_CLICKED, NULL);
+    lv_obj_set_height(reset_btn, CYD_SCREEN_MIN_BUTTON_HEIGHT_PX);
+
+    lv_obj_t * btn_label = lv_label_create(reset_btn);
+    lv_label_set_text(btn_label, "Reset");
+    lv_obj_center(btn_label);
+
+    if (power_devices_query().count >= 1){
+        lv_obj_t * power_devices_btn = lv_btn_create(button_row);
+        lv_obj_add_event_cb(power_devices_btn, power_devices_button, LV_EVENT_CLICKED, NULL);
+        lv_obj_set_height(power_devices_btn, CYD_SCREEN_MIN_BUTTON_HEIGHT_PX);
+
+        btn_label = lv_label_create(power_devices_btn);
+        lv_label_set_text(btn_label, "Power Devices");
+        lv_obj_center(btn_label);
+    }
+}
+
+void ip_init_inner(){
     if (global_config.ipConfigured) {
-        label = lv_label_create(lv_scr_act());
-        lv_label_set_text(label, "Connecting to Klipper");
-        lv_obj_align(label, LV_ALIGN_CENTER, 0, 0);
-
-        lv_obj_t * resetBtn = lv_btn_create(lv_scr_act());
-        lv_obj_add_event_cb(resetBtn, reset_btn_event_handler, LV_EVENT_ALL, NULL);
-        lv_obj_set_height(resetBtn, CYD_SCREEN_MIN_BUTTON_HEIGHT_PX);
-        lv_obj_align(resetBtn, LV_ALIGN_CENTER, 0, CYD_SCREEN_GAP_PX + CYD_SCREEN_MIN_BUTTON_HEIGHT_PX);
-
-        lv_obj_t * btnLabel = lv_label_create(resetBtn);
-        lv_label_set_text(btnLabel, "Reset");
-        lv_obj_center(btnLabel);
+        redraw_connect_screen();
         return;
     }
+
+    lv_obj_clean(lv_scr_act());
 
     lv_obj_t * root = lv_create_empty_panel(lv_scr_act());
     lv_obj_set_size(root, CYD_SCREEN_WIDTH_PX, CYD_SCREEN_HEIGHT_PX);
@@ -148,6 +188,10 @@ void ip_init(){
             retry_count++;
             String retry_count_text = "Connecting to Klipper (Try " + String(retry_count + 1) + ")";
             lv_label_set_text(label, retry_count_text.c_str());
+
+            _power_devices_query_internal();
+            if (power_devices_query().count >= 1)
+                redraw_connect_screen();
         }
     }
 }

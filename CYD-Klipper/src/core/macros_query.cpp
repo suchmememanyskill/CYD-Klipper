@@ -42,10 +42,11 @@ static void _macros_query_internal(){
     }
 }
 
-static void _power_devices_query_internal(){
+void _power_devices_query_internal(){
     String url = "http://" + String(global_config.klipperHost) + ":" + String(global_config.klipperPort) + "/machine/device_power/devices";
     HTTPClient client;
     client.useHTTP10(true);
+    client.setTimeout(500);
     client.begin(url.c_str());
     int httpCode = client.GET();
     if (httpCode == 200){

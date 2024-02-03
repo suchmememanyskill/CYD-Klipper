@@ -15,3 +15,4 @@ MACROSQUERY macros_query();
 POWERQUERY power_devices_query();
 void macros_query_setup();
 bool set_power_state(const char* device_name, bool state);
+void _power_devices_query_internal();
