@@ -8,3 +8,4 @@ void print_panel_init(lv_obj_t* panel);
 void move_panel_init(lv_obj_t* panel);
 void progress_panel_init(lv_obj_t* panel);
 void macros_panel_init(lv_obj_t* panel);
+void stats_panel_init(lv_obj_t* panel);
