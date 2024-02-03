@@ -40,7 +40,7 @@ void error_ui_macros_open(lv_event_t * e){
     lv_label_set_text(label, LV_SYMBOL_CLOSE " Close");
     lv_obj_center(label);
 
-    macros_panel_add_macros_to_panel(panel, macros_query());
+    macros_panel_add_power_devices_to_panel(panel, power_devices_query());
 }
 
 void error_ui(){
@@ -84,14 +84,14 @@ void error_ui(){
     lv_label_set_text(label, "FW Restart");
     lv_obj_center(label);
 
-    if (macros_query().count >= 1){
+    if (power_devices_query().count >= 1){
         btn = lv_btn_create(button_row);
         lv_obj_set_height(btn, CYD_SCREEN_MIN_BUTTON_HEIGHT_PX);
         lv_obj_add_event_cb(btn, error_ui_macros_open, LV_EVENT_CLICKED, NULL);
         lv_obj_set_flex_grow(btn, 1);
 
         label = lv_label_create(btn);
-        lv_label_set_text(label, "Macros");
+        lv_label_set_text(label, "Devices");
         lv_obj_center(label);
     }
 }
