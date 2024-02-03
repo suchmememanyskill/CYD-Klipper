@@ -121,6 +121,7 @@ void fetch_printer_data()
                 printer.extruder_temp = status["extruder"]["temperature"];
                 printer.extruder_target_temp = status["extruder"]["target"];
                 bool can_extrude = status["extruder"]["can_extrude"];
+                printer.pressure_advance = status["extruder"]["pressure_advance"];
                 printer.can_extrude = can_extrude == true;
             }
 
@@ -148,6 +149,8 @@ void fetch_printer_data()
                 printer.absolute_coords = absolute_coords == true;
                 printer.speed_mult = status["gcode_move"]["speed_factor"];
                 printer.extrude_mult = status["gcode_move"]["extrude_factor"];
+                printer.feedrate_mm_per_s = status["gcode_move"]["speed"];
+                printer.feedrate_mm_per_s /= 60; // convert mm/m to mm/s
             }
 
             if (status.containsKey("fan"))
@@ -167,6 +170,8 @@ void fetch_printer_data()
                 printer.print_filename = filename_buff;
                 printer.elapsed_time_s = status["print_stats"]["print_duration"];
                 printer.filament_used_mm = status["print_stats"]["filament_used"];
+                printer.total_layers = status["print_stats"]["info"]["total_layer"];
+                printer.current_layer = status["print_stats"]["info"]["current_layer"];
 
                 const char *state = status["print_stats"]["state"];
 
