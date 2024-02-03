@@ -26,9 +26,9 @@ void lv_layout_flex_row(lv_obj_t* obj, lv_flex_align_t allign, lv_coord_t pad_co
     lv_obj_set_style_pad_row(obj, pad_row, 0);
 }
 
-static void lv_fullscreen_menu_close(lv_event_t * e){
-    lv_obj_t * panel = (lv_obj_t*)lv_event_get_user_data(e);
-    lv_obj_del(panel);
+void destroy_event_user_data(lv_event_t * e){
+    lv_obj_t * obj = (lv_obj_t *)lv_event_get_user_data(e);
+    lv_obj_del(obj);
 }
 
 void lv_create_fullscreen_button_matrix_popup(lv_obj_t * root, lv_event_cb_t title, lv_button_column_t* columns, int column_count){
@@ -51,7 +51,7 @@ void lv_create_fullscreen_button_matrix_popup(lv_obj_t * root, lv_event_cb_t tit
     lv_obj_t * btn = lv_btn_create(top_menu_row);
     lv_obj_set_size(btn, CYD_SCREEN_MIN_BUTTON_WIDTH_PX, CYD_SCREEN_MIN_BUTTON_HEIGHT_PX);
     lv_obj_align(btn, LV_ALIGN_RIGHT_MID, 0, 0);
-    lv_obj_add_event_cb(btn, lv_fullscreen_menu_close, LV_EVENT_CLICKED, panel);
+    lv_obj_add_event_cb(btn, destroy_event_user_data, LV_EVENT_CLICKED, panel);
 
     lv_obj_t * label = lv_label_create(btn);
     lv_label_set_text(label, LV_SYMBOL_CLOSE);

@@ -20,10 +20,7 @@ static void btn_click_firmware_restart(lv_event_t * e){
     send_gcode(false, "FIRMWARE_RESTART");
 }
 
-void error_ui_macros_close(lv_event_t * e){
-    lv_obj_t * obj = (lv_obj_t *)lv_event_get_user_data(e);
-    lv_obj_del(obj);
-}
+
 
 void error_ui_macros_open(lv_event_t * e){
     lv_obj_t * panel = lv_create_empty_panel(lv_scr_act());
@@ -34,7 +31,7 @@ void error_ui_macros_open(lv_event_t * e){
 
     lv_obj_t * button = lv_btn_create(panel);
     lv_obj_set_size(button, CYD_SCREEN_WIDTH_PX - CYD_SCREEN_GAP_PX * 2, CYD_SCREEN_MIN_BUTTON_HEIGHT_PX);
-    lv_obj_add_event_cb(button, error_ui_macros_close, LV_EVENT_CLICKED, panel);
+    lv_obj_add_event_cb(button, destroy_event_user_data, LV_EVENT_CLICKED, panel);
 
     lv_obj_t * label = lv_label_create(button);
     lv_label_set_text(label, LV_SYMBOL_CLOSE " Close");

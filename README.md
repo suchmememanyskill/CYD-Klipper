@@ -16,10 +16,12 @@ A ESP32-2432S028R is required to run this project. You can find out where to buy
 - View printer status
 - View print progress
 - Start a print
-- Move the printer
+- (When the printer is idle) move the printer
+- (During a print) set fan speed, flow rate, speed and z offset
 - Manage temperature
 - Extrude/Retract filament
 - Execute predefined gcode macros
+- Toggle Moonraker power devices
 
 ### Install
 
