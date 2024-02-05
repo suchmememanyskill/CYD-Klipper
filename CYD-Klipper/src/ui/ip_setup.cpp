@@ -17,15 +17,15 @@ lv_obj_t * label = NULL;
 static const char * kb_map[] = {
     "1", "2", "3", "4", "5", "6", "7", "8", "9", "0", LV_SYMBOL_BACKSPACE, "\n",
     "q", "w", "e", "r", "t", "y", "u", "i", "o", "p", "\n",
-    "a", "s", "d", "f", "g", "h", "j", "k", "l", "-", "\n",
-    " ", "z", "x", "c", "v", "b", "n", "m", ".", " ", LV_SYMBOL_OK, NULL
+    "a", "s", "d", "f", "g", "h", "j", "k", "l", LV_SYMBOL_OK, "\n",
+    "z", "x", "c", "v", "b", "n", "m", ".", "-", " ", NULL
 };
 
 static const lv_btnmatrix_ctrl_t kb_ctrl[] = {
     4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4,
     4, 4, 4, 4, 4, 4, 4, 4, 4, 4,
-    4, 4, 4, 4, 4, 4, 4, 4, 4, 4,
-    LV_BTNMATRIX_CTRL_HIDDEN | 8, 4, 4, 4, 4, 4, 4, 4, 4, LV_BTNMATRIX_CTRL_HIDDEN | 2, 6
+    4, 4, 4, 4, 4, 4, 4, 4, 4, 6,
+    4, 4, 4, 4, 4, 4, 4, 4, 4, LV_BTNMATRIX_CTRL_HIDDEN | 4
 };
 
 void ip_init_inner();
