@@ -13,6 +13,21 @@ lv_obj_t * hostEntry;
 lv_obj_t * portEntry;
 lv_obj_t * label = NULL;
 
+/* Create a custom keyboard to allow hostnames or ip addresses (a-z, 0 - 9, and -) */
+static const char * kb_map[] = {
+    "1", "2", "3", "4", "5", "6", "7", "8", "9", "0", LV_SYMBOL_BACKSPACE, "\n",
+    "q", "w", "e", "r", "t", "y", "u", "i", "o", "p", "\n",
+    "a", "s", "d", "f", "g", "h", "j", "k", "l", "-", "\n",
+    " ", "z", "x", "c", "v", "b", "n", "m", ".", " ", LV_SYMBOL_OK, NULL
+};
+
+static const lv_btnmatrix_ctrl_t kb_ctrl[] = {
+    4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4,
+    4, 4, 4, 4, 4, 4, 4, 4, 4, 4,
+    4, 4, 4, 4, 4, 4, 4, 4, 4, 4,
+    LV_BTNMATRIX_CTRL_HIDDEN | 8, 4, 4, 4, 4, 4, 4, 4, 4, LV_BTNMATRIX_CTRL_HIDDEN | 2, 6
+};
+
 void ip_init_inner();
 
 bool verify_ip(){
@@ -60,6 +75,19 @@ static void ta_event_cb(lv_event_t * e) {
         {
             lv_label_set_text(label, "Failed to connect");
         }
+    }
+    else
+    {
+        return;
+    }
+
+    if (lv_obj_has_flag(ta, LV_OBJ_FLAG_USER_1))
+    {
+        lv_keyboard_set_mode(kb, LV_KEYBOARD_MODE_USER_1);
+    }
+    else
+    {
+        lv_keyboard_set_mode(kb, LV_KEYBOARD_MODE_NUMBER);
     }
 }
 
@@ -150,6 +178,7 @@ void ip_init_inner(){
 
     hostEntry = lv_textarea_create(textbow_row);
     lv_textarea_set_one_line(hostEntry, true);
+    lv_obj_add_flag(hostEntry, LV_OBJ_FLAG_USER_1);
     lv_textarea_set_max_length(hostEntry, 63);
     lv_textarea_set_text(hostEntry, "");
     lv_obj_set_flex_grow(hostEntry, 3);
@@ -160,31 +189,12 @@ void ip_init_inner(){
     lv_textarea_set_text(portEntry, "80");
     lv_obj_set_flex_grow(portEntry, 1);
 
-	/* Create a custom keyboard to allow hostnames or ip addresses (a-z, 0 - 9, and -) */
-    static const char * kb_map[] = {
-        "1", "2", "3", "4", "5", "6", "7", "8", "9", "0", LV_SYMBOL_BACKSPACE, "\n",
-        "q", "w", "e", "r", "t", "y", "u", "i", "o", "p", "\n",
-        "a", "s", "d", "f", "g", "h", "j", "k", "l", "-", "\n",
-        " ", "z", "x", "c", "v", "b", "n", "m", ".", " ", LV_SYMBOL_OK, NULL
-    };
-
-    static const lv_btnmatrix_ctrl_t kb_ctrl[] = {
-        4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4,
-        4, 4, 4, 4, 4, 4, 4, 4, 4, 4,
-        4, 4, 4, 4, 4, 4, 4, 4, 4, 4,
-        LV_BTNMATRIX_CTRL_HIDDEN | 8, 4, 4, 4, 4, 4, 4, 4, 4, LV_BTNMATRIX_CTRL_HIDDEN | 2, 6
-    };
-    
-    lv_obj_t * hostKeyboard = lv_keyboard_create(root);
-    lv_keyboard_set_map(hostKeyboard, LV_KEYBOARD_MODE_USER_1, kb_map, kb_ctrl);
-    lv_keyboard_set_mode(hostKeyboard, LV_KEYBOARD_MODE_USER_1);
-    lv_obj_add_event_cb(hostEntry, ta_event_cb, LV_EVENT_ALL, hostKeyboard);
-    lv_obj_add_flag(hostKeyboard, LV_OBJ_FLAG_HIDDEN);
-
-    lv_obj_t * portKeyboard = lv_keyboard_create(root);
-    lv_keyboard_set_mode(portKeyboard, LV_KEYBOARD_MODE_NUMBER);
-    lv_obj_add_event_cb(portEntry, ta_event_cb, LV_EVENT_ALL, portKeyboard);
-    lv_obj_add_flag(portKeyboard, LV_OBJ_FLAG_HIDDEN);
+    lv_obj_t * keyboard = lv_keyboard_create(root);
+    lv_keyboard_set_map(keyboard, LV_KEYBOARD_MODE_USER_1, kb_map, kb_ctrl);
+    lv_obj_add_event_cb(hostEntry, ta_event_cb, LV_EVENT_ALL, keyboard);
+    lv_obj_add_event_cb(portEntry, ta_event_cb, LV_EVENT_ALL, keyboard);
+    lv_keyboard_set_mode(keyboard, LV_KEYBOARD_MODE_USER_1);
+    lv_keyboard_set_textarea(keyboard, hostEntry);
 }
 
 long last_data_update_ip = -10000;
