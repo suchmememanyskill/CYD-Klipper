@@ -1,0 +1,3 @@
+[submodule "CYD-Klipper/boards"]
+	path = CYD-Klipper/boards
+	url = https://github.com/suchmememanyskill/platformio-espressif32-sunton
