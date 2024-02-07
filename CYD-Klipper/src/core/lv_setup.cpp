@@ -25,6 +25,11 @@ void set_screen_brightness()
 void screen_timer_wake()
 {
     lv_timer_reset(screenSleepTimer);
+
+    if (!isScreenInSleep){
+        return;
+    }
+
     isScreenInSleep = false;
     set_screen_brightness();
 

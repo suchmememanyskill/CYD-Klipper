@@ -11,6 +11,7 @@
         "initializer_list": "cpp",
         "algorithm": "cpp",
         "cstddef": "cpp",
-        "functional": "cpp"
+        "functional": "cpp",
+        "*.tcc": "cpp"
     }
 }
