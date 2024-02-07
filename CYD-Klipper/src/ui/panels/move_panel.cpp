@@ -1,8 +1,8 @@
 #include "lvgl.h"
 #include "panel.h"
 #include "../../core/data_setup.h"
-#include <TFT_eSPI.h>
 #include "../ui_utils.h"
+#include <stdio.h>
 
 static bool last_homing_state = false;
 

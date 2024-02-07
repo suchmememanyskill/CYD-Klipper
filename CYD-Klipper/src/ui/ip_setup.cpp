@@ -1,7 +1,6 @@
 #include "ip_setup.h"
 #include "../conf/global_config.h"
 #include "lvgl.h"
-#include <TFT_eSPI.h>
 #include <HTTPClient.h>
 #include "core/data_setup.h"
 #include "ui_utils.h"

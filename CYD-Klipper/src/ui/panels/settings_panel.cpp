@@ -5,6 +5,7 @@
 #include "../main_ui.h"
 #include "../ui_utils.h"
 #include <Esp.h>
+#include "../../core/lv_setup.h"
 
 static void invert_color_switch(lv_event_t * e){
     auto state = lv_obj_get_state(lv_event_get_target(e));

@@ -7,6 +7,7 @@
 #include "ui_utils.h"
 #include "panels/panel.h"
 #include "../core/macros_query.h"
+#include "../core/lv_setup.h"
 
 char extruder_temp_buff[20];
 char bed_temp_buff[20];
@@ -19,8 +20,6 @@ static void btn_click_restart(lv_event_t * e){
 static void btn_click_firmware_restart(lv_event_t * e){
     send_gcode(false, "FIRMWARE_RESTART");
 }
-
-
 
 void error_ui_macros_open(lv_event_t * e){
     lv_obj_t * panel = lv_create_empty_panel(lv_scr_act());

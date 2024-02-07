@@ -7,6 +7,7 @@
 #include "lvgl.h"
 #include <XPT2046_Touchscreen.h>
 #include <TFT_eSPI.h>
+#include "../lv_setup.h"
 
 #define XPT2046_IRQ 36
 #define XPT2046_MOSI 32
@@ -19,15 +20,10 @@
 SPIClass touchscreen_spi = SPIClass(HSPI);
 XPT2046_Touchscreen touchscreen(XPT2046_CS, XPT2046_IRQ);
 
-uint32_t LV_EVENT_GET_COMP_CHILD;
-
 static lv_disp_draw_buf_t draw_buf;
 static lv_color_t buf[CYD_SCREEN_HEIGHT_PX * CYD_SCREEN_WIDTH_PX / 10];
 
 TFT_eSPI tft = TFT_eSPI();
-
-bool isScreenInSleep = false;
-lv_timer_t *screenSleepTimer;
 
 TS_Point touchscreen_point()
 {
@@ -103,61 +99,6 @@ void screen_setBrightness(byte brightness)
     ledcWrite(0, duty);
 }
 
-void set_screen_brightness()
-{
-    if (global_config.brightness < 32)
-        screen_setBrightness(255);
-    else
-        screen_setBrightness(global_config.brightness);
-}
-
-void screen_timer_wake()
-{
-    lv_timer_reset(screenSleepTimer);
-    isScreenInSleep = false;
-    set_screen_brightness();
-
-    // Reset cpu freq
-    setCpuFrequencyMhz(CPU_FREQ_HIGH);
-    Serial.printf("CPU Speed: %d MHz\n", ESP.getCpuFreqMHz());
-}
-
-void screen_timer_sleep(lv_timer_t *timer)
-{
-    screen_setBrightness(0);
-    isScreenInSleep = true;
-
-    // Screen is off, no need to make the cpu run fast, the user won't notice ;)
-    setCpuFrequencyMhz(CPU_FREQ_LOW);
-    Serial.printf("CPU Speed: %d MHz\n", ESP.getCpuFreqMHz());
-}
-
-void screen_timer_setup()
-{
-    screenSleepTimer = lv_timer_create(screen_timer_sleep, global_config.screenTimeout * 1000 * 60, NULL);
-    lv_timer_pause(screenSleepTimer);
-}
-
-void screen_timer_start()
-{
-    lv_timer_resume(screenSleepTimer);
-}
-
-void screen_timer_stop()
-{
-    lv_timer_pause(screenSleepTimer);
-}
-
-void screen_timer_period(uint32_t period)
-{
-    lv_timer_set_period(screenSleepTimer, period);
-}
-
-void set_screen_timer_period()
-{
-    screen_timer_period(global_config.screenTimeout * 1000 * 60);
-}
-
 void screen_lv_flush(lv_disp_drv_t *disp, const lv_area_t *area, lv_color_t *color_p)
 {
     uint32_t w = (area->x2 - area->x1 + 1);
@@ -173,12 +114,10 @@ void screen_lv_flush(lv_disp_drv_t *disp, const lv_area_t *area, lv_color_t *col
 
 void screen_lv_touchRead(lv_indev_drv_t *indev_driver, lv_indev_data_t *data)
 {
-
     if (touchscreen.tirqTouched() && touchscreen.touched())
     {
-        lv_timer_reset(screenSleepTimer);
         // dont pass first touch after power on
-        if (isScreenInSleep)
+        if (is_screen_asleep())
         {
             screen_timer_wake();
             while (touchscreen.touched())
@@ -195,25 +134,6 @@ void screen_lv_touchRead(lv_indev_drv_t *indev_driver, lv_indev_data_t *data)
     {
         data->state = LV_INDEV_STATE_REL;
     }
-}
-
-void set_color_scheme(){
-    lv_disp_t *dispp = lv_disp_get_default();
-    lv_color_t main_color = {0};
-    COLOR_DEF color_def = color_defs[global_config.color_scheme];
-
-    if (color_defs[global_config.color_scheme].primary_color_light > 0){
-        main_color = lv_palette_lighten(color_def.primary_color, color_def.primary_color_light);
-    }
-    else if (color_defs[global_config.color_scheme].primary_color_light < 0) {
-        main_color = lv_palette_darken(color_def.primary_color, color_def.primary_color_light * -1);
-    }
-    else {
-        main_color = lv_palette_main(color_defs[global_config.color_scheme].primary_color);
-    }
-
-    lv_theme_t *theme = lv_theme_default_init(dispp, main_color, lv_palette_main(color_def.secondary_color), !global_config.lightMode, CYD_SCREEN_FONT);
-    lv_disp_set_theme(dispp, theme);
 }
 
 void set_invert_display(){
@@ -254,20 +174,12 @@ void screen_setup()
     disp_drv.draw_buf = &draw_buf;
     lv_disp_drv_register(&disp_drv);
 
-
     /*Initialize the (dummy) input device driver*/
     static lv_indev_drv_t indev_drv;
     lv_indev_drv_init(&indev_drv);
     indev_drv.type = LV_INDEV_TYPE_POINTER;
     indev_drv.read_cb = screen_lv_touchRead;
     lv_indev_drv_register(&indev_drv);
-
-    screen_timer_setup();
-    screen_timer_start();
-
-    /*Initialize the graphics library */
-    LV_EVENT_GET_COMP_CHILD = lv_event_register_id();
-    set_color_scheme();
 }
 
 #endif // CYD_SCREEN_DRIVER_ESP32_2432S028R

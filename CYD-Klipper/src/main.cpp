@@ -7,12 +7,14 @@
 #include "ui/main_ui.h"
 #include "ui/nav_buttons.h"
 #include <Esp.h>
+#include "core/lv_setup.h"
 
 void setup() {
     Serial.begin(115200);
     Serial.println("Hello World");
     LoadGlobalConfig();
     screen_setup();
+    lv_setup();
     Serial.println("Screen init done");
     
     wifi_init();
