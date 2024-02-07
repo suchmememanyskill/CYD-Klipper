@@ -28,27 +28,17 @@ jobs:
 
       - name: Build PlatformIO Project
         run: |
-          cd CYD-Klipper
-          pio run
-
-      - name: Make output dir
-        run: |
-          mkdir -p output
+          python3 ci.py
       
-      - name: Build Binary
+      - name: Copy output to site
         run: |
-          cp ./CYD-Klipper/.pio/build/esp32dev/bootloader.bin output
-          cp ./CYD-Klipper/.pio/build/esp32dev/partitions.bin output
-          cp ./CYD-Klipper/.pio/build/esp32dev/firmware.bin output
-          cp ~/.platformio/packages/framework-arduinoespressif32/tools/partitions/boot_app0.bin output
-          python3 -m esptool --chip esp32 merge_bin -o ./output/merged-firmware.bin --flash_mode dio --flash_freq 40m --flash_size 4MB 0x1000 ./output/bootloader.bin 0x8000 ./output/partitions.bin 0xe000 ./output/boot_app0.bin 0x10000 ./output/firmware.bin
-          cp -r ./output ./_site
+          cp -r ./out ./_site
 
       - name: Upload artifact 
         uses: actions/upload-artifact@v3
         with:
           name: firmware
-          path: ./output 
+          path: ./out 
 
       - name: Upload GitHub Page Artifact
         uses: actions/upload-pages-artifact@v2
