@@ -28,7 +28,7 @@ void macros_panel_add_macros_to_panel(lv_obj_t * root_panel, MACROSQUERY query){
         lv_layout_flex_row(panel, LV_FLEX_ALIGN_END);
         lv_obj_set_size(panel, CYD_SCREEN_PANEL_WIDTH_PX - CYD_SCREEN_GAP_PX * 3, CYD_SCREEN_MIN_BUTTON_HEIGHT_PX);
 
-        lv_obj_t * label = lv_label_create(panel);
+        lv_obj_t * label = lv_label_create_ex(panel);
         lv_label_set_text(label, macro);
         lv_label_set_long_mode(label, LV_LABEL_LONG_SCROLL_CIRCULAR);
         lv_obj_set_flex_grow(label, 1);
@@ -37,7 +37,7 @@ void macros_panel_add_macros_to_panel(lv_obj_t * root_panel, MACROSQUERY query){
         lv_obj_add_event_cb(btn, btn_press, LV_EVENT_CLICKED, (void*)macro);
         lv_obj_set_height(btn, CYD_SCREEN_MIN_BUTTON_HEIGHT_PX);
 
-        label = lv_label_create(btn);
+        label = lv_label_create_ex(btn);
         lv_label_set_text(label, "Run");
         lv_obj_center(label);
 
@@ -66,7 +66,7 @@ void macros_panel_add_power_devices_to_panel(lv_obj_t * root_panel, POWERQUERY q
         lv_layout_flex_row(panel, LV_FLEX_ALIGN_END);
         lv_obj_set_size(panel, CYD_SCREEN_PANEL_WIDTH_PX - CYD_SCREEN_GAP_PX * 3, CYD_SCREEN_MIN_BUTTON_HEIGHT_PX);
 
-        lv_obj_t * label = lv_label_create(panel);
+        lv_obj_t * label = lv_label_create_ex(panel);
         lv_label_set_text(label, power_device_name);
         lv_label_set_long_mode(label, LV_LABEL_LONG_SCROLL_CIRCULAR);
         lv_obj_set_flex_grow(label, 1);
@@ -90,14 +90,14 @@ void macros_panel_init(lv_obj_t* panel) {
     lv_obj_set_size(btn, CYD_SCREEN_PANEL_WIDTH_PX - CYD_SCREEN_GAP_PX * 2, CYD_SCREEN_MIN_BUTTON_HEIGHT_PX);
     lv_obj_align(btn, LV_ALIGN_TOP_MID, 0, CYD_SCREEN_GAP_PX);
 
-    lv_obj_t * label = lv_label_create(btn);
+    lv_obj_t * label = lv_label_create_ex(btn);
     lv_label_set_text(label, LV_SYMBOL_SETTINGS " Screen Settings");
     lv_obj_center(label);
 
     MACROSQUERY query = macros_query();
     POWERQUERY power = power_devices_query();
     if (query.count == 0 && power.count == 0){
-        label = lv_label_create(panel);
+        label = lv_label_create_ex(panel);
         lv_label_set_text(label, "No macros found.\nMacros with the description\n\"CYD_SCREEN_MACRO\"\nwill show up here.");
         lv_obj_align(label, LV_ALIGN_CENTER, 0, 0);
         return;

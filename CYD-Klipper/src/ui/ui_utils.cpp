@@ -1,6 +1,14 @@
 #include "lvgl.h"
 #include "ui_utils.h"
 #include "../core/data_setup.h"
+#include "../core/lv_setup.h"
+
+lv_obj_t* lv_label_create_ex(lv_obj_t* parent)
+{
+    lv_obj_t* label = lv_label_create(parent);
+    lv_obj_add_style(label, get_default_label_style(), 0);
+    return label;
+}
 
 lv_obj_t* lv_create_empty_panel(lv_obj_t* root) {
     lv_obj_t* panel = lv_obj_create(root); 
@@ -53,11 +61,11 @@ void lv_create_fullscreen_button_matrix_popup(lv_obj_t * root, lv_event_cb_t tit
     lv_obj_align(btn, LV_ALIGN_RIGHT_MID, 0, 0);
     lv_obj_add_event_cb(btn, destroy_event_user_data, LV_EVENT_CLICKED, panel);
 
-    lv_obj_t * label = lv_label_create(btn);
+    lv_obj_t * label = lv_label_create_ex(btn);
     lv_label_set_text(label, LV_SYMBOL_CLOSE);
     lv_obj_center(label);
 
-    label = lv_label_create(top_menu_row);
+    label = lv_label_create_ex(top_menu_row);
     lv_label_set_text(label, "-");
     lv_obj_align(label, LV_ALIGN_LEFT_MID, 0, 0);
     lv_obj_add_event_cb(label, title, LV_EVENT_MSG_RECEIVED, NULL);
@@ -79,7 +87,7 @@ void lv_create_fullscreen_button_matrix_popup(lv_obj_t * root, lv_event_cb_t tit
             lv_obj_set_size(btn, column_width, CYD_SCREEN_MIN_BUTTON_HEIGHT_PX);
             lv_obj_add_event_cb(btn, columns[i].event, LV_EVENT_CLICKED, (void*)columns[i].data[j]);
 
-            label = lv_label_create(btn);
+            label = lv_label_create_ex(btn);
             lv_label_set_text(label, columns[i].labels[j]);
             lv_obj_center(label);
         }

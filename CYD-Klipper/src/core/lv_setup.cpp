@@ -12,6 +12,7 @@
 
 bool isScreenInSleep = false;
 lv_timer_t *screenSleepTimer;
+static lv_style_t default_label_style;
 
 void set_screen_brightness()
 {
@@ -90,6 +91,9 @@ void set_color_scheme()
 
 void lv_setup()
 {
+    lv_style_init(&default_label_style);
+    lv_style_set_text_font(&default_label_style, CYD_SCREEN_FONT);
+
     screen_timer_setup();
     screen_timer_start();
     set_color_scheme();
@@ -100,3 +104,7 @@ bool is_screen_asleep()
     return isScreenInSleep;
 }
 
+lv_style_t * get_default_label_style()
+{
+    return &default_label_style;
+}

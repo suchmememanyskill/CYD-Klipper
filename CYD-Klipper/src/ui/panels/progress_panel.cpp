@@ -57,7 +57,7 @@ void progress_panel_init(lv_obj_t* panel){
     lv_layout_flex_column(center_panel);
 
     // Filename
-    lv_obj_t * label = lv_label_create(center_panel);
+    lv_obj_t * label = lv_label_create_ex(center_panel);
     lv_label_set_text(label, printer.print_filename);
     lv_label_set_long_mode(label, LV_LABEL_LONG_SCROLL_CIRCULAR);
     lv_obj_set_width(label, panel_width);
@@ -73,21 +73,21 @@ void progress_panel_init(lv_obj_t* panel){
     lv_obj_set_size(time_est_panel, panel_width, LV_SIZE_CONTENT);
 
     // Elapsed Time
-    label = lv_label_create(time_est_panel);
+    label = lv_label_create_ex(time_est_panel);
     lv_label_set_text(label, "???");
     lv_obj_align(label, LV_ALIGN_LEFT_MID, 0, 0);
     lv_obj_add_event_cb(label, update_printer_data_elapsed_time, LV_EVENT_MSG_RECEIVED, NULL);
     lv_msg_subsribe_obj(DATA_PRINTER_DATA, label, NULL);
 
     // Remaining Time
-    label = lv_label_create(time_est_panel);
+    label = lv_label_create_ex(time_est_panel);
     lv_label_set_text(label, "???");
     lv_obj_align(label, LV_ALIGN_RIGHT_MID, 0, 0);
     lv_obj_add_event_cb(label, update_printer_data_remaining_time, LV_EVENT_MSG_RECEIVED, NULL);
     lv_msg_subsribe_obj(DATA_PRINTER_DATA, label, NULL);
 
     // Percentage
-    label = lv_label_create(time_est_panel);
+    label = lv_label_create_ex(time_est_panel);
     lv_label_set_text(label, "???");
     lv_obj_align(label, LV_ALIGN_CENTER, 0, 0);
     lv_obj_add_event_cb(label, update_printer_data_percentage, LV_EVENT_MSG_RECEIVED, NULL);
@@ -99,7 +99,7 @@ void progress_panel_init(lv_obj_t* panel){
     lv_obj_set_size(btn, CYD_SCREEN_MIN_BUTTON_WIDTH_PX * button_size_mult, CYD_SCREEN_MIN_BUTTON_HEIGHT_PX * button_size_mult);
     lv_obj_add_event_cb(btn, btn_click_stop, LV_EVENT_CLICKED, NULL);
 
-    label = lv_label_create(btn);
+    label = lv_label_create_ex(btn);
     lv_label_set_text(label, LV_SYMBOL_STOP);
     lv_obj_center(label);
 
@@ -108,7 +108,7 @@ void progress_panel_init(lv_obj_t* panel){
         btn = lv_btn_create(panel);
         lv_obj_add_event_cb(btn, btn_click_resume, LV_EVENT_CLICKED, NULL);
 
-        label = lv_label_create(btn);
+        label = lv_label_create_ex(btn);
         lv_label_set_text(label, LV_SYMBOL_PLAY);
         lv_obj_center(label);
     }
@@ -117,7 +117,7 @@ void progress_panel_init(lv_obj_t* panel){
         btn = lv_btn_create(panel);
         lv_obj_add_event_cb(btn, btn_click_pause, LV_EVENT_CLICKED, NULL);
 
-        label = lv_label_create(btn);
+        label = lv_label_create_ex(btn);
         lv_label_set_text(label, LV_SYMBOL_PAUSE);
         lv_obj_center(label);
     }

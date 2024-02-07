@@ -110,7 +110,7 @@ static void power_devices_button(lv_event_t * e) {
     lv_obj_set_size(button, CYD_SCREEN_WIDTH_PX - CYD_SCREEN_GAP_PX * 2, CYD_SCREEN_MIN_BUTTON_HEIGHT_PX);
     lv_obj_add_event_cb(button, destroy_event_user_data, LV_EVENT_CLICKED, panel);
 
-    lv_obj_t * label = lv_label_create(button);
+    lv_obj_t * label = lv_label_create_ex(button);
     lv_label_set_text(label, LV_SYMBOL_CLOSE " Close");
     lv_obj_center(label);
 
@@ -120,7 +120,7 @@ static void power_devices_button(lv_event_t * e) {
 void redraw_connect_screen(){
     lv_obj_clean(lv_scr_act());
 
-    label = lv_label_create(lv_scr_act());
+    label = lv_label_create_ex(lv_scr_act());
     lv_label_set_text(label, "Connecting to Klipper");
     lv_obj_align(label, LV_ALIGN_CENTER, 0, 0);
 
@@ -133,7 +133,7 @@ void redraw_connect_screen(){
     lv_obj_add_event_cb(reset_btn, reset_btn_event_handler, LV_EVENT_CLICKED, NULL);
     lv_obj_set_height(reset_btn, CYD_SCREEN_MIN_BUTTON_HEIGHT_PX);
 
-    lv_obj_t * btn_label = lv_label_create(reset_btn);
+    lv_obj_t * btn_label = lv_label_create_ex(reset_btn);
     lv_label_set_text(btn_label, "Reset");
     lv_obj_center(btn_label);
 
@@ -142,7 +142,7 @@ void redraw_connect_screen(){
         lv_obj_add_event_cb(power_devices_btn, power_devices_button, LV_EVENT_CLICKED, NULL);
         lv_obj_set_height(power_devices_btn, CYD_SCREEN_MIN_BUTTON_HEIGHT_PX);
 
-        btn_label = lv_label_create(power_devices_btn);
+        btn_label = lv_label_create_ex(power_devices_btn);
         lv_label_set_text(btn_label, "Power Devices");
         lv_obj_center(btn_label);
     }
@@ -166,7 +166,7 @@ void ip_init_inner(){
     lv_obj_set_flex_grow(top_root, 1);
     lv_obj_set_style_pad_all(top_root, CYD_SCREEN_GAP_PX, 0);
 
-    label = lv_label_create(top_root);
+    label = lv_label_create_ex(top_root);
     lv_label_set_text(label, "Enter Klipper IP/Hostname and Port");
     lv_obj_set_width(label, CYD_SCREEN_WIDTH_PX - CYD_SCREEN_GAP_PX * 2);
 
