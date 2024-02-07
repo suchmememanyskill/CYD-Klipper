@@ -29,10 +29,6 @@ jobs:
       - name: Build PlatformIO Project
         run: |
           python3 ci.py
-      
-      - name: Copy output to site
-        run: |
-          cp -r ./out ./_site
 
       - name: Upload artifact 
         uses: actions/upload-artifact@v3
