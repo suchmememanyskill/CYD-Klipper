@@ -167,6 +167,7 @@ void settings_panel_init(lv_obj_t* panel){
 
     create_settings_widget("Brightness", dropdown, panel);
 
+#ifndef CYD_SCREEN_DISABLE_TIMEOUT
     dropdown = lv_dropdown_create(panel);
     lv_dropdown_set_options(dropdown, wake_timeout_options);
     lv_obj_add_style(dropdown, get_default_label_style(), 0);
@@ -180,6 +181,7 @@ void settings_panel_init(lv_obj_t* panel){
     }
 
     create_settings_widget("Wake Timeout", dropdown, panel);
+#endif
 
     toggle = lv_switch_create(panel);
     lv_obj_set_width(toggle, CYD_SCREEN_MIN_BUTTON_WIDTH_PX * 2);
@@ -190,6 +192,7 @@ void settings_panel_init(lv_obj_t* panel){
     
     create_settings_widget("Rotate Screen", toggle, panel);
 
+#ifndef CYD_SCREEN_DISABLE_TIMEOUT
     toggle = lv_switch_create(panel);
     lv_obj_set_width(toggle, CYD_SCREEN_MIN_BUTTON_WIDTH_PX * 2);
     lv_obj_add_event_cb(toggle, on_during_print_switch, LV_EVENT_VALUE_CHANGED, NULL);
@@ -198,4 +201,5 @@ void settings_panel_init(lv_obj_t* panel){
         lv_obj_add_state(toggle, LV_STATE_CHECKED);
 
     create_settings_widget("Screen On During Print", toggle, panel);
+#endif
 }

@@ -14,7 +14,7 @@ A ESP32-2432S028R is required to run this project. You can find out where to buy
 
 ### Features
 - View printer status
-- View print progress
+- View print progress and print statistics
 - Start a print
 - (When the printer is idle) move the printer
 - (During a print) set fan speed, flow rate, speed and z offset
@@ -36,11 +36,15 @@ There are no 'over the air' updates. Each update has to be applied manually.
 
 -|- 
 :-:|:-:
-![1](readme/PXL_20231113_142717308.jpg)|![2](readme/PXL_20231113_171701876.jpg)
-![3](readme/PXL_20231113_171715809.jpg)|![4](readme/PXL_20231113_171724404.jpg)
-![5](readme/PXL_20231113_171751745.jpg)|![6](readme/PXL_20231113_171809315.jpg)
+![1](readme/1.jpg)|![2](readme/2.jpg)
+![3](readme/3.jpg)|![4](readme/4.jpg)
+![5](readme/5.jpg)|![6](readme/6.jpg)
+![7](readme/7.jpg)|![8](readme/8.jpg)
+![9](readme/9.jpg)|![10](readme/10.jpg)
 
 
 ### Credits
 - [xtouch](https://github.com/xperiments-in/xtouch)
 - [ESP32-Cheap-Yellow-Display](https://github.com/witnessmenow/ESP32-Cheap-Yellow-Display)
+- [OperatorB](https://github.com/OperatorB) for the ESP32-3248S035C display driver
+- [esp32-smartdisplay](https://github.com/rzeldent/esp32-smartdisplay)

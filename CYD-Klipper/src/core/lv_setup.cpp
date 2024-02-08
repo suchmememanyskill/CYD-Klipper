@@ -24,6 +24,7 @@ void set_screen_brightness()
 
 void screen_timer_wake()
 {
+#ifndef CYD_SCREEN_DISABLE_TIMEOUT
     lv_timer_reset(screenSleepTimer);
 
     if (!isScreenInSleep){
@@ -36,16 +37,19 @@ void screen_timer_wake()
     // Reset cpu freq
     setCpuFrequencyMhz(CPU_FREQ_HIGH);
     Serial.printf("CPU Speed: %d MHz\n", ESP.getCpuFreqMHz());
+#endif
 }
 
 void screen_timer_sleep(lv_timer_t *timer)
 {
+#ifndef CYD_SCREEN_DISABLE_TIMEOUT
     screen_setBrightness(0);
     isScreenInSleep = true;
 
     // Screen is off, no need to make the cpu run fast, the user won't notice ;)
     setCpuFrequencyMhz(CPU_FREQ_LOW);
     Serial.printf("CPU Speed: %d MHz\n", ESP.getCpuFreqMHz());
+#endif
 }
 
 void screen_timer_setup()
