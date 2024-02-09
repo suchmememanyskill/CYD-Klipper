@@ -7,6 +7,10 @@
 #include <Esp.h>
 #include "../../core/lv_setup.h"
 
+#ifndef REPO_VERSION
+    #define REPO_VERSION "Unknown"
+#endif // REPO_VERSION
+
 static void invert_color_switch(lv_event_t * e){
     auto state = lv_obj_get_state(lv_event_get_target(e));
     bool checked = (state & LV_STATE_CHECKED == LV_STATE_CHECKED);
@@ -85,9 +89,7 @@ static void on_during_print_switch(lv_event_t* e){
 
 const static lv_point_t line_points[] = { {0, 0}, {(short int)((CYD_SCREEN_PANEL_WIDTH_PX - CYD_SCREEN_GAP_PX * 2) * 0.85f), 0} };
 
-void create_settings_widget(const char* label_text, lv_obj_t* object, lv_obj_t* root_panel){
-    lv_obj_set_height(object, CYD_SCREEN_MIN_BUTTON_HEIGHT_PX);
-
+void create_settings_widget(const char* label_text, lv_obj_t* object, lv_obj_t* root_panel, bool set_height = true){
     lv_obj_t * panel = lv_create_empty_panel(root_panel);
     lv_obj_set_size(panel, CYD_SCREEN_PANEL_WIDTH_PX - CYD_SCREEN_GAP_PX * 3, CYD_SCREEN_MIN_BUTTON_HEIGHT_PX);
 
@@ -97,6 +99,9 @@ void create_settings_widget(const char* label_text, lv_obj_t* object, lv_obj_t* 
 
     lv_obj_set_parent(object, panel);
     lv_obj_align(object, LV_ALIGN_RIGHT_MID, 0, 0);
+
+    if (set_height)
+        lv_obj_set_height(object, CYD_SCREEN_MIN_BUTTON_HEIGHT_PX);
 
     lv_obj_t * line = lv_line_create(root_panel);
     lv_line_set_points(line, line_points, 2);
@@ -204,4 +209,9 @@ void settings_panel_init(lv_obj_t* panel){
 
     create_settings_widget("Screen On During Print", toggle, panel);
 #endif
+
+    label = lv_label_create_ex(panel);
+    lv_label_set_text(label, REPO_VERSION " ");
+
+    create_settings_widget("Version", label, panel, false);
 }
