@@ -2,6 +2,8 @@
 
 #include "lvgl.h"
 
+typedef void (*lv_indev_drv_read_cb_t)(struct _lv_indev_drv_t * indev_drv, lv_indev_data_t * data);
+
 void set_screen_brightness();
 void set_screen_timer_period();
 void screen_timer_wake();

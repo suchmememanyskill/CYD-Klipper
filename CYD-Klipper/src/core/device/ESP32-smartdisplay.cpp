@@ -26,7 +26,6 @@ void screen_setup()
 {
     smartdisplay_init();
 
-    // TODO: Touch input doesn't get translated when doing this
     lv_disp_set_rotation(lv_disp_get_default(), (global_config.rotateScreen) ? LV_DISP_ROT_270 : LV_DISP_ROT_90);
 }
 

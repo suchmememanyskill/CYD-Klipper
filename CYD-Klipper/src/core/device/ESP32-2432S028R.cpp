@@ -116,17 +116,6 @@ void screen_lv_touchRead(lv_indev_drv_t *indev_driver, lv_indev_data_t *data)
 {
     if (touchscreen.tirqTouched() && touchscreen.touched())
     {
-        // dont pass first touch after power on
-        if (is_screen_asleep())
-        {
-            screen_timer_wake();
-            while (touchscreen.touched())
-                ;
-            return;
-        }
-
-        screen_timer_wake();
-
         TS_Point p = touchscreen_point();
         data->state = LV_INDEV_STATE_PR;
         data->point.x = p.x;

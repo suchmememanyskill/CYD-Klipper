@@ -1,4 +1,4 @@
-#include "lvgl.h"
+#include "lv_setup.h"
 #include "screen_driver.h"
 #include "../conf/global_config.h"
 #include <Esp.h>
@@ -98,6 +98,26 @@ void set_color_scheme()
     lv_disp_set_theme(dispp, theme);
 }
 
+static lv_indev_drv_read_cb_t original_driver = NULL;
+
+void lv_touch_intercept(lv_indev_drv_t *indev_driver, lv_indev_data_t *data) 
+{
+    original_driver(indev_driver, data);
+    
+    if (data->state == LV_INDEV_STATE_PR) {
+        if (is_screen_asleep()) {
+            while (data->state == LV_INDEV_STATE_PR) {
+                original_driver(indev_driver, data);
+                delay(20);
+            }
+
+            data->state = LV_INDEV_STATE_REL;
+        }
+
+        screen_timer_wake();
+    }
+}
+
 void lv_setup()
 {
     lv_style_init(&default_label_style);
@@ -106,6 +126,13 @@ void lv_setup()
     screen_timer_setup();
     screen_timer_start();
     set_color_scheme();
+
+    if (original_driver != NULL)
+        return;
+
+    lv_indev_t * display_driver = lv_indev_get_next(NULL);
+    original_driver = display_driver->driver->read_cb;
+    display_driver->driver->read_cb = lv_touch_intercept;
 }
 
 bool is_screen_asleep()

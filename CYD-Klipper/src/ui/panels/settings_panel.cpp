@@ -117,6 +117,7 @@ void settings_panel_init(lv_obj_t* panel){
 
     create_settings_widget("Configure WiFi", btn, panel);
 
+#ifndef CYD_SCREEN_DISABLE_TOUCH_CALIBRATION
     btn = lv_btn_create(panel);
     lv_obj_add_event_cb(btn, reset_calibration_click, LV_EVENT_CLICKED, NULL);
 
@@ -125,6 +126,7 @@ void settings_panel_init(lv_obj_t* panel){
     lv_obj_center(label);
 
     create_settings_widget("Calibrate Touch", btn, panel);
+#endif // CYD_SCREEN_DISABLE_TOUCH_CALIBRATION
 
     lv_obj_t * toggle = lv_switch_create(panel);
     lv_obj_set_width(toggle, CYD_SCREEN_MIN_BUTTON_WIDTH_PX * 2);

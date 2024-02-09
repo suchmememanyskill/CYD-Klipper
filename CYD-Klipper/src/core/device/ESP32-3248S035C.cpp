@@ -55,17 +55,6 @@ void screen_lv_touchRead(lv_indev_drv_t *indev_driver, lv_indev_data_t *data)
     }
     else
     {
-        if (is_screen_asleep())
-        {
-            screen_timer_wake();
-            while (tp.isTouched) {
-                tp.read();
-            }
-            return;
-        }
-
-        screen_timer_wake();
-
         data->state = LV_INDEV_STATE_PR;
         for (int i = 0; i < tp.touches; i++)
         {
