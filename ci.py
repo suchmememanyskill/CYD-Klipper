@@ -3,9 +3,9 @@ import subprocess, os, shutil, json
 CYD_PORTS = ["esp32-3248S035C", "esp32-2432S028R"]
 BASE_DIR = os.getcwd()
 
-def get_manifest(base_path : str):
+def get_manifest(base_path : str, device_name : str):
     return {
-        "name": "CYD-Klipper",
+        "name": f"CYD-Klipper for {device_name}",
         "new_install_prompt_erase": True,
         "builds": [
             {
@@ -52,7 +52,7 @@ for port in CYD_PORTS:
     os.chdir(BASE_DIR)
 
     with open(f"./_site/{port}.json", "w") as f:
-        json.dump(get_manifest(port_path), f)
+        json.dump(get_manifest(port_path, port), f)
 
 os.chdir(BASE_DIR)
 shutil.copytree("./out", "./_site/out")
