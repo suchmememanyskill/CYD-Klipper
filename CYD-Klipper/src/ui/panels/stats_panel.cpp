@@ -194,7 +194,7 @@ void create_stat_text_block(lv_obj_t * root, const char* label, lv_event_cb_t va
 
     lv_obj_t * label_obj = lv_label_create_ex(panel);
     lv_label_set_text(label_obj, label);
-    lv_obj_set_style_text_font(label_obj, CYD_SCREEN_FONT_SMALL, 0);
+    lv_obj_set_style_text_font(label_obj, &CYD_SCREEN_FONT_SMALL, 0);
 
     lv_obj_t * value_obj = lv_label_create_ex(panel);
     lv_obj_add_event_cb(value_obj, value, LV_EVENT_MSG_RECEIVED, NULL);

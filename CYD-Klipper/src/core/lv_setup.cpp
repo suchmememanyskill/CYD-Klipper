@@ -94,7 +94,7 @@ void set_color_scheme()
         main_color = lv_palette_main(color_defs[global_config.color_scheme].primary_color);
     }
 
-    lv_theme_t *theme = lv_theme_default_init(dispp, main_color, lv_palette_main(color_def.secondary_color), !global_config.lightMode, CYD_SCREEN_FONT);
+    lv_theme_t *theme = lv_theme_default_init(dispp, main_color, lv_palette_main(color_def.secondary_color), !global_config.lightMode, &CYD_SCREEN_FONT);
     lv_disp_set_theme(dispp, theme);
 }
 
@@ -103,7 +103,7 @@ static lv_indev_drv_read_cb_t original_driver = NULL;
 void lv_touch_intercept(lv_indev_drv_t *indev_driver, lv_indev_data_t *data) 
 {
     original_driver(indev_driver, data);
-    
+
     if (data->state == LV_INDEV_STATE_PR) {
         if (is_screen_asleep()) {
             while (data->state == LV_INDEV_STATE_PR) {
@@ -121,7 +121,7 @@ void lv_touch_intercept(lv_indev_drv_t *indev_driver, lv_indev_data_t *data)
 void lv_setup()
 {
     lv_style_init(&default_label_style);
-    lv_style_set_text_font(&default_label_style, CYD_SCREEN_FONT);
+    lv_style_set_text_font(&default_label_style, &CYD_SCREEN_FONT);
 
     screen_timer_setup();
     screen_timer_start();

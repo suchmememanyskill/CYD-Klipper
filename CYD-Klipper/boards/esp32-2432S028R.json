@@ -29,8 +29,8 @@
         "-DCYD_SCREEN_GAP_PX=8",
         "-DCYD_SCREEN_MIN_BUTTON_HEIGHT_PX=35",
         "-DCYD_SCREEN_MIN_BUTTON_WIDTH_PX=35",
-        "-DCYD_SCREEN_FONT=&lv_font_montserrat_14",
-        "-DCYD_SCREEN_FONT_SMALL=&lv_font_montserrat_10",
+        "-DCYD_SCREEN_FONT=lv_font_montserrat_14",
+        "-DCYD_SCREEN_FONT_SMALL=lv_font_montserrat_10",
         "-DCYD_SCREEN_SIDEBAR_SIZE_PX=40",
         "-DCYD_SCREEN_DRIVER_ESP32_2432S028R=1"
       ],
