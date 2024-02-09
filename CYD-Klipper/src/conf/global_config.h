@@ -20,6 +20,7 @@ typedef struct _GLOBAL_CONFIG {
             bool invertColors : 1;
             bool rotateScreen : 1;
             bool onDuringPrint : 1;
+            bool autoOtaUpdate : 1;
         };
     };
     float screenCalXOffset;

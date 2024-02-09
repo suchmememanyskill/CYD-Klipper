@@ -6,6 +6,7 @@
 #include "../ui_utils.h"
 #include <Esp.h>
 #include "../../core/lv_setup.h"
+#include "../ota_setup.h"
 
 #ifndef REPO_VERSION
     #define REPO_VERSION "Unknown"
@@ -84,6 +85,17 @@ static void on_during_print_switch(lv_event_t* e){
     bool checked = (state & LV_STATE_CHECKED == LV_STATE_CHECKED);
     global_config.onDuringPrint = checked;
     check_if_screen_needs_to_be_disabled();
+    WriteGlobalConfig();
+}
+
+static void btn_ota_do_update(lv_event_t * e){
+    set_ready_for_ota_update();
+}
+
+static void auto_ota_update_switch(lv_event_t* e){
+    auto state = lv_obj_get_state(lv_event_get_target(e));
+    bool checked = (state & LV_STATE_CHECKED == LV_STATE_CHECKED);
+    global_config.autoOtaUpdate = checked;
     WriteGlobalConfig();
 }
 
@@ -211,7 +223,33 @@ void settings_panel_init(lv_obj_t* panel){
 #endif
 
     label = lv_label_create_ex(panel);
-    lv_label_set_text(label, REPO_VERSION " ");
+    lv_label_set_text(label, REPO_VERSION "  ");
 
     create_settings_widget("Version", label, panel, false);
+
+    if (ota_has_update()){
+        btn = lv_btn_create(panel);
+        lv_obj_add_event_cb(btn, btn_ota_do_update, LV_EVENT_CLICKED, NULL);
+
+        label = lv_label_create_ex(btn);
+        lv_label_set_text_fmt(label, "Update to %s", ota_new_version_name().c_str());
+        lv_obj_center(label);
+
+        create_settings_widget("Device", btn, panel);
+    }
+    else {
+        label = lv_label_create_ex(panel);
+        lv_label_set_text(label, ARDUINO_BOARD "  ");
+
+        create_settings_widget("Device", label, panel, false);
+    }
+
+    toggle = lv_switch_create(panel);
+    lv_obj_set_width(toggle, CYD_SCREEN_MIN_BUTTON_WIDTH_PX * 2);
+    lv_obj_add_event_cb(toggle, auto_ota_update_switch, LV_EVENT_VALUE_CHANGED, NULL);
+
+    if (global_config.autoOtaUpdate)
+        lv_obj_add_state(toggle, LV_STATE_CHECKED);
+
+    create_settings_widget("Auto Update", toggle, panel);
 }
