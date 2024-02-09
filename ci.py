@@ -5,7 +5,7 @@ BASE_DIR = os.getcwd()
 
 def get_manifest(base_path : str, device_name : str):
     return {
-        "name": f"CYD-Klipper for {device_name}",
+        "name": f"to {device_name}",
         "new_install_prompt_erase": True,
         "builds": [
             {
