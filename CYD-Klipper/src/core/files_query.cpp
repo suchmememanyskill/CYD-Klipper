@@ -31,6 +31,7 @@ FILESYSTEM_FILE* get_files(int limit){
     sprintf(buff, "http://%s:%d/server/files/list", global_config.klipperHost, global_config.klipperPort);
     HTTPClient client;
     client.useHTTP10(true);
+    client.setTimeout(5000);
     client.begin(buff);
     int httpCode = client.GET();
     auto timer_parse = millis();
@@ -53,8 +54,10 @@ FILESYSTEM_FILE* get_files(int limit){
 
                 file_iter++;
             }
+
+            if (file_iter == files.end() && files.size() >= limit)
+                continue;
             
-            // Little inefficient as it always allocates a string, even if it doesn't have to
             f.name = (char*)malloc(strlen(path) + 1);
             if (f.name == NULL){
                 Serial.println("Failed to allocate memory");

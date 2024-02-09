@@ -1,6 +1,7 @@
 #include "panel.h"
 #include "../../core/data_setup.h"
 #include <stdio.h>
+#include "../ui_utils.h"
 
 char time_buffer[12];
 
@@ -47,76 +48,80 @@ static void btn_click_resume(lv_event_t * e){
 }
 
 void progress_panel_init(lv_obj_t* panel){
-    auto panel_width = TFT_HEIGHT - 40;
-    auto panel_width_margin = panel_width - 30;
+    auto panel_width = CYD_SCREEN_PANEL_WIDTH_PX - CYD_SCREEN_GAP_PX * 3;
+    const auto button_size_mult = 1.3f;
+
+    lv_obj_t * center_panel = lv_create_empty_panel(panel);
+    lv_obj_align(center_panel, LV_ALIGN_CENTER, 0, 0);
+    lv_obj_set_size(center_panel, panel_width, LV_SIZE_CONTENT);
+    lv_layout_flex_column(center_panel);
 
     // Filename
-    lv_obj_t * label = lv_label_create(panel);
+    lv_obj_t * label = lv_label_create_ex(center_panel);
     lv_label_set_text(label, printer.print_filename);
-    lv_obj_align(label, LV_ALIGN_CENTER, 0, -40);
     lv_label_set_long_mode(label, LV_LABEL_LONG_SCROLL_CIRCULAR);
-    lv_obj_set_width(label, panel_width_margin);
+    lv_obj_set_width(label, panel_width);
     
     // Progress Bar
-    lv_obj_t * bar = lv_bar_create(panel);
-    lv_obj_align(bar, LV_ALIGN_CENTER, 0, 0);
-    lv_obj_set_size(bar, panel_width_margin, 20);
+    lv_obj_t * bar = lv_bar_create(center_panel);
+    lv_obj_set_size(bar, panel_width, CYD_SCREEN_MIN_BUTTON_HEIGHT_PX * 0.75f);
     lv_obj_add_event_cb(bar, progress_bar_update, LV_EVENT_MSG_RECEIVED, NULL);
     lv_msg_subsribe_obj(DATA_PRINTER_DATA, bar, NULL);
 
+    // Time
+    lv_obj_t * time_est_panel = lv_create_empty_panel(center_panel);
+    lv_obj_set_size(time_est_panel, panel_width, LV_SIZE_CONTENT);
+
     // Elapsed Time
-    label = lv_label_create(panel);
+    label = lv_label_create_ex(time_est_panel);
     lv_label_set_text(label, "???");
-    lv_obj_align(label, LV_ALIGN_LEFT_MID, 10, 20);
+    lv_obj_align(label, LV_ALIGN_LEFT_MID, 0, 0);
     lv_obj_add_event_cb(label, update_printer_data_elapsed_time, LV_EVENT_MSG_RECEIVED, NULL);
     lv_msg_subsribe_obj(DATA_PRINTER_DATA, label, NULL);
 
     // Remaining Time
-    label = lv_label_create(panel);
+    label = lv_label_create_ex(time_est_panel);
     lv_label_set_text(label, "???");
-    lv_obj_align(label, LV_ALIGN_RIGHT_MID, -10, 20);
+    lv_obj_align(label, LV_ALIGN_RIGHT_MID, 0, 0);
     lv_obj_add_event_cb(label, update_printer_data_remaining_time, LV_EVENT_MSG_RECEIVED, NULL);
     lv_msg_subsribe_obj(DATA_PRINTER_DATA, label, NULL);
 
     // Percentage
-    label = lv_label_create(panel);
+    label = lv_label_create_ex(time_est_panel);
     lv_label_set_text(label, "???");
-    lv_obj_align(label, LV_ALIGN_CENTER, 0, 20);
+    lv_obj_align(label, LV_ALIGN_CENTER, 0, 0);
     lv_obj_add_event_cb(label, update_printer_data_percentage, LV_EVENT_MSG_RECEIVED, NULL);
     lv_msg_subsribe_obj(DATA_PRINTER_DATA, label, NULL);
 
     // Stop Button
     lv_obj_t * btn = lv_btn_create(panel);
-    lv_obj_align(btn, LV_ALIGN_BOTTOM_RIGHT, -10, -10);
-    lv_obj_set_size(btn, 40, 40);
+    lv_obj_align(btn, LV_ALIGN_BOTTOM_RIGHT, -1 * CYD_SCREEN_GAP_PX, -1 * CYD_SCREEN_GAP_PX);
+    lv_obj_set_size(btn, CYD_SCREEN_MIN_BUTTON_WIDTH_PX * button_size_mult, CYD_SCREEN_MIN_BUTTON_HEIGHT_PX * button_size_mult);
     lv_obj_add_event_cb(btn, btn_click_stop, LV_EVENT_CLICKED, NULL);
 
-    label = lv_label_create(btn);
+    label = lv_label_create_ex(btn);
     lv_label_set_text(label, LV_SYMBOL_STOP);
     lv_obj_center(label);
 
     // Resume Button
     if (printer.state == PRINTER_STATE_PAUSED){
         btn = lv_btn_create(panel);
-        lv_obj_align(btn, LV_ALIGN_BOTTOM_RIGHT, -60, -10);
-        lv_obj_set_size(btn, 40, 40);
         lv_obj_add_event_cb(btn, btn_click_resume, LV_EVENT_CLICKED, NULL);
 
-        label = lv_label_create(btn);
+        label = lv_label_create_ex(btn);
         lv_label_set_text(label, LV_SYMBOL_PLAY);
         lv_obj_center(label);
     }
     // Pause Button
     else {
         btn = lv_btn_create(panel);
-        lv_obj_align(btn, LV_ALIGN_BOTTOM_RIGHT, -60, -10);
-        lv_obj_set_size(btn, 40, 40);
         lv_obj_add_event_cb(btn, btn_click_pause, LV_EVENT_CLICKED, NULL);
 
-        label = lv_label_create(btn);
+        label = lv_label_create_ex(btn);
         lv_label_set_text(label, LV_SYMBOL_PAUSE);
         lv_obj_center(label);
     }
 
-    lv_msg_send(DATA_PRINTER_DATA, &printer);
+    lv_obj_align(btn, LV_ALIGN_BOTTOM_RIGHT, -2 * CYD_SCREEN_GAP_PX - CYD_SCREEN_MIN_BUTTON_WIDTH_PX * button_size_mult, -1 * CYD_SCREEN_GAP_PX);
+    lv_obj_set_size(btn, CYD_SCREEN_MIN_BUTTON_WIDTH_PX * button_size_mult, CYD_SCREEN_MIN_BUTTON_HEIGHT_PX * button_size_mult);
 }

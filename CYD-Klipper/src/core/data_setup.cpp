@@ -6,6 +6,7 @@
 #include <ArduinoJson.h>
 #include <esp_task_wdt.h>
 #include "macros_query.h"
+#include <UrlEncode.h>
 
 const char *printer_state_messages[] = {
     "Error",
@@ -43,8 +44,9 @@ void unfreeze_render_thread(){
 
 void send_gcode(bool wait, const char *gcode)
 {
+    Serial.printf("Sending gcode: %s\n", gcode);
     char buff[256] = {};
-    sprintf(buff, "http://%s:%d/printer/gcode/script?script=%s", global_config.klipperHost, global_config.klipperPort, gcode);
+    sprintf(buff, "http://%s:%d/printer/gcode/script?script=%s", global_config.klipperHost, global_config.klipperPort, urlEncode(gcode).c_str());
     HTTPClient client;
     client.begin(buff);
 
@@ -67,7 +69,7 @@ void fetch_printer_data()
 {
     freeze_request_thread();
     char buff[256] = {};
-    sprintf(buff, "http://%s:%d/printer/objects/query?extruder&heater_bed&toolhead&gcode_move&virtual_sdcard&print_stats&webhooks", global_config.klipperHost, global_config.klipperPort);
+    sprintf(buff, "http://%s:%d/printer/objects/query?extruder&heater_bed&toolhead&gcode_move&virtual_sdcard&print_stats&webhooks&fan", global_config.klipperHost, global_config.klipperPort);
     HTTPClient client;
     client.useHTTP10(true);
     client.begin(buff);
@@ -119,6 +121,7 @@ void fetch_printer_data()
                 printer.extruder_temp = status["extruder"]["temperature"];
                 printer.extruder_target_temp = status["extruder"]["target"];
                 bool can_extrude = status["extruder"]["can_extrude"];
+                printer.pressure_advance = status["extruder"]["pressure_advance"];
                 printer.can_extrude = can_extrude == true;
             }
 
@@ -139,8 +142,20 @@ void fetch_printer_data()
                 printer.position[0] = status["gcode_move"]["gcode_position"][0];
                 printer.position[1] = status["gcode_move"]["gcode_position"][1];
                 printer.position[2] = status["gcode_move"]["gcode_position"][2];
+                printer.gcode_offset[0] = status["gcode_move"]["homing_origin"][0];
+                printer.gcode_offset[1] = status["gcode_move"]["homing_origin"][1];
+                printer.gcode_offset[2] = status["gcode_move"]["homing_origin"][2];
                 bool absolute_coords = status["gcode_move"]["absolute_coordinates"];
                 printer.absolute_coords = absolute_coords == true;
+                printer.speed_mult = status["gcode_move"]["speed_factor"];
+                printer.extrude_mult = status["gcode_move"]["extrude_factor"];
+                printer.feedrate_mm_per_s = status["gcode_move"]["speed"];
+                printer.feedrate_mm_per_s /= 60; // convert mm/m to mm/s
+            }
+
+            if (status.containsKey("fan"))
+            {
+                printer.fan_speed = status["fan"]["speed"];
             }
 
             if (status.containsKey("virtual_sdcard"))
@@ -155,6 +170,8 @@ void fetch_printer_data()
                 printer.print_filename = filename_buff;
                 printer.elapsed_time_s = status["print_stats"]["print_duration"];
                 printer.filament_used_mm = status["print_stats"]["filament_used"];
+                printer.total_layers = status["print_stats"]["info"]["total_layer"];
+                printer.current_layer = status["print_stats"]["info"]["current_layer"];
 
                 const char *state = status["print_stats"]["state"];
 

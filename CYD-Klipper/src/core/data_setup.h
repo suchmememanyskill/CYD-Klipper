@@ -25,6 +25,14 @@ typedef struct _Printer {
     float filament_used_mm;
     char* print_filename; // 0 -> 1
     float print_progress;
+    float fan_speed; // 0 -> 1
+    float gcode_offset[3];
+    float speed_mult;
+    float extrude_mult;
+    int total_layers;
+    int current_layer;
+    float pressure_advance;
+    int feedrate_mm_per_s;
 } Printer;
 
 extern Printer printer;

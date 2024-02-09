@@ -6,22 +6,15 @@
 #include "core/data_setup.h"
 #include "ui/main_ui.h"
 #include "ui/nav_buttons.h"
-
-static void event_handler(lv_event_t * e){
-    lv_event_code_t code = lv_event_get_code(e);
-
-    if(code == LV_EVENT_CLICKED) {
-        global_config.version = 0;
-        WriteGlobalConfig();
-        ESP.restart();
-    }
-}
+#include <Esp.h>
+#include "core/lv_setup.h"
 
 void setup() {
     Serial.begin(115200);
     Serial.println("Hello World");
     LoadGlobalConfig();
     screen_setup();
+    lv_setup();
     Serial.println("Screen init done");
     
     wifi_init();

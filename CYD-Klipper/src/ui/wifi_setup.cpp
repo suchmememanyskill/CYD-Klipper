@@ -1,8 +1,9 @@
 #include "lvgl.h"
 #include "wifi_setup.h"
 #include "../conf/global_config.h"
-
+#include "ui_utils.h"
 #include "WiFi.h"
+
 void wifi_init_inner();
 
 static void reset_btn_event_handler(lv_event_t * e) {
@@ -47,18 +48,28 @@ static void ta_event_cb(lv_event_t * e) {
 void wifi_pass_entry(const char* ssid){
     lv_obj_clean(lv_scr_act());
 
-    lv_obj_t * label = lv_label_create(lv_scr_act());
-    lv_label_set_text(label, "Enter WiFi Password");
-    lv_obj_align(label, LV_ALIGN_TOP_LEFT, 10, 10 + 2);
+    lv_obj_t * root = lv_create_empty_panel(lv_scr_act());
+    lv_obj_set_size(root, CYD_SCREEN_WIDTH_PX, CYD_SCREEN_HEIGHT_PX);
+    lv_layout_flex_column(root);
 
-    lv_obj_t * passEntry = lv_textarea_create(lv_scr_act());
+    lv_obj_t * top_root = lv_create_empty_panel(root);
+    lv_obj_set_width(top_root, CYD_SCREEN_WIDTH_PX);
+    lv_layout_flex_column(top_root);
+    lv_obj_set_flex_grow(top_root, 1);
+    lv_obj_set_style_pad_all(top_root, CYD_SCREEN_GAP_PX, 0);
+
+    lv_obj_t * label = lv_label_create_ex(top_root);
+    lv_label_set_text(label, "Enter WiFi Password");
+    lv_obj_set_width(label, CYD_SCREEN_WIDTH_PX - CYD_SCREEN_GAP_PX * 2);
+
+    lv_obj_t * passEntry = lv_textarea_create(top_root);
     lv_textarea_set_one_line(passEntry, true);
     lv_textarea_set_text(passEntry, "");
-    lv_obj_align(passEntry, LV_ALIGN_TOP_LEFT, 10, 40);
+    lv_obj_set_width(passEntry, CYD_SCREEN_WIDTH_PX - CYD_SCREEN_GAP_PX * 2);
     lv_obj_add_event_cb(passEntry, ta_event_cb, LV_EVENT_ALL, NULL);
-    lv_obj_set_size(passEntry, TFT_HEIGHT - 20, 60);
+    lv_obj_set_flex_grow(passEntry, 1);
 
-    lv_obj_t * keyboard = lv_keyboard_create(lv_scr_act());
+    lv_obj_t * keyboard = lv_keyboard_create(root);
     lv_keyboard_set_textarea(keyboard, passEntry);
 }
 
@@ -74,7 +85,6 @@ static void wifi_btn_event_handler(lv_event_t * e){
     }
 }
 
-
 void wifi_init_inner(){
     WiFi.disconnect();
     lv_obj_clean(lv_scr_act());
@@ -82,22 +92,23 @@ void wifi_init_inner(){
     if (global_config.wifiConfigured){
         WiFi.begin(global_config.wifiSSID, global_config.wifiPassword);
         
-        lv_obj_t * label = lv_label_create(lv_scr_act());
+        lv_obj_t * label = lv_label_create_ex(lv_scr_act());
         lv_label_set_text(label, "Connecting to WiFi");
         lv_obj_align(label, LV_ALIGN_CENTER, 0, 0);
 
         lv_obj_t * resetBtn = lv_btn_create(lv_scr_act());
-        lv_obj_add_event_cb(resetBtn, reset_btn_event_handler, LV_EVENT_ALL, NULL);
-        lv_obj_align(resetBtn, LV_ALIGN_CENTER, 0, 40);
+        lv_obj_add_event_cb(resetBtn, reset_btn_event_handler, LV_EVENT_CLICKED, NULL);
+        lv_obj_set_height(resetBtn, CYD_SCREEN_MIN_BUTTON_HEIGHT_PX);
+        lv_obj_align(resetBtn, LV_ALIGN_CENTER, 0, CYD_SCREEN_GAP_PX + CYD_SCREEN_MIN_BUTTON_HEIGHT_PX);
 
-        label = lv_label_create(resetBtn);
+        label = lv_label_create_ex(resetBtn);
         lv_label_set_text(label, "Reset");
         lv_obj_center(label);
 
         return;
     } 
 
-    lv_obj_t * label = lv_label_create(lv_scr_act());
+    lv_obj_t * label = lv_label_create_ex(lv_scr_act());
     lv_label_set_text(label, "Scanning for networks...");
     lv_obj_align(label, LV_ALIGN_CENTER, 0, 0);
 
@@ -107,21 +118,29 @@ void wifi_init_inner(){
 
     lv_obj_clean(lv_scr_act());
 
-    lv_obj_t * refreshBtn = lv_btn_create(lv_scr_act());
-    lv_obj_add_event_cb(refreshBtn, reset_btn_event_handler, LV_EVENT_ALL, NULL);
-    lv_obj_align(refreshBtn, LV_ALIGN_TOP_RIGHT, -5, 5 - 1);
+    lv_obj_t * root = lv_create_empty_panel(lv_scr_act());
+    lv_obj_set_size(root, CYD_SCREEN_WIDTH_PX, CYD_SCREEN_HEIGHT_PX);
+    lv_layout_flex_column(root);
+    lv_obj_set_style_pad_all(root, CYD_SCREEN_GAP_PX, 0);
 
-    label = lv_label_create(refreshBtn);
+    lv_obj_t * top_row = lv_create_empty_panel(root);
+    lv_obj_set_size(top_row, CYD_SCREEN_WIDTH_PX - CYD_SCREEN_GAP_PX * 2, LV_SIZE_CONTENT);
+    lv_layout_flex_row(top_row, LV_FLEX_ALIGN_SPACE_BETWEEN);
+
+    label = lv_label_create_ex(top_row);
+    lv_label_set_text(label, "Select a network");
+
+    lv_obj_t * refreshBtn = lv_btn_create(top_row);
+    lv_obj_add_event_cb(refreshBtn, reset_btn_event_handler, LV_EVENT_ALL, NULL);
+    lv_obj_set_size(refreshBtn, CYD_SCREEN_MIN_BUTTON_WIDTH_PX, CYD_SCREEN_MIN_BUTTON_HEIGHT_PX);
+
+    label = lv_label_create_ex(refreshBtn);
     lv_label_set_text(label, LV_SYMBOL_REFRESH);
     lv_obj_center(label);
 
-    label = lv_label_create(lv_scr_act());
-    lv_label_set_text(label, "Select a network");
-    lv_obj_align(label, LV_ALIGN_TOP_LEFT, 10, 10 + 2);
-
-    lv_obj_t * list = lv_list_create(lv_scr_act());
-    lv_obj_align(list, LV_ALIGN_TOP_LEFT, 10, 40);
-    lv_obj_set_size(list, TFT_HEIGHT - 20, TFT_WIDTH - 40 - 5);
+    lv_obj_t * list = lv_list_create(root);
+    lv_obj_set_width(list, CYD_SCREEN_WIDTH_PX - CYD_SCREEN_GAP_PX * 2);
+    lv_obj_set_flex_grow(list, 1);
 
     int n = WiFi.scanNetworks();
 
