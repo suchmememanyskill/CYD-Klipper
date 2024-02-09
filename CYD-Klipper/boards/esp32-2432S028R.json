@@ -6,9 +6,9 @@
       "core": "esp32",
       "extra_flags": [
         "-DUSER_SETUP_LOADED=1",
-        "-DST7796_DRIVER=1",
-        "-DTFT_BL=27",
+        "-DILI9341_2_DRIVER=1",
         "-DTFT_BACKLIGHT_ON=HIGH",
+        "-DTFT_BL=21",
         "-DTFT_MISO=12",
         "-DTFT_MOSI=13",
         "-DTFT_SCLK=14",
@@ -24,16 +24,15 @@
         "-DSPI_TOUCH_FREQUENCY=2500000",
         "-DTOUCH_CS=-1",
         
-        "-DCYD_SCREEN_HEIGHT_PX=320",
-        "-DCYD_SCREEN_WIDTH_PX=480",
-        "-DCYD_SCREEN_GAP_PX=10",
-        "-DCYD_SCREEN_MIN_BUTTON_HEIGHT_PX=40",
-        "-DCYD_SCREEN_MIN_BUTTON_WIDTH_PX=40",
-        "-DCYD_SCREEN_FONT=&lv_font_montserrat_16",
-        "-DCYD_SCREEN_FONT_SMALL=&lv_font_montserrat_12",
-        "-DCYD_SCREEN_SIDEBAR_SIZE_PX=50",
-        "-DCYD_SCREEN_DRIVER_ESP32_3248S035C=1",
-        "-DCYD_SCREEN_DISABLE_TOUCH_CALIBRATION=1"
+        "-DCYD_SCREEN_HEIGHT_PX=240",
+        "-DCYD_SCREEN_WIDTH_PX=320",
+        "-DCYD_SCREEN_GAP_PX=8",
+        "-DCYD_SCREEN_MIN_BUTTON_HEIGHT_PX=35",
+        "-DCYD_SCREEN_MIN_BUTTON_WIDTH_PX=35",
+        "-DCYD_SCREEN_FONT=&lv_font_montserrat_14",
+        "-DCYD_SCREEN_FONT_SMALL=&lv_font_montserrat_10",
+        "-DCYD_SCREEN_SIDEBAR_SIZE_PX=40",
+        "-DCYD_SCREEN_DRIVER_ESP32_2432S028R=1"
       ],
       "f_cpu": "240000000L",
       "f_flash": "40000000L",
@@ -54,7 +53,7 @@
       "arduino",
       "espidf"
     ],
-    "name": "esp32-3248S035C",
+    "name": "esp32-2432S028R",
     "upload": {
       "flash_size": "4MB",
       "maximum_ram_size": 327680,
@@ -62,6 +61,6 @@
       "require_upload_port": true,
       "speed": 460800
     },
-    "url": "https://www.aliexpress.com/item/1005004632953455.html",
+    "url": "https://www.aliexpress.com/item/1005004502250619.html",
     "vendor": "Sunton"
   }
