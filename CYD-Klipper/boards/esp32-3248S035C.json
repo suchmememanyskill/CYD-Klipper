@@ -19,7 +19,7 @@
         "-DLOAD_FONT2=1",
         "-DLOAD_GFXFF=1",
         "-DSMOOTH_FONT=1",
-        "-DSPI_FREQUENCY=55000000",
+        "-DSPI_FREQUENCY=80000000",
         "-DSPI_READ_FREQUENCY=20000000",
         "-DSPI_TOUCH_FREQUENCY=2500000",
         "-DTOUCH_CS=-1",

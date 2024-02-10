@@ -32,6 +32,20 @@ def get_manifest(base_path : str, device_name : str):
         ]
     }
 
+def extract_commit() -> str:
+    git_describe_output = subprocess.run(["git", "describe", "--tags"], stdout=subprocess.PIPE, text=True, check=True).stdout.strip()
+    return git_describe_output.split("-")[0]
+
+repo_version = extract_commit()
+configurations = []
+
+def add_configuration(board : str):
+    configurations.append({
+        "Board": board,
+        "Version": repo_version,
+        "URL": f"https://suchmememanyskill.github.io/CYD-Klipper/out/{board}/firmware.bin"
+    })
+
 if os.path.exists("out"):
     shutil.rmtree("out")
 
@@ -54,5 +68,10 @@ for port in CYD_PORTS:
     with open(f"./_site/{port}.json", "w") as f:
         json.dump(get_manifest(port_path, port), f)
 
+    add_configuration(port)
+
 os.chdir(BASE_DIR)
 shutil.copytree("./out", "./_site/out")
+
+with open("./_site/OTA.json", "w") as f:
+    json.dump({"Configurations": configurations}, f)

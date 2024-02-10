@@ -119,21 +119,26 @@ static void keyboard_callback(lv_event_t * e){
 
     if(code == LV_EVENT_DEFOCUSED || code == LV_EVENT_CANCEL || code == LV_EVENT_READY) {
         lv_keyboard_set_textarea(kb, NULL);
-        lv_obj_del(kb);
-        lv_obj_del(ta);
+        lv_obj_del(lv_obj_get_parent(kb));
     }
 }
 
 static void show_keyboard(lv_event_t * e){
-    lv_obj_t * keyboard = lv_keyboard_create(root_panel);
-    lv_obj_t * ta = lv_textarea_create(root_panel);
-    // TODO: Hack, should be fixed before finishing porting
-    lv_obj_set_size(ta, CYD_SCREEN_PANEL_WIDTH_PX, 120);
-    lv_obj_align(ta, LV_ALIGN_TOP_MID, 0, 0);
+    lv_obj_t * parent = lv_create_empty_panel(root_panel);
+    lv_obj_set_style_bg_opa(parent, LV_OPA_50, 0); 
+    lv_obj_set_size(parent, CYD_SCREEN_PANEL_WIDTH_PX, CYD_SCREEN_HEIGHT_PX);
+    lv_layout_flex_column(parent, LV_FLEX_ALIGN_SPACE_BETWEEN);
+
+    lv_obj_t * empty_panel = lv_create_empty_panel(parent);
+    lv_obj_set_flex_grow(empty_panel, 1);
+
+    lv_obj_t * ta = lv_textarea_create(parent);
+    lv_obj_t * keyboard = lv_keyboard_create(parent);
+
+    lv_obj_set_width(ta, CYD_SCREEN_PANEL_WIDTH_PX / 2);
     lv_textarea_set_max_length(ta, 3);
-    //lv_textarea_set_one_line(ta, true);
+    lv_textarea_set_one_line(ta, true);
     lv_textarea_set_text(ta, "");
-    lv_textarea_set_align(ta, LV_TEXT_ALIGN_CENTER);
     lv_obj_add_event_cb(ta, keyboard_callback, LV_EVENT_ALL, keyboard);
 
     lv_keyboard_set_mode(keyboard, LV_KEYBOARD_MODE_NUMBER);
@@ -221,7 +226,7 @@ void temp_panel_init(lv_obj_t * panel){
         lv_layout_flex_column(temp_rows[tempIter]);
         lv_obj_set_size(temp_rows[tempIter], element_width, LV_SIZE_CONTENT);
 
-        lv_obj_t * label = lv_label_create_ex(temp_rows[tempIter]);
+        lv_obj_t * label = lv_label_create(temp_rows[tempIter]);
         lv_label_set_text(label, "???");
         lv_obj_add_event_cb(label, (tempIter == 0) ? update_printer_data_hotend_temp : update_printer_data_bed_temp, LV_EVENT_MSG_RECEIVED, NULL);
         lv_msg_subscribe_obj(DATA_PRINTER_DATA, label, NULL);
@@ -237,7 +242,7 @@ void temp_panel_init(lv_obj_t * panel){
             lv_obj_set_flex_grow(btn, 1);
             lv_obj_set_height(btn, CYD_SCREEN_MIN_BUTTON_HEIGHT_PX);
 
-            label = lv_label_create_ex(btn);
+            label = lv_label_create(btn);
             lv_label_set_text(label, "???");
             lv_obj_center(label);
             lv_obj_add_event_cb(label, update_temp_preset_label, LV_EVENT_MSG_RECEIVED, reinterpret_cast<void*>(TARGET_HOTEND_CONFIG_1 + buttonIter + tempIter * 3));
@@ -249,7 +254,7 @@ void temp_panel_init(lv_obj_t * panel){
         lv_obj_set_flex_grow(btn, 1);
         lv_obj_set_height(btn, CYD_SCREEN_MIN_BUTTON_HEIGHT_PX);
 
-        label = lv_label_create_ex(btn);
+        label = lv_label_create(btn);
         lv_label_set_text(label, "Set");
         lv_obj_center(label);
     }
@@ -269,7 +274,7 @@ void temp_panel_init(lv_obj_t * panel){
     lv_obj_add_event_cb(btn, btn_extrude, LV_EVENT_CLICKED, NULL);
     lv_obj_set_height(btn, CYD_SCREEN_MIN_BUTTON_HEIGHT_PX);
 
-    lv_obj_t * label = lv_label_create_ex(btn);
+    lv_obj_t * label = lv_label_create(btn);
     lv_label_set_text(label, LV_SYMBOL_DOWN " Extrude");
     lv_obj_center(label);
 
@@ -278,7 +283,7 @@ void temp_panel_init(lv_obj_t * panel){
     lv_obj_add_event_cb(btn, btn_retract, LV_EVENT_CLICKED, NULL);
     lv_obj_set_height(btn, CYD_SCREEN_MIN_BUTTON_HEIGHT_PX);
 
-    label = lv_label_create_ex(btn);
+    label = lv_label_create(btn);
     lv_label_set_text(label, LV_SYMBOL_UP " Retract");
     lv_obj_center(label);
 
@@ -287,7 +292,7 @@ void temp_panel_init(lv_obj_t * panel){
     lv_obj_add_event_cb(btn, cooldown_temp, LV_EVENT_CLICKED, NULL);
     lv_obj_set_height(btn, CYD_SCREEN_MIN_BUTTON_HEIGHT_PX);
 
-    label = lv_label_create_ex(btn);
+    label = lv_label_create(btn);
     lv_label_set_text(label, "Cooldown");
     lv_obj_center(label);
 
@@ -297,7 +302,7 @@ void temp_panel_init(lv_obj_t * panel){
     lv_obj_set_height(btn, CYD_SCREEN_MIN_BUTTON_HEIGHT_PX);
     lv_obj_add_flag(btn, LV_OBJ_FLAG_CHECKABLE);
 
-    label = lv_label_create_ex(btn);
+    label = lv_label_create(btn);
     lv_label_set_text(label, "Edit Presets");
     lv_obj_center(label);
 

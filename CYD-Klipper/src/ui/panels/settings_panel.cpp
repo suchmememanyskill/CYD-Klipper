@@ -6,6 +6,7 @@
 #include "../ui_utils.h"
 #include <Esp.h>
 #include "../../core/lv_setup.h"
+#include "../ota_setup.h"
 
 #ifndef REPO_VERSION
     #define REPO_VERSION "Unknown"
@@ -87,13 +88,24 @@ static void on_during_print_switch(lv_event_t* e){
     WriteGlobalConfig();
 }
 
+static void btn_ota_do_update(lv_event_t * e){
+    set_ready_for_ota_update();
+}
+
+static void auto_ota_update_switch(lv_event_t* e){
+    auto state = lv_obj_get_state(lv_event_get_target(e));
+    bool checked = (state & LV_STATE_CHECKED == LV_STATE_CHECKED);
+    global_config.autoOtaUpdate = checked;
+    WriteGlobalConfig();
+}
+
 const static lv_point_t line_points[] = { {0, 0}, {(short int)((CYD_SCREEN_PANEL_WIDTH_PX - CYD_SCREEN_GAP_PX * 2) * 0.85f), 0} };
 
 void create_settings_widget(const char* label_text, lv_obj_t* object, lv_obj_t* root_panel, bool set_height = true){
     lv_obj_t * panel = lv_create_empty_panel(root_panel);
     lv_obj_set_size(panel, CYD_SCREEN_PANEL_WIDTH_PX - CYD_SCREEN_GAP_PX * 3, CYD_SCREEN_MIN_BUTTON_HEIGHT_PX);
 
-    lv_obj_t * label = lv_label_create_ex(panel);
+    lv_obj_t * label = lv_label_create(panel);
     lv_label_set_text(label, label_text);
     lv_obj_align(label, LV_ALIGN_LEFT_MID, 0, 0);
 
@@ -116,7 +128,7 @@ void settings_panel_init(lv_obj_t* panel){
     lv_obj_t * btn = lv_btn_create(panel);
     lv_obj_add_event_cb(btn, reset_wifi_click, LV_EVENT_CLICKED, NULL);
 
-    lv_obj_t * label = lv_label_create_ex(btn);
+    lv_obj_t * label = lv_label_create(btn);
     lv_label_set_text(label, "Restart");
     lv_obj_center(label);
 
@@ -126,7 +138,7 @@ void settings_panel_init(lv_obj_t* panel){
     btn = lv_btn_create(panel);
     lv_obj_add_event_cb(btn, reset_calibration_click, LV_EVENT_CLICKED, NULL);
 
-    label = lv_label_create_ex(btn);
+    label = lv_label_create(btn);
     lv_label_set_text(label, "Restart");
     lv_obj_center(label);
 
@@ -155,14 +167,12 @@ void settings_panel_init(lv_obj_t* panel){
     lv_obj_t * dropdown = lv_dropdown_create(panel);
     lv_dropdown_set_options(dropdown, "Blue\nGreen\nGrey\nYellow\nOrange\nRed\nPurple");
     lv_dropdown_set_selected(dropdown, global_config.color_scheme);
-    lv_obj_add_style(dropdown, get_default_label_style(), 0);
     lv_obj_add_event_cb(dropdown, theme_dropdown, LV_EVENT_VALUE_CHANGED, NULL);
 
     create_settings_widget("Theme", dropdown, panel);
 
     dropdown = lv_dropdown_create(panel);
     lv_dropdown_set_options(dropdown, brightness_options);
-    lv_obj_add_style(dropdown, get_default_label_style(), 0);
     lv_obj_add_event_cb(dropdown, brightness_dropdown, LV_EVENT_VALUE_CHANGED, NULL);
 
     for (int i = 0; i < SIZEOF(brightness_options_values); i++){
@@ -177,7 +187,6 @@ void settings_panel_init(lv_obj_t* panel){
 #ifndef CYD_SCREEN_DISABLE_TIMEOUT
     dropdown = lv_dropdown_create(panel);
     lv_dropdown_set_options(dropdown, wake_timeout_options);
-    lv_obj_add_style(dropdown, get_default_label_style(), 0);
     lv_obj_add_event_cb(dropdown, wake_timeout_dropdown, LV_EVENT_VALUE_CHANGED, NULL);
 
     for (int i = 0; i < SIZEOF(wake_timeout_options_values); i++){
@@ -210,8 +219,34 @@ void settings_panel_init(lv_obj_t* panel){
     create_settings_widget("Screen On During Print", toggle, panel);
 #endif
 
-    label = lv_label_create_ex(panel);
-    lv_label_set_text(label, REPO_VERSION " ");
+    label = lv_label_create(panel);
+    lv_label_set_text(label, REPO_VERSION "  ");
 
     create_settings_widget("Version", label, panel, false);
+
+    if (ota_has_update()){
+        btn = lv_btn_create(panel);
+        lv_obj_add_event_cb(btn, btn_ota_do_update, LV_EVENT_CLICKED, NULL);
+
+        label = lv_label_create(btn);
+        lv_label_set_text_fmt(label, "Update to %s", ota_new_version_name().c_str());
+        lv_obj_center(label);
+
+        create_settings_widget("Device", btn, panel);
+    }
+    else {
+        label = lv_label_create(panel);
+        lv_label_set_text(label, ARDUINO_BOARD "  ");
+
+        create_settings_widget("Device", label, panel, false);
+    }
+
+    toggle = lv_switch_create(panel);
+    lv_obj_set_width(toggle, CYD_SCREEN_MIN_BUTTON_WIDTH_PX * 2);
+    lv_obj_add_event_cb(toggle, auto_ota_update_switch, LV_EVENT_VALUE_CHANGED, NULL);
+
+    if (global_config.autoOtaUpdate)
+        lv_obj_add_state(toggle, LV_STATE_CHECKED);
+
+    create_settings_widget("Auto Update", toggle, panel);
 }

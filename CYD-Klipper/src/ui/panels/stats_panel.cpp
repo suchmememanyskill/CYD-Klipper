@@ -145,7 +145,7 @@ void create_state_button(lv_obj_t * root, lv_event_cb_t label, lv_event_cb_t but
     lv_obj_set_size(btn, CYD_SCREEN_PANEL_WIDTH_PX / 2 - CYD_SCREEN_GAP_PX * 3, CYD_SCREEN_MIN_BUTTON_HEIGHT_PX);
     lv_obj_add_event_cb(btn, button, LV_EVENT_CLICKED, NULL);
 
-    lv_obj_t * label_obj = lv_label_create_ex(btn);
+    lv_obj_t * label_obj = lv_label_create(btn);
     lv_obj_add_event_cb(label_obj, label, LV_EVENT_MSG_RECEIVED, NULL);
     lv_msg_subscribe_obj(DATA_PRINTER_DATA, label_obj, NULL);
     lv_obj_align(label_obj, LV_ALIGN_CENTER, 0, 0);
@@ -192,11 +192,11 @@ void create_stat_text_block(lv_obj_t * root, const char* label, lv_event_cb_t va
     lv_layout_flex_column(panel , LV_FLEX_ALIGN_START, CYD_SCREEN_GAP_PX / 2, CYD_SCREEN_GAP_PX / 2);
     lv_obj_set_flex_align(panel, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START);
 
-    lv_obj_t * label_obj = lv_label_create_ex(panel);
+    lv_obj_t * label_obj = lv_label_create(panel);
     lv_label_set_text(label_obj, label);
     lv_obj_set_style_text_font(label_obj, &CYD_SCREEN_FONT_SMALL, 0);
 
-    lv_obj_t * value_obj = lv_label_create_ex(panel);
+    lv_obj_t * value_obj = lv_label_create(panel);
     lv_obj_add_event_cb(value_obj, value, LV_EVENT_MSG_RECEIVED, NULL);
     lv_msg_subscribe_obj(DATA_PRINTER_DATA, value_obj, NULL);
 }

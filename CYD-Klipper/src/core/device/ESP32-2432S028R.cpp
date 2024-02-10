@@ -77,14 +77,14 @@ void touchscreen_calibrate(bool force)
     tft.drawFastHLine(300, 230, 20, ILI9341_BLACK);
     tft.drawFastVLine(310, 220, 20, ILI9341_BLACK);
 
-    int16_t xDist = 320 - 40;
-    int16_t yDist = 240 - 40;
+    int16_t xDist = 320 - 20;
+    int16_t yDist = 240 - 20;
 
     global_config.screenCalXMult = (float)xDist / (float)(x2 - x1);
-    global_config.screenCalXOffset = 20.0 - ((float)x1 * global_config.screenCalXMult);
+    global_config.screenCalXOffset = 10.0 - ((float)x1 * global_config.screenCalXMult);
 
     global_config.screenCalYMult = (float)yDist / (float)(y2 - y1);
-    global_config.screenCalYOffset = 20.0 - ((float)y1 * global_config.screenCalYMult);
+    global_config.screenCalYOffset = 10.0 - ((float)y1 * global_config.screenCalYMult);
 
     global_config.screenCalibrated = true;
     WriteGlobalConfig();

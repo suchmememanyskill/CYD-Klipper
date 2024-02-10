@@ -3,12 +3,12 @@
 
 #include "lvgl.h"
 
-#define CONFIG_VERSION 3
+#define CONFIG_VERSION 4
 
 typedef struct _GLOBAL_CONFIG {
     unsigned char version;
     union {
-        unsigned char raw;
+        unsigned int raw;
         struct {
             // Internal
             bool screenCalibrated : 1;
@@ -20,6 +20,7 @@ typedef struct _GLOBAL_CONFIG {
             bool invertColors : 1;
             bool rotateScreen : 1;
             bool onDuringPrint : 1;
+            bool autoOtaUpdate : 1;
         };
     };
     float screenCalXOffset;
