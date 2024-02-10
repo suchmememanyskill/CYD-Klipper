@@ -54,13 +54,13 @@ void ota_do_update(bool variant_automatic)
     lv_obj_align(panel, LV_ALIGN_TOP_LEFT, 0, 0);
     lv_layout_flex_column(panel, LV_FLEX_ALIGN_CENTER);
 
-    lv_obj_t *label = lv_label_create_ex(panel);
+    lv_obj_t *label = lv_label_create(panel);
     lv_label_set_text(label, "Updating OTA...");
 
     percentage_bar = lv_bar_create(panel);
     lv_obj_set_size(percentage_bar, CYD_SCREEN_WIDTH_PX - CYD_SCREEN_GAP_PX * 3, CYD_SCREEN_MIN_BUTTON_HEIGHT_PX * 0.75f);
 
-    update_label = lv_label_create_ex(panel);
+    update_label = lv_label_create(panel);
     lv_label_set_text(update_label, "0/0");
 
     if (!variant_automatic) {

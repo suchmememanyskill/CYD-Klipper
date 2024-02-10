@@ -1,6 +1,7 @@
 #include "lv_setup.h"
 #include "screen_driver.h"
 #include "../conf/global_config.h"
+#include "lvgl.h"
 #include <Esp.h>
 
 #ifndef CPU_FREQ_HIGH
@@ -10,9 +11,10 @@
 #define CPU_FREQ_LOW 80
 #endif
 
+typedef void (*lv_indev_drv_read_cb_t)(struct _lv_indev_drv_t * indev_drv, lv_indev_data_t * data);
+
 bool isScreenInSleep = false;
 lv_timer_t *screenSleepTimer;
-static lv_style_t default_label_style;
 
 void set_screen_brightness()
 {
@@ -120,9 +122,6 @@ void lv_touch_intercept(lv_indev_drv_t *indev_driver, lv_indev_data_t *data)
 
 void lv_setup()
 {
-    lv_style_init(&default_label_style);
-    lv_style_set_text_font(&default_label_style, &CYD_SCREEN_FONT);
-
     screen_timer_setup();
     screen_timer_start();
     set_color_scheme();
@@ -138,9 +137,4 @@ void lv_setup()
 bool is_screen_asleep()
 {
     return isScreenInSleep;
-}
-
-lv_style_t * get_default_label_style()
-{
-    return &default_label_style;
 }

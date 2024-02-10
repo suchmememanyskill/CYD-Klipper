@@ -105,7 +105,7 @@ void create_settings_widget(const char* label_text, lv_obj_t* object, lv_obj_t* 
     lv_obj_t * panel = lv_create_empty_panel(root_panel);
     lv_obj_set_size(panel, CYD_SCREEN_PANEL_WIDTH_PX - CYD_SCREEN_GAP_PX * 3, CYD_SCREEN_MIN_BUTTON_HEIGHT_PX);
 
-    lv_obj_t * label = lv_label_create_ex(panel);
+    lv_obj_t * label = lv_label_create(panel);
     lv_label_set_text(label, label_text);
     lv_obj_align(label, LV_ALIGN_LEFT_MID, 0, 0);
 
@@ -128,7 +128,7 @@ void settings_panel_init(lv_obj_t* panel){
     lv_obj_t * btn = lv_btn_create(panel);
     lv_obj_add_event_cb(btn, reset_wifi_click, LV_EVENT_CLICKED, NULL);
 
-    lv_obj_t * label = lv_label_create_ex(btn);
+    lv_obj_t * label = lv_label_create(btn);
     lv_label_set_text(label, "Restart");
     lv_obj_center(label);
 
@@ -138,7 +138,7 @@ void settings_panel_init(lv_obj_t* panel){
     btn = lv_btn_create(panel);
     lv_obj_add_event_cb(btn, reset_calibration_click, LV_EVENT_CLICKED, NULL);
 
-    label = lv_label_create_ex(btn);
+    label = lv_label_create(btn);
     lv_label_set_text(label, "Restart");
     lv_obj_center(label);
 
@@ -167,14 +167,12 @@ void settings_panel_init(lv_obj_t* panel){
     lv_obj_t * dropdown = lv_dropdown_create(panel);
     lv_dropdown_set_options(dropdown, "Blue\nGreen\nGrey\nYellow\nOrange\nRed\nPurple");
     lv_dropdown_set_selected(dropdown, global_config.color_scheme);
-    lv_obj_add_style(dropdown, get_default_label_style(), 0);
     lv_obj_add_event_cb(dropdown, theme_dropdown, LV_EVENT_VALUE_CHANGED, NULL);
 
     create_settings_widget("Theme", dropdown, panel);
 
     dropdown = lv_dropdown_create(panel);
     lv_dropdown_set_options(dropdown, brightness_options);
-    lv_obj_add_style(dropdown, get_default_label_style(), 0);
     lv_obj_add_event_cb(dropdown, brightness_dropdown, LV_EVENT_VALUE_CHANGED, NULL);
 
     for (int i = 0; i < SIZEOF(brightness_options_values); i++){
@@ -189,7 +187,6 @@ void settings_panel_init(lv_obj_t* panel){
 #ifndef CYD_SCREEN_DISABLE_TIMEOUT
     dropdown = lv_dropdown_create(panel);
     lv_dropdown_set_options(dropdown, wake_timeout_options);
-    lv_obj_add_style(dropdown, get_default_label_style(), 0);
     lv_obj_add_event_cb(dropdown, wake_timeout_dropdown, LV_EVENT_VALUE_CHANGED, NULL);
 
     for (int i = 0; i < SIZEOF(wake_timeout_options_values); i++){
@@ -222,7 +219,7 @@ void settings_panel_init(lv_obj_t* panel){
     create_settings_widget("Screen On During Print", toggle, panel);
 #endif
 
-    label = lv_label_create_ex(panel);
+    label = lv_label_create(panel);
     lv_label_set_text(label, REPO_VERSION "  ");
 
     create_settings_widget("Version", label, panel, false);
@@ -231,14 +228,14 @@ void settings_panel_init(lv_obj_t* panel){
         btn = lv_btn_create(panel);
         lv_obj_add_event_cb(btn, btn_ota_do_update, LV_EVENT_CLICKED, NULL);
 
-        label = lv_label_create_ex(btn);
+        label = lv_label_create(btn);
         lv_label_set_text_fmt(label, "Update to %s", ota_new_version_name().c_str());
         lv_obj_center(label);
 
         create_settings_widget("Device", btn, panel);
     }
     else {
-        label = lv_label_create_ex(panel);
+        label = lv_label_create(panel);
         lv_label_set_text(label, ARDUINO_BOARD "  ");
 
         create_settings_widget("Device", label, panel, false);

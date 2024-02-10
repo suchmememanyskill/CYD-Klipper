@@ -58,7 +58,7 @@ void wifi_pass_entry(const char* ssid){
     lv_obj_set_flex_grow(top_root, 1);
     lv_obj_set_style_pad_all(top_root, CYD_SCREEN_GAP_PX, 0);
 
-    lv_obj_t * label = lv_label_create_ex(top_root);
+    lv_obj_t * label = lv_label_create(top_root);
     lv_label_set_text(label, "Enter WiFi Password");
     lv_obj_set_width(label, CYD_SCREEN_WIDTH_PX - CYD_SCREEN_GAP_PX * 2);
 
@@ -92,7 +92,7 @@ void wifi_init_inner(){
     if (global_config.wifiConfigured){
         WiFi.begin(global_config.wifiSSID, global_config.wifiPassword);
         
-        lv_obj_t * label = lv_label_create_ex(lv_scr_act());
+        lv_obj_t * label = lv_label_create(lv_scr_act());
         lv_label_set_text(label, "Connecting to WiFi");
         lv_obj_align(label, LV_ALIGN_CENTER, 0, 0);
 
@@ -101,14 +101,14 @@ void wifi_init_inner(){
         lv_obj_set_height(resetBtn, CYD_SCREEN_MIN_BUTTON_HEIGHT_PX);
         lv_obj_align(resetBtn, LV_ALIGN_CENTER, 0, CYD_SCREEN_GAP_PX + CYD_SCREEN_MIN_BUTTON_HEIGHT_PX);
 
-        label = lv_label_create_ex(resetBtn);
+        label = lv_label_create(resetBtn);
         lv_label_set_text(label, "Reset");
         lv_obj_center(label);
 
         return;
     } 
 
-    lv_obj_t * label = lv_label_create_ex(lv_scr_act());
+    lv_obj_t * label = lv_label_create(lv_scr_act());
     lv_label_set_text(label, "Scanning for networks...");
     lv_obj_align(label, LV_ALIGN_CENTER, 0, 0);
 
@@ -127,14 +127,14 @@ void wifi_init_inner(){
     lv_obj_set_size(top_row, CYD_SCREEN_WIDTH_PX - CYD_SCREEN_GAP_PX * 2, LV_SIZE_CONTENT);
     lv_layout_flex_row(top_row, LV_FLEX_ALIGN_SPACE_BETWEEN);
 
-    label = lv_label_create_ex(top_row);
+    label = lv_label_create(top_row);
     lv_label_set_text(label, "Select a network");
 
     lv_obj_t * refreshBtn = lv_btn_create(top_row);
     lv_obj_add_event_cb(refreshBtn, reset_btn_event_handler, LV_EVENT_ALL, NULL);
     lv_obj_set_size(refreshBtn, CYD_SCREEN_MIN_BUTTON_WIDTH_PX, CYD_SCREEN_MIN_BUTTON_HEIGHT_PX);
 
-    label = lv_label_create_ex(refreshBtn);
+    label = lv_label_create(refreshBtn);
     lv_label_set_text(label, LV_SYMBOL_REFRESH);
     lv_obj_center(label);
 

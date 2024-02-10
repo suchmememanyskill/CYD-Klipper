@@ -32,7 +32,7 @@ void error_ui_macros_open(lv_event_t * e){
     lv_obj_set_size(button, CYD_SCREEN_WIDTH_PX - CYD_SCREEN_GAP_PX * 2, CYD_SCREEN_MIN_BUTTON_HEIGHT_PX);
     lv_obj_add_event_cb(button, destroy_event_user_data, LV_EVENT_CLICKED, panel);
 
-    lv_obj_t * label = lv_label_create_ex(button);
+    lv_obj_t * label = lv_label_create(button);
     lv_label_set_text(label, LV_SYMBOL_CLOSE " Close");
     lv_obj_center(label);
 
@@ -49,10 +49,10 @@ void error_ui(){
     lv_obj_set_flex_align(panel, LV_FLEX_ALIGN_SPACE_BETWEEN, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START);
     
     lv_obj_t * label;
-    label = lv_label_create_ex(panel);
+    label = lv_label_create(panel);
     lv_label_set_text(label, LV_SYMBOL_WARNING " Printer is not ready");
 
-    label = lv_label_create_ex(panel);
+    label = lv_label_create(panel);
     lv_label_set_text(label, printer.state_message);
     lv_obj_set_width(label, CYD_SCREEN_WIDTH_PX - CYD_SCREEN_GAP_PX * 2);
     lv_obj_clear_flag(label, LV_OBJ_FLAG_SCROLLABLE);
@@ -67,7 +67,7 @@ void error_ui(){
     lv_obj_add_event_cb(btn, btn_click_restart, LV_EVENT_CLICKED, NULL);
     lv_obj_set_flex_grow(btn, 1);
 
-    label = lv_label_create_ex(btn);
+    label = lv_label_create(btn);
     lv_label_set_text(label, "Restart");
     lv_obj_center(label);
 
@@ -76,7 +76,7 @@ void error_ui(){
     lv_obj_add_event_cb(btn, btn_click_firmware_restart, LV_EVENT_CLICKED, NULL);
     lv_obj_set_flex_grow(btn, 1);
 
-    label = lv_label_create_ex(btn);
+    label = lv_label_create(btn);
     lv_label_set_text(label, "FW Restart");
     lv_obj_center(label);
 
@@ -86,7 +86,7 @@ void error_ui(){
         lv_obj_add_event_cb(btn, error_ui_macros_open, LV_EVENT_CLICKED, NULL);
         lv_obj_set_flex_grow(btn, 1);
 
-        label = lv_label_create_ex(btn);
+        label = lv_label_create(btn);
         lv_label_set_text(label, "Devices");
         lv_obj_center(label);
     }
