@@ -22,6 +22,7 @@ A ESP32-2432S028R is required to run this project. You can find out where to buy
 - Extrude/Retract filament
 - Execute predefined gcode macros
 - Toggle Moonraker power devices
+- OTA updates
 
 ### Install
 
@@ -29,7 +30,13 @@ A ESP32-2432S028R is required to run this project. You can find out where to buy
 
 On initial install, all data should be wiped. On updates, data should be able to be kept without issues.
 
-There are no 'over the air' updates. Each update has to be applied manually.
+When there is an update available, a button in the settings will appear that can be pressed to update. If automatic updates are preferred, there is a toggle in the settings to automatically update. This will right after connecting to wifi update the screen.
+
+### Donate
+
+If you found this project helpful, please consider a donation [to my Ko-Fi](https://ko-fi.com/suchmememanyskill). It would help out a lot in the development of this project, due to the need to buy the screens. 
+
+Thank you!
 
 ### Screenshots
 (Quite literally shots of the screen. I'm sorry)
