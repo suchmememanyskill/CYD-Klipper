@@ -242,8 +242,12 @@
  * Others
  *-----------*/
 
+#ifndef REPO_DEVELOPMENT
+    #define REPO_DEVELOPMENT 0
+#endif
+
 /*1: Show CPU usage and FPS count*/
-#define LV_USE_PERF_MONITOR 0
+#define LV_USE_PERF_MONITOR REPO_DEVELOPMENT
 #if LV_USE_PERF_MONITOR
     #define LV_USE_PERF_MONITOR_POS LV_ALIGN_BOTTOM_RIGHT
 #endif
