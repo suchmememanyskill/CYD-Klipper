@@ -122,13 +122,18 @@ void create_settings_widget(const char* label_text, lv_obj_t* object, lv_obj_t* 
 }
 
 void settings_panel_init(lv_obj_t* panel){
+    lv_obj_t * toggle = NULL;
+    lv_obj_t * btn = NULL;
+    lv_obj_t * label = NULL;
+    lv_obj_t * dropdown = NULL;
+
     lv_obj_set_style_pad_all(panel, CYD_SCREEN_GAP_PX, 0);
     lv_layout_flex_column(panel);
 
-    lv_obj_t * btn = lv_btn_create(panel);
+    btn = lv_btn_create(panel);
     lv_obj_add_event_cb(btn, reset_wifi_click, LV_EVENT_CLICKED, NULL);
 
-    lv_obj_t * label = lv_label_create(btn);
+    label = lv_label_create(btn);
     lv_label_set_text(label, "Restart");
     lv_obj_center(label);
 
@@ -145,7 +150,8 @@ void settings_panel_init(lv_obj_t* panel){
     create_settings_widget("Calibrate Touch", btn, panel);
 #endif // CYD_SCREEN_DISABLE_TOUCH_CALIBRATION
 
-    lv_obj_t * toggle = lv_switch_create(panel);
+#ifndef CYD_SCREEN_DISABLE_INVERT_COLORS
+    toggle = lv_switch_create(panel);
     lv_obj_set_width(toggle, CYD_SCREEN_MIN_BUTTON_WIDTH_PX * 2);
     lv_obj_add_event_cb(toggle, invert_color_switch, LV_EVENT_VALUE_CHANGED, NULL);
 
@@ -153,7 +159,7 @@ void settings_panel_init(lv_obj_t* panel){
         lv_obj_add_state(toggle, LV_STATE_CHECKED);
 
     create_settings_widget("Invert Colors", toggle, panel);
-
+#endif // CYD_SCREEN_DISABLE_INVERT_COLORS
 
     toggle = lv_switch_create(panel);
     lv_obj_set_width(toggle, CYD_SCREEN_MIN_BUTTON_WIDTH_PX * 2);
@@ -164,7 +170,7 @@ void settings_panel_init(lv_obj_t* panel){
 
     create_settings_widget("Light Mode", toggle, panel);
 
-    lv_obj_t * dropdown = lv_dropdown_create(panel);
+    dropdown = lv_dropdown_create(panel);
     lv_dropdown_set_options(dropdown, "Blue\nGreen\nGrey\nYellow\nOrange\nRed\nPurple");
     lv_dropdown_set_selected(dropdown, global_config.color_scheme);
     lv_obj_add_event_cb(dropdown, theme_dropdown, LV_EVENT_VALUE_CHANGED, NULL);
