@@ -227,10 +227,13 @@ void ip_init(){
 
 void ip_ok(){
     if (klipper_request_consecutive_fail_count > 5){
+        ESP.restart();
+        /* The below code doesn't work, fix later
         freeze_request_thread();
         ip_init();
         unfreeze_request_thread();
         klipper_request_consecutive_fail_count = 0;
         lv_msg_send(DATA_PRINTER_STATE, &printer);
+        */
     }
 }
