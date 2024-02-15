@@ -137,6 +137,9 @@ void nav_buttons_setup(unsigned char active_panel){
         case 4:
             macros_panel_init(panel);
             break;
+        case 5:
+            stats_panel_init(panel);
+            break;
     }
 
     lv_msg_send(DATA_PRINTER_DATA, &printer);

@@ -32,6 +32,7 @@ typedef struct _Printer {
     int total_layers;
     int current_layer;
     float pressure_advance;
+    float smooth_time;
     int feedrate_mm_per_s;
 } Printer;
 
@@ -45,6 +46,7 @@ extern int klipper_request_consecutive_fail_count;
 void data_loop();
 void data_setup();
 void send_gcode(bool wait, const char* gcode);
+void move_printer(const char* axis, float amount, bool relative);
 
 void freeze_request_thread();
 void unfreeze_request_thread();

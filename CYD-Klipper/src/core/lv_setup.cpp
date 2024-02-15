@@ -26,14 +26,15 @@ void lv_do_calibration(){
 
     is_in_calibration_mode = true;
     lv_obj_clean(lv_scr_act());
+    lv_obj_clear_flag(lv_scr_act(), LV_OBJ_FLAG_SCROLLABLE);
 
     lv_obj_t * label = lv_label_create(lv_scr_act());
     lv_label_set_text(label, "Calibrate Screen");
     lv_obj_align(label, LV_ALIGN_CENTER, 0, 0);
 
     lv_obj_t * line = lv_line_create(lv_scr_act());
-    static lv_point_t line_points_x[] = { {0, 10}, {20, 10} };
-    static lv_point_t line_points_y[] = { {10, 0}, {10, 20} };
+    static lv_point_t line_points_x[] = { {0, 10}, {21, 10} };
+    static lv_point_t line_points_y[] = { {10, 0}, {10, 21} };
 
     lv_line_set_points(line, line_points_x, 2);
     lv_obj_align(line, LV_ALIGN_TOP_LEFT, 0, 0);
@@ -63,12 +64,12 @@ void lv_do_calibration(){
 
     line = lv_line_create(lv_scr_act());
     lv_line_set_points(line, line_points_x, 2);
-    lv_obj_align(line, LV_ALIGN_BOTTOM_RIGHT, 0, -10);
+    lv_obj_align(line, LV_ALIGN_BOTTOM_RIGHT, 1, -10);
     lv_obj_set_style_line_width(line, 1, 0);
 
     line = lv_line_create(lv_scr_act());
     lv_line_set_points(line, line_points_y, 2);
-    lv_obj_align(line, LV_ALIGN_BOTTOM_RIGHT, -10, 0);
+    lv_obj_align(line, LV_ALIGN_BOTTOM_RIGHT, -10, 1);
 
     while (true){
         lv_timer_handler();

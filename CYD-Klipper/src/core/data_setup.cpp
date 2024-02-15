@@ -65,6 +65,33 @@ void send_gcode(bool wait, const char *gcode)
     }
 }
 
+void move_printer(const char* axis, float amount, bool relative) {
+    if (!printer.homed_axis || printer.state == PRINTER_STATE_PRINTING)
+        return;
+
+    char gcode[64];
+    const char* extra = (amount > 0) ? "+" : "";
+
+    bool absolute_coords = printer.absolute_coords;
+
+    if (absolute_coords && relative) {
+        send_gcode(true, "G91");
+    }
+    else if (!absolute_coords && !relative) {
+        send_gcode(true, "G90");
+    }
+
+    sprintf(gcode, "G1 %s%s%.3f F6000", axis, extra, amount);
+    send_gcode(true, gcode);
+
+    if (absolute_coords && relative) {
+        send_gcode(true, "G90");
+    }
+    else if (!absolute_coords && !relative) {
+        send_gcode(true, "G91");
+    }
+}
+
 void fetch_printer_data()
 {
     freeze_request_thread();
@@ -122,6 +149,7 @@ void fetch_printer_data()
                 printer.extruder_target_temp = status["extruder"]["target"];
                 bool can_extrude = status["extruder"]["can_extrude"];
                 printer.pressure_advance = status["extruder"]["pressure_advance"];
+                printer.smooth_time = status["extruder"]["smooth_time"];
                 printer.can_extrude = can_extrude == true;
             }
 
