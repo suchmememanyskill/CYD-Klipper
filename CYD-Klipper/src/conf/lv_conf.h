@@ -501,7 +501,7 @@
 
 #define LV_USE_MSG 1
 
-#define LV_USE_CHART      0
+#define LV_USE_CHART      1
 
 #define LV_USE_COLORWHEEL 0
 
