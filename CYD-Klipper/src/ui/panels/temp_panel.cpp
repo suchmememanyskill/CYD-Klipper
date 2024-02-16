@@ -208,28 +208,27 @@ static void btn_retract(lv_event_t * e){
 }
 
 static void set_chart_range(lv_event_t * e) {
-    lv_obj_t * chart = lv_event_get_target(e);
-
+    lv_obj_t * chart_obj = lv_event_get_target(e);
+    lv_chart_t * chart = (lv_chart_t *)chart_obj;
     int max_temp = 0;
+    lv_chart_series_t * prev = NULL;
+    
+    do {
+        prev = lv_chart_get_series_next(chart_obj, prev);
 
-    if (printer.extruder_target_temp > max_temp)
-        max_temp = printer.extruder_target_temp;
-
-    if (printer.bed_target_temp > max_temp)
-        max_temp = printer.bed_target_temp;
-
-    if (printer.extruder_temp > max_temp)
-        max_temp = printer.extruder_temp;
-
-    if (printer.bed_temp > max_temp)
-        max_temp = printer.bed_temp;
+        if (prev != NULL)
+            for (int i = 0; i < chart->point_cnt; i++)
+                if (prev->y_points[i] > max_temp)
+                    max_temp = prev->y_points[i];
+        
+    } while (prev != NULL);
 
     int range = ((max_temp + 49) / 50) * 50;
 
     if (range < 100)
         range = 100;
-    
-    lv_chart_set_range(chart, LV_CHART_AXIS_PRIMARY_Y, 0, range);
+
+    lv_chart_set_range(chart_obj, LV_CHART_AXIS_PRIMARY_Y, 0, range);
 }
 
 static void set_hotend_temp_chart(lv_event_t * e){
@@ -279,9 +278,13 @@ void temp_panel_init(lv_obj_t * panel){
     lv_chart_set_update_mode(chart, LV_CHART_UPDATE_MODE_SHIFT);
 
     lv_chart_series_t * ser1 = lv_chart_add_series(chart, lv_palette_main(LV_PALETTE_ORANGE), LV_CHART_AXIS_PRIMARY_Y);
+    lv_chart_set_all_value(chart, ser1, printer.extruder_target_temp);
     lv_chart_series_t * ser2 = lv_chart_add_series(chart, lv_palette_main(LV_PALETTE_RED), LV_CHART_AXIS_PRIMARY_Y);
+    lv_chart_set_all_value(chart, ser2, printer.extruder_temp);
     lv_chart_series_t * ser3 = lv_chart_add_series(chart, lv_palette_main(LV_PALETTE_TEAL), LV_CHART_AXIS_PRIMARY_Y);
+    lv_chart_set_all_value(chart, ser3, printer.bed_target_temp);
     lv_chart_series_t * ser4 = lv_chart_add_series(chart, lv_palette_main(LV_PALETTE_BLUE), LV_CHART_AXIS_PRIMARY_Y);
+    lv_chart_set_all_value(chart, ser4, printer.bed_temp);
 
     lv_obj_add_event_cb(chart, set_hotend_target_temp_chart, LV_EVENT_MSG_RECEIVED, ser1);
     lv_obj_add_event_cb(chart, set_hotend_temp_chart, LV_EVENT_MSG_RECEIVED, ser2);
