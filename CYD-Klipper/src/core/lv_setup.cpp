@@ -15,16 +15,58 @@
 typedef void (*lv_indev_drv_read_cb_t)(struct _lv_indev_drv_t * indev_drv, lv_indev_data_t * data);
 
 bool is_screen_in_sleep = false;
-bool is_in_calibration_mode = false;
 lv_timer_t *screen_sleep_timer;
 lv_coord_t point[2] = {0};
+
+static lv_indev_drv_read_cb_t original_touch_driver = NULL;
+
+void lv_touch_intercept_calibration(lv_indev_drv_t *indev_driver, lv_indev_data_t *data) 
+{
+    original_touch_driver(indev_driver, data);
+
+    if (data->state == LV_INDEV_STATE_PR){
+        point[0] = data->point.x;
+        point[1] = data->point.y;
+
+        while (data->state == LV_INDEV_STATE_PR){
+            original_touch_driver(indev_driver, data);
+            delay(20);    
+        }
+    }
+
+    data->state = LV_INDEV_STATE_REL;
+}
+
+void lv_touch_intercept(lv_indev_drv_t *indev_driver, lv_indev_data_t *data) 
+{
+    original_touch_driver(indev_driver, data);
+    
+    if (data->state == LV_INDEV_STATE_PR) {
+        if (is_screen_asleep()) {
+            while (data->state == LV_INDEV_STATE_PR) {
+                original_touch_driver(indev_driver, data);
+                delay(20);
+            }
+
+            data->state = LV_INDEV_STATE_REL;
+        }
+
+        screen_timer_wake();
+#ifndef CYD_SCREEN_DISABLE_TOUCH_CALIBRATION
+        data->point.x = round((data->point.x * global_config.screenCalXMult) + global_config.screenCalXOffset);
+        data->point.y = round((data->point.y * global_config.screenCalYMult) + global_config.screenCalYOffset);
+#endif // CYD_SCREEN_DISABLE_TOUCH_CALIBRATION
+    }
+}
 
 void lv_do_calibration(){
     if (global_config.screenCalibrated){
         return;
     }
 
-    is_in_calibration_mode = true;
+    lv_indev_t * display_driver = lv_indev_get_next(NULL);
+    display_driver->driver->read_cb = lv_touch_intercept_calibration;
+
     lv_obj_clean(lv_scr_act());
     lv_obj_clear_flag(lv_scr_act(), LV_OBJ_FLAG_SCROLLABLE);
 
@@ -95,7 +137,6 @@ void lv_do_calibration(){
     global_config.screenCalibrated = true;
     WriteGlobalConfig();
 
-    is_in_calibration_mode = false;
     lv_obj_clean(lv_scr_act());
 }
 
@@ -183,58 +224,13 @@ void set_color_scheme()
     lv_disp_set_theme(dispp, theme);
 }
 
-static lv_indev_drv_read_cb_t original_touch_driver = NULL;
-
-void lv_touch_intercept(lv_indev_drv_t *indev_driver, lv_indev_data_t *data) 
-{
-    original_touch_driver(indev_driver, data);
-
-#ifndef CYD_SCREEN_DISABLE_TOUCH_CALIBRATION
-    if (is_in_calibration_mode){
-        if (data->state == LV_INDEV_STATE_PR){
-            point[0] = data->point.x;
-            point[1] = data->point.y;
-
-            while (data->state == LV_INDEV_STATE_PR){
-                original_touch_driver(indev_driver, data);
-                delay(20);    
-            }
-        }
-
-        data->state = LV_INDEV_STATE_REL;
-        return;
-    }
-#endif // CYD_SCREEN_DISABLE_TOUCH_CALIBRATION
-    
-    if (data->state == LV_INDEV_STATE_PR) {
-        if (is_screen_asleep()) {
-            while (data->state == LV_INDEV_STATE_PR) {
-                original_touch_driver(indev_driver, data);
-                delay(20);
-            }
-
-            data->state = LV_INDEV_STATE_REL;
-        }
-
-        screen_timer_wake();
-    }
-
-#ifndef CYD_SCREEN_DISABLE_TOUCH_CALIBRATION
-    if (data->state == LV_INDEV_STATE_PR) {
-        //Serial.printf("Before: %d %d\n",  data->point.x, data->point.y);
-        data->point.x = round((data->point.x * global_config.screenCalXMult) + global_config.screenCalXOffset);
-        data->point.y = round((data->point.y * global_config.screenCalYMult) + global_config.screenCalYOffset);
-        //Serial.printf("After: %d %d\n",  data->point.x, data->point.y);
-    }
-#endif // CYD_SCREEN_DISABLE_TOUCH_CALIBRATION
-}
-
 void lv_setup()
 {
-    if (original_touch_driver == NULL) {
-        lv_indev_t * display_driver = lv_indev_get_next(NULL);
+    lv_indev_t * display_driver = lv_indev_get_next(NULL);
+
+    if (original_touch_driver == NULL) 
+    {
         original_touch_driver = display_driver->driver->read_cb;
-        display_driver->driver->read_cb = lv_touch_intercept;
     }
 
     set_color_scheme();
@@ -242,6 +238,8 @@ void lv_setup()
 #ifndef CYD_SCREEN_DISABLE_TOUCH_CALIBRATION
     lv_do_calibration();
 #endif // CYD_SCREEN_DISABLE_TOUCH_CALIBRATION
+
+    display_driver->driver->read_cb = lv_touch_intercept;
 
     screen_timer_setup();
     screen_timer_start();

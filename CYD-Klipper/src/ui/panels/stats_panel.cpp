@@ -46,10 +46,8 @@ static void set_zoffset_text_ex(lv_event_t * e) {
 static void set_zoffset(lv_event_t * e){
     char* offset = (char*)lv_event_get_user_data(e);
 
-    const char* extra = printer.state == PRINTER_STATE_IDLE ? " MOVE=1" : "";
-
     char gcode[64];
-    sprintf(gcode, "SET_GCODE_OFFSET Z_ADJUST=%s%s", offset, extra);
+    sprintf(gcode, "SET_GCODE_OFFSET Z_ADJUST=%s MOVE=1", offset);
     send_gcode(true, gcode);
 }
 

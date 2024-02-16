@@ -129,6 +129,7 @@ void settings_panel_init(lv_obj_t* panel){
 
     lv_obj_set_style_pad_all(panel, CYD_SCREEN_GAP_PX, 0);
     lv_layout_flex_column(panel);
+    lv_obj_set_scrollbar_mode(panel, LV_SCROLLBAR_MODE_OFF);
 
     btn = lv_btn_create(panel);
     lv_obj_add_event_cb(btn, reset_wifi_click, LV_EVENT_CLICKED, NULL);
