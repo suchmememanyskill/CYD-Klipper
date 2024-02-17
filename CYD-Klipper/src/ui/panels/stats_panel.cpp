@@ -52,20 +52,26 @@ static void set_zoffset(lv_event_t * e){
 }
 
 static void set_z(lv_event_t * e){
-    bool is_zero = !strcmp((char*)lv_event_get_user_data(e), "Z=0");
-    char gcode[64];
+    void* ptr = lv_event_get_user_data(e);
+    float value = *(float *)(&ptr);
 
-    move_printer("Z", is_zero ? 0 : 1, false);
+    if (value < 0) {
+        send_gcode(true, "SET_GCODE_OFFSET Z=0 MOVE=1");
+        return;
+    }
+
+    move_printer("Z", value, false);
 }
 
-const char* zoffsets[] = { "-0.005", "-0.01", "-0.025", "-0.05" };
-const char* zoffsets_2[] = { "+0.005", "+0.01", "+0.025", "+0.05" };
-const char* z_set[] = { "Z=0", "Z=1" };
+const char* zoffsets[] = { "-0.01", "-0.025", "-0.05", "-0.2" };
+const char* zoffsets_2[] = { "+0.01", "+0.025", "+0.05", "+0.2" };
+const char* zabs[] = { "Z=0", "Z=0.1", "Z=1", "Clear" };
+const float zabsvalues[] = { 0, 0.1f, 1.0f, -1.0f };
 
 lv_button_column_t zoffset_columns[] = {
     { set_zoffset, zoffsets, (const void**)zoffsets, 4},
     { set_zoffset, zoffsets_2, (const void**)zoffsets_2, 4},
-    { set_z, z_set, (const void**)z_set, 2}
+    { set_z, zabs, (const void**)zabsvalues, 4}
 };
 
 static void set_speed_mult_text(lv_event_t * e){
