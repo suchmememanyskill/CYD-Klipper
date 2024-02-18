@@ -99,6 +99,14 @@ static void auto_ota_update_switch(lv_event_t* e){
     WriteGlobalConfig();
 }
 
+const char* estimated_time_options = "Percentage\nInterpolated\nSlicer";
+
+static void estimated_time_dropdown(lv_event_t * e){
+    lv_obj_t * dropdown = lv_event_get_target(e);
+    global_config.remaining_time_calc_mode = lv_dropdown_get_selected(dropdown);
+    WriteGlobalConfig();
+}
+
 const static lv_point_t line_points[] = { {0, 0}, {(short int)((CYD_SCREEN_PANEL_WIDTH_PX - CYD_SCREEN_GAP_PX * 2) * 0.85f), 0} };
 
 void create_settings_widget(const char* label_text, lv_obj_t* object, lv_obj_t* root_panel, bool set_height = true){
@@ -256,4 +264,11 @@ void settings_panel_init(lv_obj_t* panel){
         lv_obj_add_state(toggle, LV_STATE_CHECKED);
 
     create_settings_widget("Auto Update", toggle, panel);
+
+    dropdown = lv_dropdown_create(panel);
+    lv_dropdown_set_options(dropdown, estimated_time_options);
+    lv_obj_add_event_cb(dropdown, estimated_time_dropdown, LV_EVENT_VALUE_CHANGED, NULL);
+
+    lv_dropdown_set_selected(dropdown, global_config.remaining_time_calc_mode);
+    create_settings_widget("Estimated Time", dropdown, panel);
 }

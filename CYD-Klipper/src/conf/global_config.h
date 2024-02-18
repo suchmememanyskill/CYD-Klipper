@@ -5,6 +5,12 @@
 
 #define CONFIG_VERSION 4
 
+enum {
+    REMAINING_TIME_CALC_PERCENTAGE = 0,
+    REMAINING_TIME_CALC_INTERPOLATED = 1,
+    REMAINING_TIME_CALC_SLICER = 2,
+};
+
 typedef struct _GLOBAL_CONFIG {
     unsigned char version;
     union {
@@ -21,6 +27,7 @@ typedef struct _GLOBAL_CONFIG {
             bool rotateScreen : 1;
             bool onDuringPrint : 1;
             bool autoOtaUpdate : 1;
+            unsigned char remaining_time_calc_mode : 2;
         };
     };
     float screenCalXOffset;
