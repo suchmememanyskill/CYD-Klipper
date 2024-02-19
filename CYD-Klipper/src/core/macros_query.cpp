@@ -18,6 +18,10 @@ static void _macros_query_internal(){
     HTTPClient client;
     client.useHTTP10(true);
     client.begin(url.c_str());
+
+    if (global_config.auth_configured)
+        client.addHeader("X-Api-Key", global_config.klipper_auth);
+
     int httpCode = client.GET();
     if (httpCode == 200){
         JsonDocument doc;
@@ -57,6 +61,10 @@ void _power_devices_query_internal(){
     client.setTimeout(500);
     client.setConnectTimeout(1000);
     client.begin(url.c_str());
+
+    if (global_config.auth_configured)
+        client.addHeader("X-Api-Key", global_config.klipper_auth);
+
     int httpCode = client.GET();
     if (httpCode == 200){
         JsonDocument doc;
@@ -90,6 +98,10 @@ bool set_power_state(const char* device_name, bool state) {
     HTTPClient client;
     client.useHTTP10(true);
     client.begin(url.c_str());
+
+    if (global_config.auth_configured)
+        client.addHeader("X-Api-Key", global_config.klipper_auth);
+
     if (client.POST("") != 200)
         return false;
 

@@ -49,8 +49,11 @@ void send_gcode(bool wait, const char *gcode)
     sprintf(buff, "http://%s:%d/printer/gcode/script?script=%s", global_config.klipperHost, global_config.klipperPort, urlEncode(gcode).c_str());
     HTTPClient client;
     client.begin(buff);
-    int httpCode = client.GET();
 
+    if (global_config.auth_configured)
+        client.addHeader("X-Api-Key", global_config.klipper_auth);
+
+    int httpCode = client.GET();
 
     if (!wait)
     {
@@ -79,6 +82,10 @@ int get_slicer_time_estimate_s()
     HTTPClient client;
     client.useHTTP10(true);
     client.begin(buff);
+
+    if (global_config.auth_configured)
+        client.addHeader("X-Api-Key", global_config.klipper_auth);
+
     int httpCode = client.GET();
 
     if (httpCode != 200) 
@@ -126,6 +133,10 @@ void fetch_printer_data()
     HTTPClient client;
     client.useHTTP10(true);
     client.begin(buff);
+
+    if (global_config.auth_configured)
+        client.addHeader("X-Api-Key", global_config.klipper_auth);
+
     int httpCode = client.GET();
     delay(10);
     if (httpCode == 200)

@@ -2,8 +2,8 @@
 #include "panels/panel.h"
 #include "../core/data_setup.h"
 #include "nav_buttons.h"
-#include <HTTPClient.h>
 #include "ui_utils.h"
+#include <stdio.h>
 
 static lv_style_t nav_button_style;
 

@@ -29,6 +29,7 @@ static void reset_calibration_click(lv_event_t * e){
 static void reset_wifi_click(lv_event_t * e){
     global_config.wifiConfigured = false;
     global_config.ipConfigured = false;
+    global_config.auth_configured = false;
     WriteGlobalConfig();
     ESP.restart();
 }

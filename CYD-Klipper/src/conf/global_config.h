@@ -28,6 +28,9 @@ typedef struct _GLOBAL_CONFIG {
             bool onDuringPrint : 1;
             bool autoOtaUpdate : 1;
             unsigned char remaining_time_calc_mode : 2;
+
+            // Internal
+            bool auth_configured : 1;
         };
     };
     float screenCalXOffset;
@@ -47,6 +50,8 @@ typedef struct _GLOBAL_CONFIG {
 
     unsigned short hotend_presets[3];
     unsigned short bed_presets[3];
+
+    char klipper_auth[33];
 } GLOBAL_CONFIG;
     
 typedef struct _COLOR_DEF {

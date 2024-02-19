@@ -37,6 +37,10 @@ static void btn_print_file(lv_event_t * e){
 
     HTTPClient client;
     client.begin(buff);
+
+    if (global_config.auth_configured)
+        client.addHeader("X-Api-Key", global_config.klipper_auth);
+
     int httpCode = client.POST("");
     Serial.printf("Print start: HTTP %d\n", httpCode);
 }
