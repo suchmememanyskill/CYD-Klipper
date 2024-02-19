@@ -267,7 +267,6 @@ void temp_panel_init(lv_obj_t * panel){
     lv_layout_flex_column(root_temp_panel);
     lv_obj_set_flex_align(root_temp_panel, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_END, LV_FLEX_ALIGN_CENTER);
     lv_obj_set_scrollbar_mode(root_temp_panel, LV_SCROLLBAR_MODE_OFF);
-    lv_obj_clear_flag(root_temp_panel, LV_OBJ_FLAG_SCROLL_ELASTIC);
 
     lv_obj_t * chart = lv_chart_create(root_temp_panel);
     lv_obj_set_size(chart, element_width - CYD_SCREEN_MIN_BUTTON_WIDTH_PX, CYD_SCREEN_MIN_BUTTON_HEIGHT_PX * 3);

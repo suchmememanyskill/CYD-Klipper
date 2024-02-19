@@ -214,6 +214,13 @@ void settings_panel_init(lv_obj_t* panel){
     create_settings_widget("Wake Timeout", dropdown, panel);
 #endif
 
+    dropdown = lv_dropdown_create(panel);
+    lv_dropdown_set_options(dropdown, estimated_time_options);
+    lv_obj_add_event_cb(dropdown, estimated_time_dropdown, LV_EVENT_VALUE_CHANGED, NULL);
+
+    lv_dropdown_set_selected(dropdown, global_config.remaining_time_calc_mode);
+    create_settings_widget("Estimated Time", dropdown, panel);
+
     toggle = lv_switch_create(panel);
     lv_obj_set_width(toggle, CYD_SCREEN_MIN_BUTTON_WIDTH_PX * 2);
     lv_obj_add_event_cb(toggle, rotate_screen_switch, LV_EVENT_VALUE_CHANGED, NULL);
@@ -233,6 +240,15 @@ void settings_panel_init(lv_obj_t* panel){
 
     create_settings_widget("Screen On During Print", toggle, panel);
 #endif
+
+    toggle = lv_switch_create(panel);
+    lv_obj_set_width(toggle, CYD_SCREEN_MIN_BUTTON_WIDTH_PX * 2);
+    lv_obj_add_event_cb(toggle, auto_ota_update_switch, LV_EVENT_VALUE_CHANGED, NULL);
+
+    if (global_config.autoOtaUpdate)
+        lv_obj_add_state(toggle, LV_STATE_CHECKED);
+
+    create_settings_widget("Auto Update", toggle, panel);
 
     label = lv_label_create(panel);
     lv_label_set_text(label, REPO_VERSION "  ");
@@ -255,20 +271,4 @@ void settings_panel_init(lv_obj_t* panel){
 
         create_settings_widget("Device", label, panel, false);
     }
-
-    toggle = lv_switch_create(panel);
-    lv_obj_set_width(toggle, CYD_SCREEN_MIN_BUTTON_WIDTH_PX * 2);
-    lv_obj_add_event_cb(toggle, auto_ota_update_switch, LV_EVENT_VALUE_CHANGED, NULL);
-
-    if (global_config.autoOtaUpdate)
-        lv_obj_add_state(toggle, LV_STATE_CHECKED);
-
-    create_settings_widget("Auto Update", toggle, panel);
-
-    dropdown = lv_dropdown_create(panel);
-    lv_dropdown_set_options(dropdown, estimated_time_options);
-    lv_obj_add_event_cb(dropdown, estimated_time_dropdown, LV_EVENT_VALUE_CHANGED, NULL);
-
-    lv_dropdown_set_selected(dropdown, global_config.remaining_time_calc_mode);
-    create_settings_widget("Estimated Time", dropdown, panel);
 }
