@@ -229,7 +229,11 @@ void fetch_printer_data()
 
                 const char *state = status["print_stats"]["state"];
 
-                if (strcmp(state, "printing") == 0)
+                if (state == nullptr)
+                {
+                    printer_state = PRINTER_STATE_ERROR;
+                }
+                else if (strcmp(state, "printing") == 0)
                 {
                     printer_state = PRINTER_STATE_PRINTING;
                 }
