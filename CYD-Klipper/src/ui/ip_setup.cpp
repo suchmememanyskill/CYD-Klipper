@@ -36,6 +36,7 @@ bool verify_ip(){
     try {
         Serial.println(url);
         client.setTimeout(500);
+        client.setConnectTimeout(1000);
         client.begin(url.c_str());
         httpCode = client.GET();
         return httpCode == 200;
@@ -227,13 +228,11 @@ void ip_init(){
 
 void ip_ok(){
     if (klipper_request_consecutive_fail_count > 5){
-        ESP.restart();
-        /* The below code doesn't work, fix later
         freeze_request_thread();
+        power_devices_clear();
         ip_init();
         unfreeze_request_thread();
         klipper_request_consecutive_fail_count = 0;
         lv_msg_send(DATA_PRINTER_STATE, &printer);
-        */
     }
 }
