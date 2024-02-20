@@ -53,8 +53,6 @@ void send_gcode(bool wait, const char *gcode)
     if (global_config.auth_configured)
         client.addHeader("X-Api-Key", global_config.klipper_auth);
 
-    int httpCode = client.GET();
-
     if (!wait)
     {
         client.setTimeout(1000);
