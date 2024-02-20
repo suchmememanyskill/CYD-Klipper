@@ -123,6 +123,8 @@ void move_printer(const char* axis, float amount, bool relative) {
     }
 }
 
+int last_slicer_time_query = -15000;
+
 void fetch_printer_data()
 {
     freeze_request_thread();
@@ -298,12 +300,15 @@ void fetch_printer_data()
 
         if (printer.state != printer_state || emit_state_update)
         {
-            if (printer_state == PRINTER_STATE_PRINTING){
-                printer.slicer_estimated_print_time_s = get_slicer_time_estimate_s();
-            }
-
             printer.state = printer_state;
             lv_msg_send(DATA_PRINTER_STATE, &printer);
+        }
+        
+        if (printer.state == PRINTER_STATE_PRINTING && millis() - last_slicer_time_query > 30000 && printer.slicer_estimated_print_time_s <= 0)
+        {
+            delay(10);
+            last_slicer_time_query = millis();
+            printer.slicer_estimated_print_time_s = get_slicer_time_estimate_s();
         }
 
         unfreeze_render_thread();

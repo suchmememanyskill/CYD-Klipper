@@ -48,7 +48,7 @@ connection_status_t verify_ip(){
             client.addHeader("X-Api-Key", global_config.klipper_auth);
 
         httpCode = client.GET();
-        Serial.printf("%d %s", httpCode, url.c_str());
+        Serial.printf("%d %s\n", httpCode, url.c_str());
 
         if (httpCode == 401)
             return CONNECT_AUTH_REQUIRED;
