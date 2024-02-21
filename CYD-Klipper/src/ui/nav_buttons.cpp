@@ -2,8 +2,8 @@
 #include "panels/panel.h"
 #include "../core/data_setup.h"
 #include "nav_buttons.h"
-#include <HTTPClient.h>
 #include "ui_utils.h"
+#include <stdio.h>
 
 static lv_style_t nav_button_style;
 
@@ -136,6 +136,9 @@ void nav_buttons_setup(unsigned char active_panel){
             break;
         case 4:
             macros_panel_init(panel);
+            break;
+        case 5:
+            stats_panel_init(panel);
             break;
     }
 

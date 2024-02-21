@@ -207,22 +207,100 @@ static void btn_retract(lv_event_t * e){
     send_gcode(true, "G1 E-25 F300");
 }
 
+static void set_chart_range(lv_event_t * e) {
+    lv_obj_t * chart_obj = lv_event_get_target(e);
+    lv_chart_t * chart = (lv_chart_t *)chart_obj;
+    int max_temp = 0;
+    lv_chart_series_t * prev = NULL;
+    
+    do {
+        prev = lv_chart_get_series_next(chart_obj, prev);
+
+        if (prev != NULL)
+            for (int i = 0; i < chart->point_cnt; i++)
+                if (prev->y_points[i] > max_temp)
+                    max_temp = prev->y_points[i];
+        
+    } while (prev != NULL);
+
+    int range = ((max_temp + 49) / 50) * 50;
+
+    if (range < 100)
+        range = 100;
+
+    lv_chart_set_range(chart_obj, LV_CHART_AXIS_PRIMARY_Y, 0, range);
+}
+
+static void set_hotend_temp_chart(lv_event_t * e){
+    lv_obj_t * chart = lv_event_get_target(e);
+    lv_chart_series_t * series = (lv_chart_series_t *)lv_event_get_user_data(e);
+    lv_chart_set_next_value(chart, series, printer.extruder_temp);
+}
+
+static void set_hotend_target_temp_chart(lv_event_t * e){
+    lv_obj_t * chart = lv_event_get_target(e);
+    lv_chart_series_t * series = (lv_chart_series_t *)lv_event_get_user_data(e);
+    lv_chart_set_next_value(chart, series, printer.extruder_target_temp);
+}
+
+static void set_bed_temp_chart(lv_event_t * e){
+    lv_obj_t * chart = lv_event_get_target(e);
+    lv_chart_series_t * series = (lv_chart_series_t *)lv_event_get_user_data(e);
+    lv_chart_set_next_value(chart, series, printer.bed_temp);
+}
+
+static void set_bed_target_temp_chart(lv_event_t * e){
+    lv_obj_t * chart = lv_event_get_target(e);
+    lv_chart_series_t * series = (lv_chart_series_t *)lv_event_get_user_data(e);
+    lv_chart_set_next_value(chart, series, printer.bed_target_temp);
+}
+
 void temp_panel_init(lv_obj_t * panel){
     const auto element_width = CYD_SCREEN_PANEL_WIDTH_PX - CYD_SCREEN_GAP_PX * 2;
     root_panel = panel;
     edit_mode = false;
 
     lv_obj_t * root_temp_panel = lv_create_empty_panel(panel);
-    lv_obj_set_size(root_temp_panel, CYD_SCREEN_PANEL_WIDTH_PX, LV_SIZE_CONTENT);
+    lv_obj_set_size(root_temp_panel, CYD_SCREEN_PANEL_WIDTH_PX, CYD_SCREEN_HEIGHT_PX);
     lv_obj_align(root_temp_panel, LV_ALIGN_TOP_RIGHT, 0, 0);
     lv_obj_set_style_pad_all(root_temp_panel, CYD_SCREEN_GAP_PX, 0);
     lv_layout_flex_column(root_temp_panel);
+    lv_obj_set_flex_align(root_temp_panel, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_END, LV_FLEX_ALIGN_CENTER);
+    lv_obj_set_scrollbar_mode(root_temp_panel, LV_SCROLLBAR_MODE_OFF);
+
+    lv_obj_t * chart = lv_chart_create(root_temp_panel);
+    lv_obj_set_size(chart, element_width - CYD_SCREEN_MIN_BUTTON_WIDTH_PX, CYD_SCREEN_MIN_BUTTON_HEIGHT_PX * 3);
+    lv_chart_set_type(chart, LV_CHART_TYPE_LINE);
+    lv_chart_set_point_count(chart, 120);
+    lv_obj_set_style_size(chart, 0, LV_PART_INDICATOR);
+    lv_chart_set_axis_tick(chart, LV_CHART_AXIS_PRIMARY_Y, CYD_SCREEN_GAP_PX / 2, CYD_SCREEN_GAP_PX / 4, 4, 3, true, CYD_SCREEN_MIN_BUTTON_WIDTH_PX);
+    lv_chart_set_update_mode(chart, LV_CHART_UPDATE_MODE_SHIFT);
+
+    lv_chart_series_t * ser1 = lv_chart_add_series(chart, lv_palette_main(LV_PALETTE_ORANGE), LV_CHART_AXIS_PRIMARY_Y);
+    lv_chart_set_all_value(chart, ser1, printer.extruder_target_temp);
+    lv_chart_series_t * ser2 = lv_chart_add_series(chart, lv_palette_main(LV_PALETTE_RED), LV_CHART_AXIS_PRIMARY_Y);
+    lv_chart_set_all_value(chart, ser2, printer.extruder_temp);
+    lv_chart_series_t * ser3 = lv_chart_add_series(chart, lv_palette_main(LV_PALETTE_TEAL), LV_CHART_AXIS_PRIMARY_Y);
+    lv_chart_set_all_value(chart, ser3, printer.bed_target_temp);
+    lv_chart_series_t * ser4 = lv_chart_add_series(chart, lv_palette_main(LV_PALETTE_BLUE), LV_CHART_AXIS_PRIMARY_Y);
+    lv_chart_set_all_value(chart, ser4, printer.bed_temp);
+
+    lv_obj_add_event_cb(chart, set_hotend_target_temp_chart, LV_EVENT_MSG_RECEIVED, ser1);
+    lv_obj_add_event_cb(chart, set_hotend_temp_chart, LV_EVENT_MSG_RECEIVED, ser2);
+    lv_obj_add_event_cb(chart, set_bed_target_temp_chart, LV_EVENT_MSG_RECEIVED, ser3);
+    lv_obj_add_event_cb(chart, set_bed_temp_chart, LV_EVENT_MSG_RECEIVED, ser4);
+    lv_obj_add_event_cb(chart, set_chart_range, LV_EVENT_MSG_RECEIVED, NULL);
+    lv_msg_subscribe_obj(DATA_PRINTER_DATA, chart, NULL);
+
+    lv_obj_t * single_screen_panel = lv_create_empty_panel(root_temp_panel);
+    lv_obj_set_size(single_screen_panel, element_width, CYD_SCREEN_HEIGHT_PX - CYD_SCREEN_GAP_PX * 2 - CYD_SCREEN_GAP_PX / 2);
+    lv_layout_flex_column(single_screen_panel);
 
     lv_obj_t * temp_rows[2] = {0};
     lv_obj_t * button_temp_rows[2] = {0};
 
     for (int tempIter = 0; tempIter < 2; tempIter++){
-        temp_rows[tempIter] = lv_create_empty_panel(root_temp_panel);
+        temp_rows[tempIter] = lv_create_empty_panel(single_screen_panel);
         lv_layout_flex_column(temp_rows[tempIter]);
         lv_obj_set_size(temp_rows[tempIter], element_width, LV_SIZE_CONTENT);
 
@@ -259,15 +337,16 @@ void temp_panel_init(lv_obj_t * panel){
         lv_obj_center(label);
     }
 
-    lv_obj_t * bottom_panel = lv_create_empty_panel(panel);
-    lv_obj_set_size(bottom_panel, element_width, CYD_SCREEN_MIN_BUTTON_HEIGHT_PX);
-    lv_obj_align(bottom_panel, LV_ALIGN_BOTTOM_MID, 0, -1 * CYD_SCREEN_GAP_PX);
-    lv_layout_flex_row(bottom_panel, LV_FLEX_ALIGN_SPACE_EVENLY);
+    lv_obj_t * gap = lv_create_empty_panel(single_screen_panel);
+    lv_obj_set_flex_grow(gap, 1);
 
-    lv_obj_t * one_above_bottom_panel = lv_create_empty_panel(panel);
+    lv_obj_t * one_above_bottom_panel = lv_create_empty_panel(single_screen_panel);
     lv_obj_set_size(one_above_bottom_panel, element_width, CYD_SCREEN_MIN_BUTTON_HEIGHT_PX);
-    lv_obj_align(one_above_bottom_panel, LV_ALIGN_BOTTOM_MID, 0, -1 * CYD_SCREEN_MIN_BUTTON_HEIGHT_PX - CYD_SCREEN_GAP_PX * 2);
     lv_layout_flex_row(one_above_bottom_panel, LV_FLEX_ALIGN_SPACE_EVENLY);
+
+    lv_obj_t * bottom_panel = lv_create_empty_panel(single_screen_panel);
+    lv_obj_set_size(bottom_panel, element_width, CYD_SCREEN_MIN_BUTTON_HEIGHT_PX);
+    lv_layout_flex_row(bottom_panel, LV_FLEX_ALIGN_SPACE_EVENLY);
 
     lv_obj_t * btn = lv_btn_create(bottom_panel);
     lv_obj_set_flex_grow(btn, 1);
@@ -306,5 +385,6 @@ void temp_panel_init(lv_obj_t * panel){
     lv_label_set_text(label, "Edit Presets");
     lv_obj_center(label);
 
+    lv_obj_scroll_to_y(root_temp_panel, 9999, LV_ANIM_OFF);
     lv_msg_send(DATA_PRINTER_TEMP_PRESET, &printer);
 }

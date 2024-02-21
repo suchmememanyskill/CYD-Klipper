@@ -33,6 +33,10 @@ FILESYSTEM_FILE* get_files(int limit){
     client.useHTTP10(true);
     client.setTimeout(5000);
     client.begin(buff);
+
+    if (global_config.auth_configured)
+        client.addHeader("X-Api-Key", global_config.klipper_auth);
+
     int httpCode = client.GET();
     auto timer_parse = millis();
 

@@ -29,20 +29,35 @@ static const lv_btnmatrix_ctrl_t kb_ctrl[] = {
 
 void ip_init_inner();
 
-bool verify_ip(){
+enum connection_status_t {
+    CONNECT_FAIL = 0,
+    CONNECT_OK = 1,
+    CONNECT_AUTH_REQUIRED = 2,
+};
+
+connection_status_t verify_ip(){
     HTTPClient client;
     String url = "http://" + String(global_config.klipperHost) + ":" + String(global_config.klipperPort) + "/printer/info";
     int httpCode;
     try {
-        Serial.println(url);
         client.setTimeout(500);
+        client.setConnectTimeout(1000);
         client.begin(url.c_str());
+
+        if (global_config.auth_configured)
+            client.addHeader("X-Api-Key", global_config.klipper_auth);
+
         httpCode = client.GET();
-        return httpCode == 200;
+        Serial.printf("%d %s\n", httpCode, url.c_str());
+
+        if (httpCode == 401)
+            return CONNECT_AUTH_REQUIRED;
+
+        return httpCode == 200 ? CONNECT_OK : CONNECT_FAIL;
     }
     catch (...) {
         Serial.println("Failed to connect");
-        return false;
+        return CONNECT_FAIL;
     }
 }
 
@@ -64,11 +79,18 @@ static void ta_event_cb(lv_event_t * e) {
         strcpy(global_config.klipperHost, lv_textarea_get_text(hostEntry));
         global_config.klipperPort = atoi(lv_textarea_get_text(portEntry));
 
-        if (verify_ip())
+        connection_status_t status = verify_ip();
+        if (status == CONNECT_OK)
         {
             global_config.ipConfigured = true;
             WriteGlobalConfig();
             connect_ok = true;
+        }
+        else if (status == CONNECT_AUTH_REQUIRED)
+        {
+            label = NULL;
+            global_config.ipConfigured = true;
+            WriteGlobalConfig();
         }
         else
         {
@@ -148,6 +170,77 @@ void redraw_connect_screen(){
     }
 }
 
+static bool auth_entry_done = false;
+
+static void keyboard_event_auth_entry(lv_event_t * e) {
+    lv_event_code_t code = lv_event_get_code(e);
+    lv_obj_t * ta = lv_event_get_target(e);
+    lv_obj_t * kb = (lv_obj_t *)lv_event_get_user_data(e);
+
+    if (code == LV_EVENT_READY) 
+    {
+        const char * txt = lv_textarea_get_text(ta);
+        int len = strlen(txt);
+        if (len > 0)
+        {
+            global_config.auth_configured = true;
+            strcpy(global_config.klipper_auth, txt);
+            WriteGlobalConfig();
+            auth_entry_done = true;
+        }
+    }
+    else if (code == LV_EVENT_CANCEL)
+    {
+        auth_entry_done = true;
+    }
+}
+
+void handle_auth_entry(){
+    auth_entry_done = false;
+    global_config.klipper_auth[32] = 0;
+    lv_obj_clean(lv_scr_act());
+
+    lv_obj_t * root = lv_create_empty_panel(lv_scr_act());
+    lv_obj_set_size(root, CYD_SCREEN_WIDTH_PX, CYD_SCREEN_HEIGHT_PX);
+    lv_layout_flex_column(root);
+
+    lv_obj_t * top_root = lv_create_empty_panel(root);
+    lv_obj_set_width(top_root, CYD_SCREEN_WIDTH_PX);
+    lv_layout_flex_column(top_root);
+    lv_obj_set_flex_grow(top_root, 1);
+    lv_obj_set_style_pad_all(top_root, CYD_SCREEN_GAP_PX, 0);
+
+    lv_obj_t * label = lv_label_create(top_root);
+    lv_label_set_text(label, "Enter API Key");
+    lv_obj_set_width(label, CYD_SCREEN_WIDTH_PX - CYD_SCREEN_GAP_PX * 2);
+
+    lv_obj_t * keyboard = lv_keyboard_create(root);
+    lv_obj_t * passEntry = lv_textarea_create(top_root);
+    lv_textarea_set_max_length(passEntry, 32);
+    lv_textarea_set_one_line(passEntry, true);
+
+    if (global_config.auth_configured)
+        lv_textarea_set_text(passEntry, global_config.klipper_auth);
+    else
+        lv_textarea_set_text(passEntry, "");
+
+    lv_obj_set_width(passEntry, CYD_SCREEN_WIDTH_PX - CYD_SCREEN_GAP_PX * 2);
+    lv_obj_add_event_cb(passEntry, keyboard_event_auth_entry, LV_EVENT_ALL, keyboard);
+    lv_obj_set_flex_grow(passEntry, 1);
+    
+
+    lv_keyboard_set_textarea(keyboard, passEntry);
+    lv_keyboard_set_map(keyboard, LV_KEYBOARD_MODE_USER_1, kb_map, kb_ctrl);
+    lv_keyboard_set_mode(keyboard, LV_KEYBOARD_MODE_USER_1);
+
+    while (!auth_entry_done) {
+        lv_timer_handler();
+        lv_task_handler();
+    }
+
+    redraw_connect_screen();
+}
+
 void ip_init_inner(){
     if (global_config.ipConfigured) {
         redraw_connect_screen();
@@ -203,6 +296,7 @@ int retry_count = 0;
 void ip_init(){
     connect_ok = false;
     retry_count = 0;
+    int prev_power_device_count = 0;
 
     ip_init_inner();
 
@@ -212,15 +306,25 @@ void ip_init(){
         lv_task_handler();
 
         if (!connect_ok && global_config.ipConfigured && (millis() - last_data_update_ip) > data_update_interval_ip){
-            connect_ok = verify_ip();
+            connection_status_t status = verify_ip();
+
+            connect_ok = status == CONNECT_OK;
             last_data_update_ip = millis();
             retry_count++;
-            String retry_count_text = "Connecting to Klipper (Try " + String(retry_count + 1) + ")";
-            lv_label_set_text(label, retry_count_text.c_str());
+            if (label != NULL){
+                String retry_count_text = "Connecting to Klipper (Try " + String(retry_count + 1) + ")";
+                lv_label_set_text(label, retry_count_text.c_str());
+            }
 
-            _power_devices_query_internal();
-            if (power_devices_query().count >= 1)
+            if (status != CONNECT_AUTH_REQUIRED)
+                _power_devices_query_internal();
+            else
+                handle_auth_entry();
+
+            if (power_devices_query().count != prev_power_device_count) {
+                prev_power_device_count = power_devices_query().count;
                 redraw_connect_screen();
+            }
         }
     }
 }
@@ -228,6 +332,7 @@ void ip_init(){
 void ip_ok(){
     if (klipper_request_consecutive_fail_count > 5){
         freeze_request_thread();
+        power_devices_clear();
         ip_init();
         unfreeze_request_thread();
         klipper_request_consecutive_fail_count = 0;

@@ -15,11 +15,17 @@ except:
     version = "Unknown"
 
 flag = "-D REPO_VERSION=\\\"" + version + "\\\""
+dev_flag = "-DREPO_DEVELOPMENT=1"
 print(f"Version: {version}")
 print(f"Flag: {flag}")
+
+flags = [flag]
+
+if ('(' in version):
+    flags.append(dev_flag)
 
 Import("env")
 
 env.Append(
-    BUILD_FLAGS=[flag]
+    BUILD_FLAGS=flags
 )

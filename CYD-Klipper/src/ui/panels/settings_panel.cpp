@@ -29,6 +29,7 @@ static void reset_calibration_click(lv_event_t * e){
 static void reset_wifi_click(lv_event_t * e){
     global_config.wifiConfigured = false;
     global_config.ipConfigured = false;
+    global_config.auth_configured = false;
     WriteGlobalConfig();
     ESP.restart();
 }
@@ -99,6 +100,14 @@ static void auto_ota_update_switch(lv_event_t* e){
     WriteGlobalConfig();
 }
 
+const char* estimated_time_options = "Percentage\nInterpolated\nSlicer";
+
+static void estimated_time_dropdown(lv_event_t * e){
+    lv_obj_t * dropdown = lv_event_get_target(e);
+    global_config.remaining_time_calc_mode = lv_dropdown_get_selected(dropdown);
+    WriteGlobalConfig();
+}
+
 const static lv_point_t line_points[] = { {0, 0}, {(short int)((CYD_SCREEN_PANEL_WIDTH_PX - CYD_SCREEN_GAP_PX * 2) * 0.85f), 0} };
 
 void create_settings_widget(const char* label_text, lv_obj_t* object, lv_obj_t* root_panel, bool set_height = true){
@@ -122,13 +131,19 @@ void create_settings_widget(const char* label_text, lv_obj_t* object, lv_obj_t* 
 }
 
 void settings_panel_init(lv_obj_t* panel){
+    lv_obj_t * toggle = NULL;
+    lv_obj_t * btn = NULL;
+    lv_obj_t * label = NULL;
+    lv_obj_t * dropdown = NULL;
+
     lv_obj_set_style_pad_all(panel, CYD_SCREEN_GAP_PX, 0);
     lv_layout_flex_column(panel);
+    lv_obj_set_scrollbar_mode(panel, LV_SCROLLBAR_MODE_OFF);
 
-    lv_obj_t * btn = lv_btn_create(panel);
+    btn = lv_btn_create(panel);
     lv_obj_add_event_cb(btn, reset_wifi_click, LV_EVENT_CLICKED, NULL);
 
-    lv_obj_t * label = lv_label_create(btn);
+    label = lv_label_create(btn);
     lv_label_set_text(label, "Restart");
     lv_obj_center(label);
 
@@ -145,7 +160,8 @@ void settings_panel_init(lv_obj_t* panel){
     create_settings_widget("Calibrate Touch", btn, panel);
 #endif // CYD_SCREEN_DISABLE_TOUCH_CALIBRATION
 
-    lv_obj_t * toggle = lv_switch_create(panel);
+#ifndef CYD_SCREEN_DISABLE_INVERT_COLORS
+    toggle = lv_switch_create(panel);
     lv_obj_set_width(toggle, CYD_SCREEN_MIN_BUTTON_WIDTH_PX * 2);
     lv_obj_add_event_cb(toggle, invert_color_switch, LV_EVENT_VALUE_CHANGED, NULL);
 
@@ -153,7 +169,7 @@ void settings_panel_init(lv_obj_t* panel){
         lv_obj_add_state(toggle, LV_STATE_CHECKED);
 
     create_settings_widget("Invert Colors", toggle, panel);
-
+#endif // CYD_SCREEN_DISABLE_INVERT_COLORS
 
     toggle = lv_switch_create(panel);
     lv_obj_set_width(toggle, CYD_SCREEN_MIN_BUTTON_WIDTH_PX * 2);
@@ -164,7 +180,7 @@ void settings_panel_init(lv_obj_t* panel){
 
     create_settings_widget("Light Mode", toggle, panel);
 
-    lv_obj_t * dropdown = lv_dropdown_create(panel);
+    dropdown = lv_dropdown_create(panel);
     lv_dropdown_set_options(dropdown, "Blue\nGreen\nGrey\nYellow\nOrange\nRed\nPurple");
     lv_dropdown_set_selected(dropdown, global_config.color_scheme);
     lv_obj_add_event_cb(dropdown, theme_dropdown, LV_EVENT_VALUE_CHANGED, NULL);
@@ -199,6 +215,13 @@ void settings_panel_init(lv_obj_t* panel){
     create_settings_widget("Wake Timeout", dropdown, panel);
 #endif
 
+    dropdown = lv_dropdown_create(panel);
+    lv_dropdown_set_options(dropdown, estimated_time_options);
+    lv_obj_add_event_cb(dropdown, estimated_time_dropdown, LV_EVENT_VALUE_CHANGED, NULL);
+
+    lv_dropdown_set_selected(dropdown, global_config.remaining_time_calc_mode);
+    create_settings_widget("Estimated Time", dropdown, panel);
+
     toggle = lv_switch_create(panel);
     lv_obj_set_width(toggle, CYD_SCREEN_MIN_BUTTON_WIDTH_PX * 2);
     lv_obj_add_event_cb(toggle, rotate_screen_switch, LV_EVENT_VALUE_CHANGED, NULL);
@@ -218,6 +241,15 @@ void settings_panel_init(lv_obj_t* panel){
 
     create_settings_widget("Screen On During Print", toggle, panel);
 #endif
+
+    toggle = lv_switch_create(panel);
+    lv_obj_set_width(toggle, CYD_SCREEN_MIN_BUTTON_WIDTH_PX * 2);
+    lv_obj_add_event_cb(toggle, auto_ota_update_switch, LV_EVENT_VALUE_CHANGED, NULL);
+
+    if (global_config.autoOtaUpdate)
+        lv_obj_add_state(toggle, LV_STATE_CHECKED);
+
+    create_settings_widget("Auto Update", toggle, panel);
 
     label = lv_label_create(panel);
     lv_label_set_text(label, REPO_VERSION "  ");
@@ -240,13 +272,4 @@ void settings_panel_init(lv_obj_t* panel){
 
         create_settings_widget("Device", label, panel, false);
     }
-
-    toggle = lv_switch_create(panel);
-    lv_obj_set_width(toggle, CYD_SCREEN_MIN_BUTTON_WIDTH_PX * 2);
-    lv_obj_add_event_cb(toggle, auto_ota_update_switch, LV_EVENT_VALUE_CHANGED, NULL);
-
-    if (global_config.autoOtaUpdate)
-        lv_obj_add_state(toggle, LV_STATE_CHECKED);
-
-    create_settings_widget("Auto Update", toggle, panel);
 }

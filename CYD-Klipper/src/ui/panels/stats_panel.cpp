@@ -36,19 +36,42 @@ static void set_zoffset_text(lv_event_t * e) {
     lv_label_set_text(label, data);
 }
 
+static void set_zoffset_text_ex(lv_event_t * e) {
+    lv_obj_t * label = lv_event_get_target(e);
+    char data[64];
+    sprintf(data, "Z Offset: %.03f, Z: %.03f", printer.gcode_offset[2], printer.position[2]);
+    lv_label_set_text(label, data);
+}
+
 static void set_zoffset(lv_event_t * e){
     char* offset = (char*)lv_event_get_user_data(e);
+
     char gcode[64];
-    sprintf(gcode, "SET_GCODE_OFFSET Z_ADJUST=%s", offset);
+    sprintf(gcode, "SET_GCODE_OFFSET Z_ADJUST=%s MOVE=1", offset);
     send_gcode(true, gcode);
 }
 
-const char* zoffsets[] = { "-0.005", "-0.01", "-0.025", "-0.05" };
-const char* zoffsets_2[] = { "+0.005", "+0.01", "+0.025", "+0.05" };
+static void set_z(lv_event_t * e){
+    void* ptr = lv_event_get_user_data(e);
+    float value = *(float *)(&ptr);
+
+    if (value < 0) {
+        send_gcode(true, "SET_GCODE_OFFSET Z=0 MOVE=1");
+        return;
+    }
+
+    move_printer("Z", value, false);
+}
+
+const char* zoffsets[] = { "-0.01", "-0.025", "-0.05", "-0.2" };
+const char* zoffsets_2[] = { "+0.01", "+0.025", "+0.05", "+0.2" };
+const char* zabs[] = { "Z=0", "Z=0.1", "Z=1", "Clear" };
+const float zabsvalues[] = { 0, 0.1f, 1.0f, -1.0f };
 
 lv_button_column_t zoffset_columns[] = {
     { set_zoffset, zoffsets, (const void**)zoffsets, 4},
-    { set_zoffset, zoffsets_2, (const void**)zoffsets_2, 4}
+    { set_zoffset, zoffsets_2, (const void**)zoffsets_2, 4},
+    { set_z, zabs, (const void**)zabsvalues, 4}
 };
 
 static void set_speed_mult_text(lv_event_t * e){
@@ -126,7 +149,7 @@ static void open_fan_speed_panel(lv_event_t * e){
 }
 
 static void open_zoffset_panel(lv_event_t * e){
-    lv_create_fullscreen_button_matrix_popup(lv_scr_act(), set_zoffset_text, zoffset_columns, 2);
+    lv_create_fullscreen_button_matrix_popup(lv_scr_act(), set_zoffset_text_ex, zoffset_columns, (printer.state == PRINTER_STATE_IDLE) ? 3 : 2);
     lv_msg_send(DATA_PRINTER_DATA, &printer);
 }
 
@@ -175,7 +198,7 @@ static void label_total_layers(lv_event_t * e){
 static void label_pressure_advance(lv_event_t * e){
     lv_obj_t * label = lv_event_get_target(e);
     char pressure_buff[32];
-    sprintf(pressure_buff, "%.3f", printer.pressure_advance);
+    sprintf(pressure_buff, "%.3f (%.2fs)", printer.pressure_advance, printer.smooth_time);
     lv_label_set_text(label, pressure_buff);
 }
 
@@ -211,8 +234,12 @@ void stats_panel_init(lv_obj_t* panel) {
     lv_obj_align(left_panel, LV_ALIGN_TOP_LEFT, CYD_SCREEN_GAP_PX, CYD_SCREEN_GAP_PX);
 
     create_stat_text_block(left_panel, "Position:", label_pos);
-    create_stat_text_block(left_panel, "Filament Used:", label_filament_used_m);
-    create_stat_text_block(left_panel, "Layer:", label_total_layers);
+
+    if (printer.state != PRINTER_STATE_IDLE){
+        create_stat_text_block(left_panel, "Filament Used:", label_filament_used_m);
+        create_stat_text_block(left_panel, "Layer:", label_total_layers);
+    }
+
     create_stat_text_block(left_panel, "Pressure Advance:", label_pressure_advance);
     create_stat_text_block(left_panel, "Feedrate:", label_feedrate);
 

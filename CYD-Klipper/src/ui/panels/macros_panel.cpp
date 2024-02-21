@@ -104,6 +104,7 @@ void macros_panel_init(lv_obj_t* panel) {
     }
 
     lv_obj_t * root_panel = lv_create_empty_panel(panel);
+    lv_obj_set_scrollbar_mode(root_panel, LV_SCROLLBAR_MODE_OFF);
     lv_obj_set_size(root_panel, CYD_SCREEN_PANEL_WIDTH_PX, CYD_SCREEN_HEIGHT_PX - CYD_SCREEN_MIN_BUTTON_HEIGHT_PX - CYD_SCREEN_GAP_PX * 2); 
     lv_obj_align(root_panel, LV_ALIGN_TOP_MID, 0, CYD_SCREEN_MIN_BUTTON_HEIGHT_PX + CYD_SCREEN_GAP_PX * 2);
     lv_layout_flex_column(root_panel);

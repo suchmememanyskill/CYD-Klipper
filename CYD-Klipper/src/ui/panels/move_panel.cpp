@@ -1,48 +1,28 @@
 #include "lvgl.h"
 #include "panel.h"
 #include "../../core/data_setup.h"
+#include "../nav_buttons.h"
 #include "../ui_utils.h"
 #include <stdio.h>
 
 static bool last_homing_state = false;
 
-static void move_printer(const char* axis, float amount) {
-    if (!printer.homed_axis || printer.state == PRINTER_STATE_PRINTING)
-        return;
-
-    char gcode[64];
-    const char* extra = (amount > 0) ? "+" : "";
-
-    bool absolute_coords = printer.absolute_coords;
-
-    if (absolute_coords) {
-        send_gcode(true, "G91");
-    }
-
-    sprintf(gcode, "G1 %s%s%.1f F6000", axis, extra, amount);
-    send_gcode(true, gcode);
-
-    if (absolute_coords) {
-        send_gcode(true, "G90");
-    }
-}
-
 static void x_line_button_press(lv_event_t * e) {
     float* data_pointer = (float*)lv_event_get_user_data(e);
     float data = *data_pointer;
-    move_printer("X", data);
+    move_printer("X", data, true);
 }
 
 static void y_line_button_press(lv_event_t * e) {
     float* data_pointer = (float*)lv_event_get_user_data(e);
     float data = *data_pointer;
-    move_printer("Y", data);
+    move_printer("Y", data, true);
 }
 
 static void z_line_button_press(lv_event_t * e) {
     float* data_pointer = (float*)lv_event_get_user_data(e);
     float data = *data_pointer;
-    move_printer("Z", data);
+    move_printer("Z", data, true);
 }
 
 char x_pos_buff[12];
@@ -103,6 +83,11 @@ static void disable_steppers_click(lv_event_t * e) {
     send_gcode(true, "M18");
 } 
 
+static void switch_to_stat_panel(lv_event_t * e) {
+    lv_obj_t * panel = lv_event_get_target(e);
+    nav_buttons_setup(5);
+}
+
 inline void root_panel_steppers_locked(lv_obj_t * root_panel){
     const auto width = CYD_SCREEN_PANEL_WIDTH_PX - CYD_SCREEN_GAP_PX * 2;
 
@@ -121,7 +106,7 @@ inline void root_panel_steppers_locked(lv_obj_t * root_panel){
     lv_obj_set_flex_grow(btn, 1);
 
     lv_obj_t * label = lv_label_create(btn);
-    lv_label_set_text(label, LV_SYMBOL_HOME "Home Axis");
+    lv_label_set_text(label, LV_SYMBOL_HOME "Home");
     lv_obj_center(label);
 
     btn = lv_btn_create(home_button_row);
@@ -130,7 +115,16 @@ inline void root_panel_steppers_locked(lv_obj_t * root_panel){
     lv_obj_set_flex_grow(btn, 1);
 
     label = lv_label_create(btn);
-    lv_label_set_text(label, LV_SYMBOL_EYE_CLOSE " Disable Step");
+    lv_label_set_text(label, LV_SYMBOL_EYE_CLOSE " Unlock");
+    lv_obj_center(label);
+
+    btn = lv_btn_create(home_button_row);
+    lv_obj_set_height(btn, CYD_SCREEN_MIN_BUTTON_HEIGHT_PX);
+    lv_obj_add_event_cb(btn, switch_to_stat_panel, LV_EVENT_CLICKED, NULL);
+    lv_obj_set_flex_grow(btn, 1);
+
+    label = lv_label_create(btn);
+    lv_label_set_text(label, LV_SYMBOL_EDIT " Params");
     lv_obj_center(label);
 
     for (int row = 0; row < 3; row++) {

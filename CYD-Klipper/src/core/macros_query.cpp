@@ -18,6 +18,10 @@ static void _macros_query_internal(){
     HTTPClient client;
     client.useHTTP10(true);
     client.begin(url.c_str());
+
+    if (global_config.auth_configured)
+        client.addHeader("X-Api-Key", global_config.klipper_auth);
+
     int httpCode = client.GET();
     if (httpCode == 200){
         JsonDocument doc;
@@ -42,23 +46,32 @@ static void _macros_query_internal(){
     }
 }
 
+void power_devices_clear(){
+    for (int i = 0; i < power_devices_count; i++){
+        free(power_devices[i]);
+    }
+
+    power_devices_count = 0;
+}
+
 void _power_devices_query_internal(){
     String url = "http://" + String(global_config.klipperHost) + ":" + String(global_config.klipperPort) + "/machine/device_power/devices";
     HTTPClient client;
     client.useHTTP10(true);
     client.setTimeout(500);
+    client.setConnectTimeout(1000);
     client.begin(url.c_str());
+
+    if (global_config.auth_configured)
+        client.addHeader("X-Api-Key", global_config.klipper_auth);
+
     int httpCode = client.GET();
     if (httpCode == 200){
         JsonDocument doc;
         deserializeJson(doc, client.getStream());
         auto result = doc["result"]["devices"].as<JsonArray>();
 
-        for (int i = 0; i < power_devices_count; i++){
-            free(power_devices[i]);
-        }
-
-        power_devices_count = 0;
+        power_devices_clear();
 
         for (auto i : result){
             const char * device_name = i["device"];
@@ -85,6 +98,10 @@ bool set_power_state(const char* device_name, bool state) {
     HTTPClient client;
     client.useHTTP10(true);
     client.begin(url.c_str());
+
+    if (global_config.auth_configured)
+        client.addHeader("X-Api-Key", global_config.klipper_auth);
+
     if (client.POST("") != 200)
         return false;
 

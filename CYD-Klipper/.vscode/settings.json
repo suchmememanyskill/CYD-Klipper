@@ -12,6 +12,8 @@
         "algorithm": "cpp",
         "cstddef": "cpp",
         "functional": "cpp",
-        "*.tcc": "cpp"
-    }
+        "*.tcc": "cpp",
+        "cmath": "cpp"
+    },
+    "cmake.configureOnOpen": false
 }

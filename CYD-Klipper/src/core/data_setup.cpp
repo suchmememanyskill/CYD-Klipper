@@ -50,6 +50,9 @@ void send_gcode(bool wait, const char *gcode)
     HTTPClient client;
     client.begin(buff);
 
+    if (global_config.auth_configured)
+        client.addHeader("X-Api-Key", global_config.klipper_auth);
+
     if (!wait)
     {
         client.setTimeout(1000);
@@ -65,6 +68,63 @@ void send_gcode(bool wait, const char *gcode)
     }
 }
 
+int get_slicer_time_estimate_s()
+{
+    if (printer.state == PRINTER_STATE_IDLE)
+        return 0;
+    
+    delay(10);
+
+    char buff[256] = {};
+    sprintf(buff, "http://%s:%d/server/files/metadata?filename=%s", global_config.klipperHost, global_config.klipperPort, urlEncode(printer.print_filename).c_str());
+    HTTPClient client;
+    client.useHTTP10(true);
+    client.begin(buff);
+
+    if (global_config.auth_configured)
+        client.addHeader("X-Api-Key", global_config.klipper_auth);
+
+    int httpCode = client.GET();
+
+    if (httpCode != 200) 
+        return 0;
+    
+    JsonDocument doc;
+    deserializeJson(doc, client.getStream());
+    int time_estimate_s = doc["result"]["estimated_time"];
+    Serial.printf("Got slicer time estimate: %ds\n", time_estimate_s);
+    return time_estimate_s;
+}
+
+void move_printer(const char* axis, float amount, bool relative) {
+    if (!printer.homed_axis || printer.state == PRINTER_STATE_PRINTING)
+        return;
+
+    char gcode[64];
+    const char* extra = (amount > 0) ? "+" : "";
+
+    bool absolute_coords = printer.absolute_coords;
+
+    if (absolute_coords && relative) {
+        send_gcode(true, "G91");
+    }
+    else if (!absolute_coords && !relative) {
+        send_gcode(true, "G90");
+    }
+
+    sprintf(gcode, "G1 %s%s%.3f F6000", axis, extra, amount);
+    send_gcode(true, gcode);
+
+    if (absolute_coords && relative) {
+        send_gcode(true, "G90");
+    }
+    else if (!absolute_coords && !relative) {
+        send_gcode(true, "G91");
+    }
+}
+
+int last_slicer_time_query = -15000;
+
 void fetch_printer_data()
 {
     freeze_request_thread();
@@ -73,6 +133,10 @@ void fetch_printer_data()
     HTTPClient client;
     client.useHTTP10(true);
     client.begin(buff);
+
+    if (global_config.auth_configured)
+        client.addHeader("X-Api-Key", global_config.klipper_auth);
+
     int httpCode = client.GET();
     delay(10);
     if (httpCode == 200)
@@ -122,6 +186,7 @@ void fetch_printer_data()
                 printer.extruder_target_temp = status["extruder"]["target"];
                 bool can_extrude = status["extruder"]["can_extrude"];
                 printer.pressure_advance = status["extruder"]["pressure_advance"];
+                printer.smooth_time = status["extruder"]["smooth_time"];
                 printer.can_extrude = can_extrude == true;
             }
 
@@ -175,7 +240,11 @@ void fetch_printer_data()
 
                 const char *state = status["print_stats"]["state"];
 
-                if (strcmp(state, "printing") == 0)
+                if (state == nullptr)
+                {
+                    printer_state = PRINTER_STATE_ERROR;
+                }
+                else if (strcmp(state, "printing") == 0)
                 {
                     printer_state = PRINTER_STATE_PRINTING;
                 }
@@ -194,7 +263,36 @@ void fetch_printer_data()
 
             if (printer.state == PRINTER_STATE_PRINTING && printer.print_progress > 0)
             {
-                printer.remaining_time_s = (printer.elapsed_time_s / printer.print_progress) - printer.elapsed_time_s;
+                float remaining_time_s_percentage = (printer.elapsed_time_s / printer.print_progress) - printer.elapsed_time_s;
+                float remaining_time_s_slicer = 0;
+
+                if (printer.slicer_estimated_print_time_s > 0)
+                {
+                    remaining_time_s_slicer = printer.slicer_estimated_print_time_s - printer.elapsed_time_s;
+                }
+
+                if (remaining_time_s_slicer <= 0 || global_config.remaining_time_calc_mode == REMAINING_TIME_CALC_PERCENTAGE)
+                {
+                    printer.remaining_time_s = remaining_time_s_percentage;
+                }
+                else if (global_config.remaining_time_calc_mode == REMAINING_TIME_CALC_INTERPOLATED)
+                {
+                    printer.remaining_time_s = remaining_time_s_percentage * printer.print_progress + remaining_time_s_slicer * (1 - printer.print_progress);
+                }
+                else if (global_config.remaining_time_calc_mode == REMAINING_TIME_CALC_SLICER)
+                {
+                    printer.remaining_time_s = remaining_time_s_slicer;
+                }
+            }
+
+            if (printer.remaining_time_s < 0)
+            {
+                printer.remaining_time_s = 0;
+            }
+
+            if (printer.state == PRINTER_STATE_IDLE)
+            {
+                printer.slicer_estimated_print_time_s = 0;
             }
 
             lv_msg_send(DATA_PRINTER_DATA, &printer);
@@ -204,6 +302,13 @@ void fetch_printer_data()
         {
             printer.state = printer_state;
             lv_msg_send(DATA_PRINTER_STATE, &printer);
+        }
+        
+        if (printer.state == PRINTER_STATE_PRINTING && millis() - last_slicer_time_query > 30000 && printer.slicer_estimated_print_time_s <= 0)
+        {
+            delay(10);
+            last_slicer_time_query = millis();
+            printer.slicer_estimated_print_time_s = get_slicer_time_estimate_s();
         }
 
         unfreeze_render_thread();
