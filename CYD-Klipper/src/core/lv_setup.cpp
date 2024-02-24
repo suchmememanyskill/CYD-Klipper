@@ -74,19 +74,25 @@ void lv_do_calibration(){
     lv_label_set_text(label, "Calibrate Screen");
     lv_obj_align(label, LV_ALIGN_CENTER, 0, 0);
 
-    lv_obj_t * line = lv_line_create(lv_scr_act());
+    lv_obj_t * line_x = lv_line_create(lv_scr_act());
+    lv_obj_t * line_y = lv_line_create(lv_scr_act());
+
     static lv_point_t line_points_x[] = { {0, 10}, {21, 10} };
     static lv_point_t line_points_y[] = { {10, 0}, {10, 21} };
 
-    lv_line_set_points(line, line_points_x, 2);
-    lv_obj_align(line, LV_ALIGN_TOP_LEFT, 0, 0);
-    lv_obj_set_style_line_width(line, 1, 0);
+    lv_line_set_points(line_x, line_points_x, 2);
+    lv_obj_set_style_line_width(line_x, 1, 0);
+    lv_line_set_points(line_y, line_points_y, 2);
+    lv_obj_set_style_line_width(line_y, 1, 0);
 
-    lv_obj_t * line2 = lv_line_create(lv_scr_act());
-    lv_line_set_points(line2, line_points_y, 2);
-    lv_obj_align(line2, LV_ALIGN_TOP_LEFT, 0, 0);
-    lv_obj_set_style_line_width(line2, 1, 0);
-
+#ifdef CYD_SCREEN_DRIVER_ESP32_SMARTDISPLAY
+    lv_obj_align(line_x, LV_ALIGN_TOP_RIGHT, 1, 0);
+    lv_obj_align(line_y, LV_ALIGN_TOP_RIGHT, -10, 0);        
+#else
+    lv_obj_align(line_x, LV_ALIGN_TOP_LEFT, 0, 0);
+    lv_obj_align(line_y, LV_ALIGN_TOP_LEFT, 0, 0);
+#endif
+    
     while (true){
         lv_timer_handler();
         lv_task_handler();
@@ -101,17 +107,24 @@ void lv_do_calibration(){
     point[0] = 0;
     point[1] = 0;
 
-    lv_obj_del(line);
-    lv_obj_del(line2);
+    lv_obj_del(line_x);
+    lv_obj_del(line_y);
 
-    line = lv_line_create(lv_scr_act());
-    lv_line_set_points(line, line_points_x, 2);
-    lv_obj_align(line, LV_ALIGN_BOTTOM_RIGHT, 1, -10);
-    lv_obj_set_style_line_width(line, 1, 0);
+    line_x = lv_line_create(lv_scr_act());
+    line_y = lv_line_create(lv_scr_act());
+    lv_line_set_points(line_x, line_points_x, 2);
+    lv_line_set_points(line_y, line_points_y, 2);
+    lv_obj_set_style_line_width(line_x, 1, 0);
+    lv_obj_set_style_line_width(line_y, 1, 0);
 
-    line = lv_line_create(lv_scr_act());
-    lv_line_set_points(line, line_points_y, 2);
-    lv_obj_align(line, LV_ALIGN_BOTTOM_RIGHT, -10, 1);
+    
+#ifdef CYD_SCREEN_DRIVER_ESP32_SMARTDISPLAY
+    lv_obj_align(line_x, LV_ALIGN_BOTTOM_LEFT, 0, -10);
+    lv_obj_align(line_y, LV_ALIGN_BOTTOM_LEFT, 0, 1);
+#else
+    lv_obj_align(line_x, LV_ALIGN_BOTTOM_RIGHT, 1, -10);
+    lv_obj_align(line_y, LV_ALIGN_BOTTOM_RIGHT, -10, 1);
+#endif
 
     while (true){
         lv_timer_handler();
@@ -125,8 +138,13 @@ void lv_do_calibration(){
     lv_coord_t x2 = point[0];
     lv_coord_t y2 = point[1];
 
+#ifdef CYD_SCREEN_DRIVER_ESP32_SMARTDISPLAY
+    int16_t xDist = CYD_SCREEN_HEIGHT_PX - 20;
+    int16_t yDist = CYD_SCREEN_WIDTH_PX - 20;
+#else
     int16_t xDist = CYD_SCREEN_WIDTH_PX - 20;
     int16_t yDist = CYD_SCREEN_HEIGHT_PX - 20;
+#endif
 
     global_config.screenCalXMult = (float)xDist / (float)(x2 - x1);
     global_config.screenCalXOffset = 10.0 - ((float)x1 * global_config.screenCalXMult);
@@ -134,10 +152,16 @@ void lv_do_calibration(){
     global_config.screenCalYMult = (float)yDist / (float)(y2 - y1);
     global_config.screenCalYOffset = 10.0 - ((float)y1 * global_config.screenCalYMult);
 
+    if (global_config.screenCalXMult == std::numeric_limits<float>::infinity() || global_config.screenCalYMult == std::numeric_limits<float>::infinity()){
+        Serial.println("Calibration failed, please try again");
+        ESP.restart();
+    }
+
     global_config.screenCalibrated = true;
     WriteGlobalConfig();
 
     lv_obj_clean(lv_scr_act());
+    Serial.printf("Calibration done: X*%.2f + %.2f, Y*%.2f + %.2f\n", global_config.screenCalXMult, global_config.screenCalXOffset, global_config.screenCalYMult, global_config.screenCalYOffset);
 }
 
 void set_screen_brightness()
