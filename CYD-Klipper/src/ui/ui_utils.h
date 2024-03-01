@@ -1,15 +1,30 @@
 #pragma once
 
-#ifndef CYD_SCREEN_WIDTH_PX
-#define CYD_SCREEN_WIDTH_PX LCD_HEIGHT
-#endif
+#ifdef CYD_SCREEN_VERTICAL
+    #ifndef CYD_SCREEN_WIDTH_PX
+        #define CYD_SCREEN_WIDTH_PX LCD_WIDTH
+    #endif
 
-#ifndef CYD_SCREEN_HEIGHT_PX
-#define CYD_SCREEN_HEIGHT_PX LCD_WIDTH
-#endif
+    #ifndef CYD_SCREEN_HEIGHT_PX
+        #define CYD_SCREEN_HEIGHT_PX LCD_HEIGHT
+    #endif
 
-#define CYD_SCREEN_PANEL_WIDTH_PX \
-    (CYD_SCREEN_WIDTH_PX - CYD_SCREEN_SIDEBAR_SIZE_PX)
+    #define CYD_SCREEN_PANEL_HEIGHT_PX \
+        (CYD_SCREEN_HEIGHT_PX - CYD_SCREEN_SIDEBAR_SIZE_PX)
+    #define CYD_SCREEN_PANEL_WIDTH_PX CYD_SCREEN_WIDTH_PX
+#else 
+    #ifndef CYD_SCREEN_WIDTH_PX
+        #define CYD_SCREEN_WIDTH_PX LCD_HEIGHT
+    #endif
+
+    #ifndef CYD_SCREEN_HEIGHT_PX
+        #define CYD_SCREEN_HEIGHT_PX LCD_WIDTH
+    #endif
+
+    #define CYD_SCREEN_PANEL_HEIGHT_PX CYD_SCREEN_HEIGHT_PX
+    #define CYD_SCREEN_PANEL_WIDTH_PX \
+        (CYD_SCREEN_WIDTH_PX - CYD_SCREEN_SIDEBAR_SIZE_PX)
+#endif
 
 typedef struct {
     lv_event_cb_t event;

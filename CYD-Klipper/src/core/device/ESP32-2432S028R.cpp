@@ -1,6 +1,10 @@
 #ifdef CYD_SCREEN_DRIVER_ESP32_2432S028R
 #include "../screen_driver.h"
 
+#ifdef CYD_SCREEN_VERTICAL
+    #error "Vertical screen not supported with the ESP32_2432S028R driver"
+#endif
+
 #include <SPI.h>
 #include <TFT_eSPI.h>
 #include "../../conf/global_config.h"

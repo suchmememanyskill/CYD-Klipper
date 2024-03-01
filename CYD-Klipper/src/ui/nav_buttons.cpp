@@ -79,7 +79,13 @@ static void btn_click_macros(lv_event_t * e){
 void create_button(const char* icon, const char* name, lv_event_cb_t button_click, lv_event_cb_t label_update, lv_obj_t * root){
     lv_obj_t* btn = lv_btn_create(root);
     lv_obj_set_flex_grow(btn, 1);
+
+#ifdef CYD_SCREEN_VERTICAL
+    lv_obj_set_height(btn, CYD_SCREEN_SIDEBAR_SIZE_PX);
+#else
     lv_obj_set_width(btn, CYD_SCREEN_SIDEBAR_SIZE_PX);
+#endif
+
     lv_obj_add_style(btn, &nav_button_style, 0);
     if (button_click != NULL)
         lv_obj_add_event_cb(btn, button_click, LV_EVENT_CLICKED, NULL);
@@ -101,9 +107,17 @@ void nav_buttons_setup(unsigned char active_panel){
     lv_obj_clear_flag(lv_scr_act(), LV_OBJ_FLAG_SCROLLABLE);
 
     lv_obj_t * root_panel = lv_create_empty_panel(lv_scr_act());
+
+#ifdef CYD_SCREEN_VERTICAL
+    lv_obj_set_size(root_panel, CYD_SCREEN_WIDTH_PX, CYD_SCREEN_SIDEBAR_SIZE_PX); 
+    lv_obj_align(root_panel, LV_ALIGN_BOTTOM_LEFT, 0, 0);
+    lv_layout_flex_row(root_panel, LV_FLEX_ALIGN_START, 0, 0);
+#else
     lv_obj_set_size(root_panel, CYD_SCREEN_SIDEBAR_SIZE_PX, CYD_SCREEN_HEIGHT_PX); 
     lv_obj_align(root_panel, LV_ALIGN_TOP_LEFT, 0, 0);
     lv_layout_flex_column(root_panel, LV_FLEX_ALIGN_START, 0, 0);
+
+#endif
 
     // Files/Print
     create_button(LV_SYMBOL_COPY, "Idle", btn_click_files, update_printer_data_time, root_panel);
@@ -118,7 +132,7 @@ void nav_buttons_setup(unsigned char active_panel){
     create_button(LV_SYMBOL_GPS, "Macro", btn_click_macros, NULL, root_panel);
 
     lv_obj_t * panel = lv_create_empty_panel(lv_scr_act());
-    lv_obj_set_size(panel, CYD_SCREEN_PANEL_WIDTH_PX, CYD_SCREEN_HEIGHT_PX);
+    lv_obj_set_size(panel, CYD_SCREEN_PANEL_WIDTH_PX, CYD_SCREEN_PANEL_HEIGHT_PX);
     lv_obj_align(panel, LV_ALIGN_TOP_RIGHT, 0, 0);
 
     switch (active_panel){

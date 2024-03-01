@@ -126,7 +126,7 @@ static void keyboard_callback(lv_event_t * e){
 static void show_keyboard(lv_event_t * e){
     lv_obj_t * parent = lv_create_empty_panel(root_panel);
     lv_obj_set_style_bg_opa(parent, LV_OPA_50, 0); 
-    lv_obj_set_size(parent, CYD_SCREEN_PANEL_WIDTH_PX, CYD_SCREEN_HEIGHT_PX);
+    lv_obj_set_size(parent, CYD_SCREEN_PANEL_WIDTH_PX, CYD_SCREEN_PANEL_HEIGHT_PX);
     lv_layout_flex_column(parent, LV_FLEX_ALIGN_SPACE_BETWEEN);
 
     lv_obj_t * empty_panel = lv_create_empty_panel(parent);
@@ -261,7 +261,7 @@ void temp_panel_init(lv_obj_t * panel){
     edit_mode = false;
 
     lv_obj_t * root_temp_panel = lv_create_empty_panel(panel);
-    lv_obj_set_size(root_temp_panel, CYD_SCREEN_PANEL_WIDTH_PX, CYD_SCREEN_HEIGHT_PX);
+    lv_obj_set_size(root_temp_panel, CYD_SCREEN_PANEL_WIDTH_PX, CYD_SCREEN_PANEL_HEIGHT_PX);
     lv_obj_align(root_temp_panel, LV_ALIGN_TOP_RIGHT, 0, 0);
     lv_obj_set_style_pad_all(root_temp_panel, CYD_SCREEN_GAP_PX, 0);
     lv_layout_flex_column(root_temp_panel);
@@ -293,7 +293,7 @@ void temp_panel_init(lv_obj_t * panel){
     lv_msg_subscribe_obj(DATA_PRINTER_DATA, chart, NULL);
 
     lv_obj_t * single_screen_panel = lv_create_empty_panel(root_temp_panel);
-    lv_obj_set_size(single_screen_panel, element_width, CYD_SCREEN_HEIGHT_PX - CYD_SCREEN_GAP_PX * 2 - CYD_SCREEN_GAP_PX / 2);
+    lv_obj_set_size(single_screen_panel, element_width, CYD_SCREEN_PANEL_HEIGHT_PX - CYD_SCREEN_GAP_PX * 2 - CYD_SCREEN_GAP_PX / 2);
     lv_layout_flex_column(single_screen_panel);
 
     lv_obj_t * temp_rows[2] = {0};

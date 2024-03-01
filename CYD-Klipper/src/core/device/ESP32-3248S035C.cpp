@@ -1,4 +1,9 @@
 #ifdef CYD_SCREEN_DRIVER_ESP32_3248S035C
+#include "../screen_driver.h"
+
+#ifdef CYD_SCREEN_VERTICAL
+    #error "Vertical screen not supported with the ESP32_3248S035C driver"
+#endif
 
 #include "lvgl.h"
 #include <TAMC_GT911.h>
