@@ -100,9 +100,9 @@
         "-DCYD_SCREEN_GAP_PX=10",
         "-DCYD_SCREEN_MIN_BUTTON_HEIGHT_PX=40",
         "-DCYD_SCREEN_MIN_BUTTON_WIDTH_PX=40",
-        "-DCYD_SCREEN_FONT=lv_font_montserrat_16",
-        "-DCYD_SCREEN_FONT_SMALL=lv_font_montserrat_12",
-        "-DCYD_SCREEN_SIDEBAR_SIZE_PX=50",
+        "-DCYD_SCREEN_FONT=lv_font_montserrat_22",
+        "-DCYD_SCREEN_FONT_SMALL=lv_font_montserrat_14",
+        "-DCYD_SCREEN_SIDEBAR_SIZE_PX=80",
         "-DCYD_SCREEN_DRIVER_ESP32_SMARTDISPLAY=1",
         "-DCYD_SCREEN_DISABLE_TOUCH_CALIBRATION=1"
       ],
