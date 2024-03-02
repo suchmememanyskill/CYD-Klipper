@@ -106,8 +106,6 @@ lv_obj_t* draw_gcode_img()
             return NULL;
         }
 
-        Serial.println((char*)data_png);
-
         memset(&img_header, 0, sizeof(img_header));
         img_header.header.w = 32;
         img_header.header.h = 32;

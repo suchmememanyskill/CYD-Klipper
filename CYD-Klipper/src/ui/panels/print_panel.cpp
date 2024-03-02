@@ -100,6 +100,8 @@ void print_panel_init(lv_obj_t* panel){
         return;
     }
 
+    clear_img_mem();
+
     lv_obj_t * list = lv_list_create(panel);
     lv_obj_set_style_radius(list, 0, 0);
     lv_obj_set_style_border_width(list, 0, 0); 
