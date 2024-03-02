@@ -10,12 +10,6 @@ static unsigned char * data_png = NULL;
 static char img_filename_path[256] = {0};
 static lv_img_dsc_t img_header = {0};
 
-static void close_button_click(lv_event_t * e){
-    lv_obj_t * root = (lv_obj_t *)lv_event_get_user_data(e);
-    lv_obj_del(root);
-    clear_img_mem();
-}
-
 bool has_128_128_gcode(const char* filename)
 {
     if (filename == NULL){
@@ -60,7 +54,7 @@ bool has_128_128_gcode(const char* filename)
         }
 
         if (chosen_thumb != NULL){
-            Serial.printf("Found 128x128 PNG gcode img at %s\n", filename);
+            Serial.printf("Found 32x32 PNG gcode img at %s\n", filename);
             strcpy(img_filename_path, chosen_thumb);
             return true;
         }
@@ -130,7 +124,7 @@ lv_obj_t* show_gcode_img(const char* filename)
     }
 
     if (!has_128_128_gcode(filename)){
-        Serial.println("No 128x128 gcode img found");
+        Serial.println("No 32x32 gcode img found");
         return NULL;
     }
 
