@@ -3,6 +3,8 @@
 #include "lvgl.h"
 
 #define CONFIG_VERSION 4
+#define TYPEC_CYD 1 // IMPORTANT! Type-C CYDs are inverted by default (apparently fixed in a experimental build, but this needs to have inverted to be on by default)
+
 #define GLOBAL_CONFIG_NAMESPACE "global_config"
 #define GLOBAL_CONFIG_KEY "global_config"
 
@@ -10,6 +12,77 @@ enum {
     REMAINING_TIME_CALC_PERCENTAGE = 0,
     REMAINING_TIME_CALC_INTERPOLATED = 1,
     REMAINING_TIME_CALC_SLICER = 2,
+};
+
+#include <vector>
+#include <string>
+#include <utility>
+#include <algorithm>
+#include <stdexcept>
+
+template <typename T>
+class DynamicDropdownDataContainer {
+public:
+    virtual ~DynamicDropdownDataContainer() {}
+
+    DynamicDropdownDataContainer(std::initializer_list<std::pair<std::string, T>> items) {
+        addItems(items);
+    }
+
+    void addItems(std::initializer_list<std::pair<std::string, T>> items) {
+        for (const auto& item : items) {
+            _data.push_back(item);
+        }
+    }
+
+    void removeItem(const T& value) {
+        for (auto it = _data.begin(); it != _data.end(); ++it) {
+            if (it->second == value) {
+                _data.erase(it);
+                break;
+            }
+        }
+    }
+
+    const char* getOptions() const {
+        _optionsCache.clear();
+        _optionsCache.reserve(_data.size() * (std::max(_data.begin()->first.size(), _data.rbegin()->first.size()) + 1));
+        for (const auto& item : _data) {
+            _optionsCache += item.first;
+            _optionsCache += '\n';
+        }
+        return _optionsCache.c_str();
+    }
+
+    uint8_t getValues(T* values) const {
+        uint8_t count = 0;
+        for (const auto& item : _data) {
+            values[count++] = item.second;
+        }
+        return count;
+    }
+
+    uint8_t getSelectedIndex(const T& value) const {
+        uint8_t index = 0;
+        for (const auto& item : _data) {
+            if (item.second == value) {
+                return index;
+            }
+            index++;
+        }
+        return 0;
+    }
+
+    std::pair<std::string, T> getByIndex(uint8_t index) const {
+        if (index >= _data.size()) {
+            throw std::out_of_range("Index out of range");
+        }
+        return _data[index];
+    }
+
+private:
+    std::vector<std::pair<std::string, T>> _data;
+    mutable std::string _optionsCache;
 };
 
 typedef struct {
@@ -23,8 +96,10 @@ typedef struct {
             bool ipConfigured : 1;
 
             // External
-            bool lightMode : 1;
+            bool darkMode : 1;
+            #if !TYPEC_CYD 
             bool invertColors : 1;
+            #endif
             bool rotateScreen : 1;
             bool onDuringPrint : 1;
             bool autoOtaUpdate : 1;
@@ -57,7 +132,7 @@ typedef struct {
 
 typedef struct {
     lv_palette_t primaryColor;
-    short primaryColorLight;
+    short brightnessModulate;
     lv_palette_t secondaryColor;
 } ColorDef;
 

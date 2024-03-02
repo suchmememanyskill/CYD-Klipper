@@ -4,6 +4,7 @@
 #include "lvgl.h"
 #include "../ui/ui_utils.h"
 #include <Esp.h>
+#include "color_util.h"
 
 #ifndef CPU_FREQ_HIGH
 #define CPU_FREQ_HIGH 240
@@ -176,17 +177,17 @@ void SetColorScheme()
     lv_color_t mainColor = {0};
     ColorDef colorDef = colorDefs[globalConfig.colorScheme];
 
-    if (colorDefs[globalConfig.colorScheme].primaryColorLight > 0){
-        mainColor = lv_palette_lighten(colorDef.primaryColor, colorDef.primaryColorLight);
+    if (colorDef.brightnessModulate > 0){
+        mainColor = lv_palette_lighten(colorDef.primaryColor, colorDef.brightnessModulate);
     }
-    else if (colorDefs[globalConfig.colorScheme].primaryColorLight < 0) {
-        mainColor = lv_palette_darken(colorDef.primaryColor, colorDef.primaryColorLight * -1);
+    else if (colorDef.brightnessModulate < 0) {
+        mainColor = lv_palette_darken(colorDef.primaryColor, colorDef.brightnessModulate * -1);
     }
     else {
-        mainColor = lv_palette_main(colorDefs[globalConfig.colorScheme].primaryColor);
+        mainColor = lv_palette_main(colorDef.primaryColor);
     }
-
-    lv_theme_t *theme = lv_theme_default_init(dispp, mainColor, lv_palette_main(colorDef.secondaryColor), !globalConfig.lightMode, &CYD_SCREEN_FONT);
+    
+    lv_theme_t *theme = lv_theme_default_init(dispp, mainColor, lv_palette_main(colorDef.secondaryColor), globalConfig.darkMode, &CYD_SCREEN_FONT);
     lv_disp_set_theme(dispp, theme);
 }
 

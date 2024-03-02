@@ -11,7 +11,7 @@
 #ifndef REPO_VERSION
 #define REPO_VERSION "Unknown"
 #endif // REPO_VERSION
-
+#if !TYPEC_CYD
 static void InvertColorSwitch(lv_event_t *e)
 {
     auto state = lv_obj_get_state(lv_event_get_target(e));
@@ -20,6 +20,7 @@ static void InvertColorSwitch(lv_event_t *e)
     WriteGlobalConfig();
     SetInvertDisplay();
 }
+#endif
 
 static void ResetCalibrationClick(lv_event_t *e)
 {
@@ -37,11 +38,11 @@ static void ResetWifiClick(lv_event_t *e)
     ESP.restart();
 }
 
-static void LightModeSwitch(lv_event_t *e)
+static void DarkModeSwitch(lv_event_t *e)
 {
     auto state = lv_obj_get_state(lv_event_get_target(e));
     bool checked = (state & LV_STATE_CHECKED == LV_STATE_CHECKED);
-    globalConfig.lightMode = checked;
+    globalConfig.darkMode = checked;
     WriteGlobalConfig();
     SetColorScheme();
 }
@@ -175,6 +176,7 @@ void SettingsPanelInit(lv_obj_t *panel)
     CreateSettingsWidget("Calibrate Touch", btn, panel);
 #endif // CYD_SCREEN_DISABLE_TOUCH_CALIBRATION
 
+#if !TYPEC_CYD
 #ifndef CYD_SCREEN_DISABLE_INVERT_COLORS
     toggle = lv_switch_create(panel);
     lv_obj_set_width(toggle, CYD_SCREEN_MIN_BUTTON_WIDTH_PX * 2);
@@ -185,18 +187,20 @@ void SettingsPanelInit(lv_obj_t *panel)
 
     CreateSettingsWidget("Invert Colors", toggle, panel);
 #endif // CYD_SCREEN_DISABLE_INVERT_COLORS
+#endif
 
     toggle = lv_switch_create(panel);
     lv_obj_set_width(toggle, CYD_SCREEN_MIN_BUTTON_WIDTH_PX * 2);
-    lv_obj_add_event_cb(toggle, LightModeSwitch, LV_EVENT_VALUE_CHANGED, NULL);
+    lv_obj_add_event_cb(toggle, DarkModeSwitch, LV_EVENT_VALUE_CHANGED, NULL);
 
-    if (globalConfig.lightMode)
+    if (globalConfig.darkMode)
         lv_obj_add_state(toggle, LV_STATE_CHECKED);
 
-    CreateSettingsWidget("Light Mode", toggle, panel);
+    CreateSettingsWidget("Dark Mode", toggle, panel);
 
     dropdown = lv_dropdown_create(panel);
-    lv_dropdown_set_options(dropdown, "Blue\nGreen\nGrey\nYellow\nOrange\nRed\nPurple");
+
+    lv_dropdown_set_options(dropdown, "Blue\nLime\nGrey\nYellow\nOrange\nRed\nPurple");
     lv_dropdown_set_selected(dropdown, globalConfig.colorScheme);
     lv_obj_add_event_cb(dropdown, ThemeDropdown, LV_EVENT_VALUE_CHANGED, NULL);
 
