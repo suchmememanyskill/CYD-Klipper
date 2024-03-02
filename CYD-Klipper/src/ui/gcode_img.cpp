@@ -115,7 +115,6 @@ lv_obj_t* draw_gcode_img()
 
         lv_obj_t * img = lv_img_create(lv_scr_act());
         lv_img_set_src(img, &img_header);
-        //lv_img_set_zoom(img, 512);
 
         return img;
     }

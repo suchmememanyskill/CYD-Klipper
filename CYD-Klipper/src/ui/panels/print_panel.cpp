@@ -90,7 +90,6 @@ static void btn_print_file_verify(lv_event_t * e){
     if (img != NULL){
         lv_obj_set_parent(img, panel);
         lv_obj_align(img, LV_ALIGN_BOTTOM_MID, 0, 0);
-        //lv_obj_set_size(img, CYD_SCREEN_MIN_BUTTON_WIDTH_PX * button_size_mult, CYD_SCREEN_MIN_BUTTON_HEIGHT_PX * button_size_mult);
     }
 }
 
