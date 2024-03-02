@@ -301,7 +301,7 @@ void TempPanelInit(lv_obj_t * panel) {
 
     for (int tempIter = 0; tempIter < 2; tempIter++){
         temp_rows[tempIter] = CreateEmptyPanel(single_screen_panel);
-        LayoutFlexRow(temp_rows[tempIter]);
+        LayoutFlexColumn(temp_rows[tempIter]);
         lv_obj_set_size(temp_rows[tempIter], elementWidth, LV_SIZE_CONTENT);
 
         lv_obj_t * label = lv_label_create(temp_rows[tempIter]);
