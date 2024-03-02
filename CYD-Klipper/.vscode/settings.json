@@ -13,7 +13,8 @@
         "cstddef": "cpp",
         "functional": "cpp",
         "*.tcc": "cpp",
-        "cmath": "cpp"
+        "cmath": "cpp",
+        "lv_roller.h": "c"
     },
     "cmake.configureOnOpen": false
 }

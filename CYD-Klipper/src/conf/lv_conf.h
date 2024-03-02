@@ -438,7 +438,7 @@
 
 #define LV_USE_ARC        1
 
-#define LV_USE_ANIMIMG    0
+#define LV_USE_ANIMIMG    1
 
 #define LV_USE_BAR        1
 
@@ -503,13 +503,13 @@
 
 #define LV_USE_CHART      1
 
-#define LV_USE_COLORWHEEL 0
+#define LV_USE_COLORWHEEL 1
 
 #define LV_USE_IMGBTN     1
 
 #define LV_USE_KEYBOARD   1
 
-#define LV_USE_LED        0
+#define LV_USE_LED        1
 
 #define LV_USE_LIST       1
 
@@ -517,19 +517,19 @@
 
 #define LV_USE_METER      0
 
-#define LV_USE_MSGBOX     0
+#define LV_USE_MSGBOX     1
 
-#define LV_USE_SPINBOX    0
+#define LV_USE_SPINBOX    1
 
-#define LV_USE_SPINNER    0
+#define LV_USE_SPINNER    1
 
 #define LV_USE_TABVIEW    0
 
-#define LV_USE_TILEVIEW   0
+#define LV_USE_TILEVIEW   1
 
 #define LV_USE_WIN        0
 
-#define LV_USE_SPAN       0
+#define LV_USE_SPAN       1
 #if LV_USE_SPAN
     /*A line text can contain maximum num of span descriptor */
     #define LV_SPAN_SNIPPET_STACK_SIZE 64
@@ -544,7 +544,7 @@
 #if LV_USE_THEME_DEFAULT
 
     /*0: Light mode; 1: Dark mode*/
-    #define LV_THEME_DEFAULT_DARK 0
+    #define LV_THEME_DEFAULT_DARK 1
 
     /*1: Enable grow on press*/
     #define LV_THEME_DEFAULT_GROW 1
@@ -607,7 +607,7 @@
 #endif
 
 /*PNG decoder library*/
-#define LV_USE_PNG 0
+#define LV_USE_PNG 1
 
 /*BMP decoder library*/
 #define LV_USE_BMP 0
@@ -620,10 +620,10 @@
 #define LV_USE_GIF 0
 
 /*QR code library*/
-#define LV_USE_QRCODE 0
+#define LV_USE_QRCODE 1
 
 /*FreeType library*/
-#define LV_USE_FREETYPE 0
+#define LV_USE_FREETYPE 1
 #if LV_USE_FREETYPE
     /*Memory used by FreeType to cache characters [bytes] (-1: no caching)*/
     #define LV_FREETYPE_CACHE_SIZE (16 * 1024)
@@ -644,7 +644,7 @@
 
 /*FFmpeg library for image decoding and playing videos
  *Supports all major image formats so do not enable other image decoder with it*/
-#define LV_USE_FFMPEG  0
+#define LV_USE_FFMPEG  1
 #if LV_USE_FFMPEG
     /*Dump input information to stderr*/
     #define LV_FFMPEG_AV_DUMP_FORMAT 0

@@ -14,14 +14,14 @@ void setup() {
     Serial.begin(115200);
     Serial.println("Hello World");
     LoadGlobalConfig();
-    screen_setup();
-    lv_setup();
+    setupScreen();
+    lvSetup();
     Serial.println("Screen init done");
     
     wifi_init();
     ota_init();
     ip_init();
-    data_setup();
+    dataSetup();
 
     nav_style_setup();
     main_ui_setup();
@@ -30,7 +30,7 @@ void setup() {
 void loop(){
     wifi_ok();
     ip_ok();
-    data_loop();
+    dataLoop();
     lv_timer_handler();
     lv_task_handler();
 

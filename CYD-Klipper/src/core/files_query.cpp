@@ -7,38 +7,38 @@
 #include <HardwareSerial.h>
 
 // Always has +1 entry with a null'd name
-FILESYSTEM_FILE* last_query = NULL;
+FILESYSTEM_FILE* lastQuery = NULL;
 
-FILESYSTEM_FILE* get_files(int limit){
-    freeze_request_thread();
+FILESYSTEM_FILE* getFiles(int limit){
+    freezeRequestThread();
 
-    if (last_query != NULL){
-        FILESYSTEM_FILE* current = last_query;
+    if (lastQuery != NULL){
+        FILESYSTEM_FILE* current = lastQuery;
 
         while (current->name != NULL){
             free(current->name);
             current += 1;
         }
 
-        free(last_query);
+        free(lastQuery);
     }
 
     Serial.printf("Heap space pre-file-parse: %d bytes\n", esp_get_free_heap_size());
     std::list<FILESYSTEM_FILE> files;
 
-    auto timer_request = millis();
+    auto timerRequest = millis();
     char buff[256] = {};
-    sprintf(buff, "http://%s:%d/server/files/list", global_config.klipperHost, global_config.klipperPort);
+    sprintf(buff, "http://%s:%d/server/files/list", globalConfig.klipperHost, globalConfig.klipperPort);
     HTTPClient client;
     client.useHTTP10(true);
     client.setTimeout(5000);
     client.begin(buff);
 
-    if (global_config.auth_configured)
-        client.addHeader("X-Api-Key", global_config.klipper_auth);
+    if (globalConfig.authConfigured)
+        client.addHeader("X-Api-Key", globalConfig.klipperAuth);
 
     int httpCode = client.GET();
-    auto timer_parse = millis();
+    auto timerParse = millis();
 
     if (httpCode == 200){
         JsonDocument doc;
@@ -50,18 +50,18 @@ FILESYSTEM_FILE* get_files(int limit){
             FILESYSTEM_FILE f = {0};
             const char* path = file["path"];
             float modified = file["modified"];
-            auto file_iter = files.begin();
+            auto fileIter = files.begin();
 
-            while (file_iter != files.end()){
-                if ((*file_iter).modified < modified)
+            while (fileIter != files.end()){
+                if ((*fileIter).modified < modified)
                     break;
 
-                file_iter++;
+                fileIter++;
             }
 
-            if (file_iter == files.end() && files.size() >= limit)
+            if (fileIter == files.end() && files.size() >= limit)
                 continue;
-            
+
             f.name = (char*)malloc(strlen(path) + 1);
             if (f.name == NULL){
                 Serial.println("Failed to allocate memory");
@@ -70,16 +70,16 @@ FILESYSTEM_FILE* get_files(int limit){
             strcpy(f.name, path);
             f.modified = modified;
 
-            if (file_iter != files.end())
-                files.insert(file_iter, f);
-            else 
+            if (fileIter != files.end())
+                files.insert(fileIter, f);
+            else
                 files.push_back(f);
 
             if (files.size() > limit){
-                auto last_entry = files.back();
+                auto lastEntry = files.back();
 
-                if (last_entry.name != NULL)
-                    free(last_entry.name);
+                if (lastEntry.name != NULL)
+                    free(lastEntry.name);
 
                 files.pop_back();
             }
@@ -96,11 +96,11 @@ FILESYSTEM_FILE* get_files(int limit){
             free(file.name);
         }
 
-        unfreeze_request_thread();
+        unfreezeRequestThread();
         return NULL;
     }
 
-    last_query = result;
+    lastQuery = result;
     result[files.size()].name = NULL;
 
     for (auto file : files){
@@ -109,7 +109,7 @@ FILESYSTEM_FILE* get_files(int limit){
     }
 
     Serial.printf("Heap space post-file-parse: %d bytes\n", esp_get_free_heap_size());
-    Serial.printf("Got %d files. Request took %dms, parsing took %dms\n", files.size(), timer_parse - timer_request, millis() - timer_parse);
-    unfreeze_request_thread();
-    return last_query;
+    Serial.printf("Got %d files. Request took %dms, parsing took %dms\n", files.size(), timerParse - timerRequest, millis() - timerParse);
+    unfreezeRequestThread();
+    return lastQuery;
 }

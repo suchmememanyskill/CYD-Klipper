@@ -1,9 +1,10 @@
-#ifndef _GLOBAL_CONFIG_INIT
-#define _GLOBAL_CONFIG_INIT
+#pragma once
 
 #include "lvgl.h"
 
 #define CONFIG_VERSION 4
+#define GLOBAL_CONFIG_NAMESPACE "global_config"
+#define GLOBAL_CONFIG_KEY "global_config"
 
 enum {
     REMAINING_TIME_CALC_PERCENTAGE = 0,
@@ -11,7 +12,7 @@ enum {
     REMAINING_TIME_CALC_SLICER = 2,
 };
 
-typedef struct _GLOBAL_CONFIG {
+typedef struct {
     unsigned char version;
     union {
         unsigned int raw;
@@ -27,10 +28,10 @@ typedef struct _GLOBAL_CONFIG {
             bool rotateScreen : 1;
             bool onDuringPrint : 1;
             bool autoOtaUpdate : 1;
-            unsigned char remaining_time_calc_mode : 2;
+            unsigned char remainingTimeCalcMode : 2;
 
             // Internal
-            bool auth_configured : 1;
+            bool authConfigured : 1;
         };
     };
     float screenCalXOffset;
@@ -38,33 +39,31 @@ typedef struct _GLOBAL_CONFIG {
     float screenCalYOffset;
     float screenCalYMult;
 
-    char wifiSSID[32];
+    char wifiSsid[32];
     char wifiPassword[64];
 
     char klipperHost[64];
     unsigned short klipperPort;
-    
-    unsigned char color_scheme;
+
+    unsigned char colorScheme;
     unsigned char brightness;
     unsigned char screenTimeout;
 
-    unsigned short hotend_presets[3];
-    unsigned short bed_presets[3];
+    unsigned short hotendPresets[3];
+    unsigned short bedPresets[3];
 
-    char klipper_auth[33];
-} GLOBAL_CONFIG;
-    
-typedef struct _COLOR_DEF {
-    lv_palette_t primary_color;
-    short primary_color_light;
-    lv_palette_t secondary_color;
-} COLOR_DEF;
+    char klipperAuth[33];
+} GlobalConfig;
 
-extern GLOBAL_CONFIG global_config;
-extern COLOR_DEF color_defs[];
+typedef struct {
+    lv_palette_t primaryColor;
+    short primaryColorLight;
+    lv_palette_t secondaryColor;
+} ColorDef;
+
+extern GlobalConfig globalConfig;
+extern ColorDef colorDefs[];
 
 void WriteGlobalConfig();
 void VerifyVersion();
 void LoadGlobalConfig();
-
-#endif // !_GLOBAL_CONFIG_INIT

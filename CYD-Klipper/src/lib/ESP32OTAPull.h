@@ -1,57 +1,30 @@
-/*
-ESP32-OTA-Pull - a library for doing "pull" based OTA ("Over The Air") firmware
-updates, where the image updates are posted on the web.
-
-MIT License
-
-Copyright (c) 2022-3 Mikal Hart
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
-*/
-
 #pragma once
 #include <HTTPClient.h>
 #include <ArduinoJson.h>
 #include <Update.h>
 #include <WiFi.h>
 
-class ESP32OTAPull
+class Esp32OtaPull
 {
 public:
     enum ActionType { DONT_DO_UPDATE, UPDATE_BUT_NO_BOOT, UPDATE_AND_BOOT };
 
-    // Return codes from CheckForOTAUpdate
+    // Return codes from CheckForOtaUpdate
     enum ErrorCode { UPDATE_AVAILABLE = -3, NO_UPDATE_PROFILE_FOUND = -2, NO_UPDATE_AVAILABLE = -1, UPDATE_OK = 0, HTTP_FAILED = 1, WRITE_ERROR = 2, JSON_PROBLEM = 3, OTA_UPDATE_FAIL = 4 };
 
 private:
-    void (*Callback)(int offset, int totallength) = NULL;
-    ActionType Action = UPDATE_AND_BOOT;
-    String Board = ARDUINO_BOARD;
-    String Device = "";
-    String Config = "";
-    String CVersion = "";
-    bool DowngradesAllowed = false;
+    void (*callback)(int offset, int totallength) = NULL;
+    ActionType action = UPDATE_AND_BOOT;
+    String board = ARDUINO_BOARD;
+    String device = "";
+    String config = "";
+    String cVersion = "";
+    bool downgradesAllowed = false;
 
-    int DownloadJson(const char* URL, String& payload)
+    int downloadJson(const char* url, String& payload)
     {
         HTTPClient http;
-        http.begin(URL);
+        http.begin(url);
 
         // Send HTTP GET request
         int httpResponseCode = http.GET();
@@ -66,10 +39,10 @@ private:
         return httpResponseCode;
     }
 
-    int DoOTAUpdate(const char* URL, ActionType Action)
+    int doOtaUpdate(const char* url, ActionType action)
     {
         HTTPClient http;
-        http.begin(URL);
+        http.begin(url);
 
         // Send HTTP GET request
         int httpResponseCode = http.GET();
@@ -95,17 +68,17 @@ private:
                 size_t sizeAvail = stream->available();
                 if (sizeAvail > 0)
                 {
-                    size_t bytes_to_read = min(sizeAvail, sizeof(buff));
-                    size_t bytes_read = stream->readBytes(buff, bytes_to_read);
-                    size_t bytes_written = Update.write(buff, bytes_read);
-                    if (bytes_read != bytes_written)
+                    size_t bytesToRead = min(sizeAvail, sizeof(buff));
+                    size_t bytesRead = stream->readBytes(buff, bytesToRead);
+                    size_t bytesWritten = Update.write(buff, bytesRead);
+                    if (bytesRead != bytesWritten)
                     {
-                        // Serial.printf("Unexpected error in OTA: %d %d %d\n", bytes_to_read, bytes_read, bytes_written);
+                        // Serial.printf("Unexpected error in OTA: %d %d %d\n", bytesToRead, bytesRead, bytesWritten);
                         break;
                     }
-                    offset += bytes_written;
-                    if (Callback != NULL)
-                        Callback(offset, totalLength);
+                    offset += bytesWritten;
+                    if (callback != NULL)
+                        callback(offset, totalLength);
                 }
             }
 
@@ -115,7 +88,7 @@ private:
                 delay(1000);
 
                 // Restart ESP32 to see changes
-                if (Action == UPDATE_BUT_NO_BOOT)
+                if (action == UPDATE_BUT_NO_BOOT)
                     return UPDATE_OK;
                 ESP.restart();
             }
@@ -129,102 +102,101 @@ private:
 public:
     /// @brief Return the version string of the binary, as reported by the JSON
     /// @return The firmware version
-    String GetVersion()
+    String getVersion()
     {
-        return CVersion;
+        return cVersion;
     }
 
     /// @brief Override the default "Device" id (MAC Address)
     /// @param device A string identifying the particular device (instance) (typically e.g., a MAC address)
-    /// @return The current ESP32OTAPull object for chaining
-    ESP32OTAPull &OverrideDevice(const char *device)
+    /// @return The current Esp32OtaPull object for chaining
+    Esp32OtaPull &overrideDevice(const char *device)
     {
-        Device = device;
+        this->device = device;
         return *this;
     }
 
-    /// @brief Override the default "Board" value of ARDUINO_BOARD
+        /// @brief Override the default "Board" value of ARDUINO_BOARD
     /// @param board A string identifying the board (class) being targeted
-    /// @return The current ESP32OTAPull object for chaining
-    ESP32OTAPull &OverrideBoard(const char *board)
+    /// @return The current Esp32OtaPull object for chaining
+    Esp32OtaPull &overrideBoard(const char *board)
     {
-        Board = board;
+        this->board = board;
         return *this;
     }
 
     /// @brief Specify a configuration string that must match any "Config" in JSON
     /// @param config An arbitrary string showing the current configuration
-    /// @return The current ESP32OTAPull object for chaining
-    ESP32OTAPull &SetConfig(const char *config)
+    /// @return The current Esp32OtaPull object for chaining
+    Esp32OtaPull &setConfig(const char *config)
     {
-        Config = config;
+        this->config = config;
         return *this;
     }
 
     /// @brief Specify whether downgrades (posted version is lower) are allowed
-    /// @param allow_downgrades true if downgrades are allowed
-    /// @return The current ESP32OTAPull object for chaining
-    ESP32OTAPull &AllowDowngrades(bool allow_downgrades)
+    /// @param allowDowngrades true if downgrades are allowed
+    /// @return The current Esp32OtaPull object for chaining
+    Esp32OtaPull &allowDowngrades(bool allowDowngrades)
     {
-        DowngradesAllowed = allow_downgrades;
+        this->downgradesAllowed = allowDowngrades;
         return *this;
     }
 
     /// @brief Specify a callback function to monitor update progress
     /// @param callback Pointer to a function that is called repeatedly during update
-    /// @return The current ESP32OTAPull object for chaining
-    ESP32OTAPull &SetCallback(void (*callback)(int offset, int totallength))
+    /// @return The current Esp32OtaPull object for chaining
+    Esp32OtaPull &setCallback(void (*callback)(int offset, int totallength))
     {
-        Callback = callback;
+        this->callback = callback;
         return *this;
     }
 
     /// @brief The main entry point for OTA Update
     /// @param JSON_URL The URL for the JSON filter file
-    /// @param CurrentVersion The version # of the current (i.e. to be replaced) sketch
-    /// @param ActionType The action to be performed.  May be any of DONT_DO_UPDATE, UPDATE_BUT_NO_BOOT, UPDATE_AND_BOOT (default)
+    /// @param currentVersion The version # of the current (i.e. to be replaced) sketch
+    /// @param action The action to be performed.  May be any of DONT_DO_UPDATE, UPDATE_BUT_NO_BOOT, UPDATE_AND_BOOT (default)
     /// @return ErrorCode or HTTP failure code (see enum above)
-    int CheckForOTAUpdate(const char* JSON_URL, const char *CurrentVersion, ActionType Action = UPDATE_AND_BOOT)
+    int checkForOtaUpdate(const char* jsonUrl, const char *currentVersion, ActionType action = UPDATE_AND_BOOT)
     {
-        CurrentVersion = CurrentVersion == NULL ? "" : CurrentVersion;
+        currentVersion = currentVersion == NULL ? "" : currentVersion;
 
         // Downloading OTA Json...
-        String Payload;
-        int httpResponseCode = DownloadJson(JSON_URL, Payload);
+        String payload;
+        int httpResponseCode = downloadJson(jsonUrl, payload);
         if (httpResponseCode != 200)
             return httpResponseCode > 0 ? httpResponseCode : HTTP_FAILED;
 
         // Deserialize the JSON file downloaded from user's site
         JsonDocument doc;
-        DeserializationError deserialization = deserializeJson(doc, Payload.c_str());
+        DeserializationError deserialization = deserializeJson(doc, payload.c_str());
         if (deserialization != DeserializationError::Ok)
             return JSON_PROBLEM;
 
-        String DeviceName = Device.isEmpty() ? WiFi.macAddress() : Device;
-        String BoardName = Board.isEmpty() ? ARDUINO_BOARD : Board;
-        String ConfigName = Config.isEmpty() ? "" : Config;
+        String deviceName = device.isEmpty() ? WiFi.macAddress() : device;
+        String boardName = board.isEmpty() ? ARDUINO_BOARD : board;
+        String configName = config.isEmpty() ? "" : config;
         bool foundProfile = false;
 
         // Step through the configurations looking for a match
         for (auto config : doc["Configurations"].as<JsonArray>())
         {
-            String CBoard = config["Board"].isNull() ? "" : (const char *)config["Board"];
-            String CDevice = config["Device"].isNull() ? "" : (const char *)config["Device"];
-            CVersion = config["Version"].isNull() ? "" : (const char *)config["Version"];
-            String CConfig = config["Config"].isNull() ? "" : (const char *)config["Config"];
-            //Serial.printf("Checking %s %s %s %s\n", CBoard.c_str(), CDevice.c_str(), CVersion.c_str(), CConfig.c_str());
-            //Serial.printf("Against %s %s %s %s\n", BoardName.c_str(), DeviceName.c_str(), CurrentVersion, ConfigName.c_str());
-            if ((CBoard.isEmpty() || CBoard == BoardName) &&
-                (CDevice.isEmpty() || CDevice == DeviceName) &&
-                (CConfig.isEmpty() || CConfig == ConfigName))
+            String cBoard = config["Board"].isNull() ? "" : (const char *)config["Board"];
+            String cDevice = config["Device"].isNull() ? "" : (const char *)config["Device"];
+            cVersion = config["Version"].isNull() ? "" : (const char *)config["Version"];
+            String cConfig = config["Config"].isNull() ? "" : (const char *)config["Config"];
+            //Serial.printf("Checking %s %s %s %s\n", cBoard.c_str(), cDevice.c_str(), cVersion.c_str(), cConfig.c_str());
+            //Serial.printf("Against %s %s %s %s\n", boardName.c_str(), deviceName.c_str(), currentVersion, configName.c_str());
+            if ((cBoard.isEmpty() || cBoard == boardName) &&
+                (cDevice.isEmpty() || cDevice == deviceName) &&
+                (cConfig.isEmpty() || cConfig == configName))
             {
-                if (CVersion.isEmpty() || CVersion > String(CurrentVersion) ||
-                    (DowngradesAllowed && CVersion != String(CurrentVersion)))
-                    return Action == DONT_DO_UPDATE ? UPDATE_AVAILABLE : DoOTAUpdate(config["URL"], Action);
+                if (cVersion.isEmpty() || cVersion > String(currentVersion) ||
+                    (downgradesAllowed && cVersion != String(currentVersion)))
+                    return action == DONT_DO_UPDATE ? UPDATE_AVAILABLE : doOtaUpdate(config["URL"], action);
                 foundProfile = true;
             }
         }
         return foundProfile ? NO_UPDATE_AVAILABLE : NO_UPDATE_PROFILE_FOUND;
     }
 };
-

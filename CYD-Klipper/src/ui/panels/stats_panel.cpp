@@ -4,166 +4,166 @@
 #include <stdio.h>
 #include <Esp.h>
 
-static void set_fan_speed_text(lv_event_t * e) {
+static void setFanSpeedText(lv_event_t * e) {
     lv_obj_t * label = lv_event_get_target(e);
     char data[64];
-    sprintf(data, "Fan: %.0f%%", printer.fan_speed * 100);
+    sprintf(data, "Fan: %.0f%%", printer.fanSpeed * 100);
     lv_label_set_text(label, data);
 }
 
-static void set_fan_speed(lv_event_t * e){
+static void setFanSpeed(lv_event_t * e){
     int speed = (int)lv_event_get_user_data(e);
     char gcode[64];
     sprintf(gcode, "M106 S%d", speed);
-    send_gcode(true, gcode);
+    sendGcode(true, gcode);
 }
 
-const char* fan_speeds[] = { "0%", "15%", "25%", "35%" };
-const int fan_speeds_values[] = { 0, 38, 64, 90 };
+const char* FAN_SPEEDS[] = { "0%", "15%", "25%", "35%" };
+const int FAN_SPEEDS_VALUES[] = { 0, 38, 64, 90 };
 
-const char* fan_speeds_2[] = { "50%", "75%", "100%"};
-const int fan_speeds_values_2[] = { 128, 192, 255 };
+const char* FAN_SPEEDS_2[] = { "50%", "75%", "100%"};
+const int FAN_SPEEDS_VALUES_2[] = { 128, 192, 255 };
 
-lv_button_column_t fan_speed_columns[] = {
-    { set_fan_speed, fan_speeds, (const void**)fan_speeds_values, 4},
-    { set_fan_speed, fan_speeds_2, (const void**)fan_speeds_values_2, 3}
+LvButtonColumn_t FAN_SPEED_COLUMNS[] = {
+    { setFanSpeed, FAN_SPEEDS, (const void**)FAN_SPEEDS_VALUES, 4},
+    { setFanSpeed, FAN_SPEEDS_2, (const void**)FAN_SPEEDS_VALUES_2, 3}
 };
 
-static void set_zoffset_text(lv_event_t * e) {
+static void setZOffsetText(lv_event_t * e) {
     lv_obj_t * label = lv_event_get_target(e);
     char data[64];
-    sprintf(data, "Z Offset: %.03f", printer.gcode_offset[2]);
+    sprintf(data, "Z Offset: %.03f", printer.gcodeOffset[2]);
     lv_label_set_text(label, data);
 }
 
-static void set_zoffset_text_ex(lv_event_t * e) {
+static void setZOffsetTextEx(lv_event_t * e) {
     lv_obj_t * label = lv_event_get_target(e);
     char data[64];
-    sprintf(data, "Z Offset: %.03f, Z: %.03f", printer.gcode_offset[2], printer.position[2]);
+    sprintf(data, "Z Offset: %.03f, Z: %.03f", printer.gcodeOffset[2], printer.position[2]);
     lv_label_set_text(label, data);
 }
 
-static void set_zoffset(lv_event_t * e){
+static void setZOffset(lv_event_t * e){
     char* offset = (char*)lv_event_get_user_data(e);
 
     char gcode[64];
     sprintf(gcode, "SET_GCODE_OFFSET Z_ADJUST=%s MOVE=1", offset);
-    send_gcode(true, gcode);
+    sendGcode(true, gcode);
 }
 
-static void set_z(lv_event_t * e){
+static void setZ(lv_event_t * e){
     void* ptr = lv_event_get_user_data(e);
     float value = *(float *)(&ptr);
 
     if (value < 0) {
-        send_gcode(true, "SET_GCODE_OFFSET Z=0 MOVE=1");
+        sendGcode(true, "SET_GCODE_OFFSET Z=0 MOVE=1");
         return;
     }
 
-    move_printer("Z", value, false);
+    movePrinter("Z", value, false);
 }
 
-const char* zoffsets[] = { "-0.01", "-0.025", "-0.05", "-0.2" };
-const char* zoffsets_2[] = { "+0.01", "+0.025", "+0.05", "+0.2" };
-const char* zabs[] = { "Z=0", "Z=0.1", "Z=1", "Clear" };
-const float zabsvalues[] = { 0, 0.1f, 1.0f, -1.0f };
+const char* ZOFFSETS[] = { "-0.01", "-0.025", "-0.05", "-0.2" };
+const char* ZOFFSETS_2[] = { "+0.01", "+0.025", "+0.05", "+0.2" };
+const char* ZABS[] = { "Z=0", "Z=0.1", "Z=1", "Clear" };
+const float ZABSVALUES[] = { 0, 0.1f, 1.0f, -1.0f };
 
-lv_button_column_t zoffset_columns[] = {
-    { set_zoffset, zoffsets, (const void**)zoffsets, 4},
-    { set_zoffset, zoffsets_2, (const void**)zoffsets_2, 4},
-    { set_z, zabs, (const void**)zabsvalues, 4}
+LvButtonColumn_t ZOFFSET_COLUMNS[] = {
+    { setZOffset, ZOFFSETS, (const void**)ZOFFSETS, 4},
+    { setZOffset, ZOFFSETS_2, (const void**)ZOFFSETS_2, 4},
+    { setZ, ZABS, (const void**)ZABSVALUES, 4}
 };
 
-static void set_speed_mult_text(lv_event_t * e){
+static void setSpeedMultText(lv_event_t * e){
     lv_obj_t * label = lv_event_get_target(e);
     char data[64];
-    sprintf(data, "Speed: %.0f%%", printer.speed_mult * 100);
+    sprintf(data, "Speed: %.0f%%", printer.speedMult * 100);
     lv_label_set_text(label, data);
 }
 
-static void set_speed_mult(lv_event_t * e){
+static void setSpeedMult(lv_event_t * e){
     int speed = (int)lv_event_get_user_data(e);
     char gcode[64];
     sprintf(gcode, "M220 S%d", speed);
-    send_gcode(true, gcode);
+    sendGcode(true, gcode);
 }
 
-static void set_speed_mult_offset(lv_event_t * e){
+static void setSpeedMultOffset(lv_event_t * e){
     int speed = (int)lv_event_get_user_data(e);
-    float result = printer.speed_mult * 100 + speed;
-    printer.speed_mult = result / 100;
+    float result = printer.speedMult * 100 + speed;
+    printer.speedMult = result / 100;
     char gcode[64];
     sprintf(gcode, "M220 S%.0f", result);
-    send_gcode(true, gcode);
+    sendGcode(true, gcode);
 }
 
-const char* speed_presets[] = { "50%", "100%", "150%", "200%" };
-const int speed_presets_values[] = { 50, 100, 150, 200 };
-const char* speed_presets_minus[] = { "-1%", "-5%", "-10%", "-25%" };
-const int speed_presets_minus_values[] = { -1, -5, -10, -25 };
-const char* speed_presets_plus[] = { "+1%", "+5%", "+10%", "+25%" };
-const int speed_presets_plus_values[] = { 1, 5, 10, 25 };
+const char* SPEED_PRESETS[] = { "50%", "100%", "150%", "200%" };
+const int SPEED_PRESETS_VALUES[] = { 50, 100, 150, 200 };
+const char* SPEED_PRESETS_MINUS[] = { "-1%", "-5%", "-10%", "-25%" };
+const int SPEED_PRESETS_MINUS_VALUES[] = { -1, -5, -10, -25 };
+const char* SPEED_PRESETS_PLUS[] = { "+1%", "+5%", "+10%", "+25%" };
+const int SPEED_PRESETS_PLUS_VALUES[] = { 1, 5, 10, 25 };
 
-lv_button_column_t speed_mult_columns[] = {
-    { set_speed_mult, speed_presets, (const void**)speed_presets_values, 4},
-    { set_speed_mult_offset, speed_presets_minus, (const void**)speed_presets_minus_values, 4},
-    { set_speed_mult_offset, speed_presets_plus, (const void**)speed_presets_plus_values, 4}
+LvButtonColumn_t SPEED_MULT_COLUMNS[] = {
+    { setSpeedMult, SPEED_PRESETS, (const void**)SPEED_PRESETS_VALUES, 4},
+    { setSpeedMultOffset, SPEED_PRESETS_MINUS, (const void**)SPEED_PRESETS_MINUS_VALUES, 4},
+    { setSpeedMultOffset, SPEED_PRESETS_PLUS, (const void**)SPEED_PRESETS_PLUS_VALUES, 4}
 };
 
-static void set_extrude_mult_text(lv_event_t * e){
+static void setExtrudeMultText(lv_event_t * e){
     lv_obj_t * label = lv_event_get_target(e);
     char data[64];
-    sprintf(data, "Flow: %.0f%%", printer.extrude_mult * 100);
+    sprintf(data, "Flow: %.0f%%", printer.extrudeMult * 100);
     lv_label_set_text(label, data);
 }
 
-static void set_extrude_mult(lv_event_t * e){
+static void setExtrudeMult(lv_event_t * e){
     int speed = (int)lv_event_get_user_data(e);
     char gcode[64];
     sprintf(gcode, "M221 S%d", speed);
-    send_gcode(true, gcode);
+    sendGcode(true, gcode);
 }
 
-static void set_extrude_mult_offset(lv_event_t * e){
+static void setExtrudeMultOffset(lv_event_t * e){
     int speed = (int)lv_event_get_user_data(e);
-    float result = printer.extrude_mult * 100 + speed;
-    printer.extrude_mult = result / 100;
+    float result = printer.extrudeMult * 100 + speed;
+    printer.extrudeMult = result / 100;
     char gcode[64];
     sprintf(gcode, "M221 S%.0f", result);
-    send_gcode(true, gcode);
+    sendGcode(true, gcode);
 }
 
-const char* extrude_presets[] = { "95%", "100%", "105%", "110%" };
-const int extrude_presets_values[] = { 95, 100, 105, 110 };
-const char* extrude_offset[] = { "+5%", "+1%", "-1%", "-5%" };
-const int extrude_offset_values[] = { 5, 1, -1, -5 };
+const char* EXTRUDE_PRESETS[] = { "95%", "100%", "105%", "110%" };
+const int EXTRUDE_PRESETS_VALUES[] = { 95, 100, 105, 110 };
+const char* EXTRUDE_OFFSET[] = { "+5%", "+1%", "-1%", "-5%" };
+const int EXTRUDE_OFFSET_VALUES[] = { 5, 1, -1, -5 };
 
-lv_button_column_t extrude_mult_columns[] = {
-    { set_extrude_mult, extrude_presets, (const void**)extrude_presets_values, 4},
-    { set_extrude_mult_offset, extrude_offset, (const void**)extrude_offset_values, 4}
+LvButtonColumn_t EXTRUDE_MULT_COLUMNS[] = {
+    { setExtrudeMult, EXTRUDE_PRESETS, (const void**)EXTRUDE_PRESETS_VALUES, 4},
+    { setExtrudeMultOffset, EXTRUDE_OFFSET, (const void**)EXTRUDE_OFFSET_VALUES, 4}
 };
 
-static void open_fan_speed_panel(lv_event_t * e){
-    lv_create_fullscreen_button_matrix_popup(lv_scr_act(), set_fan_speed_text, fan_speed_columns, 2);
+static void openFanSpeedPanel(lv_event_t * e){
+    CreateFullscreenButtonMatrixPopup(lv_scr_act(), setFanSpeedText, FAN_SPEED_COLUMNS, 2);
     lv_msg_send(DATA_PRINTER_DATA, &printer);
 }
 
-static void open_zoffset_panel(lv_event_t * e){
-    lv_create_fullscreen_button_matrix_popup(lv_scr_act(), set_zoffset_text_ex, zoffset_columns, (printer.state == PRINTER_STATE_IDLE) ? 3 : 2);
+static void openZOffsetPanel(lv_event_t * e){
+    CreateFullscreenButtonMatrixPopup(lv_scr_act(), setZOffsetTextEx, ZOFFSET_COLUMNS, (printer.state == PRINTER_STATE_IDLE) ? 3 : 2);
     lv_msg_send(DATA_PRINTER_DATA, &printer);
 }
 
-static void open_speed_mult_panel(lv_event_t * e){
-    lv_create_fullscreen_button_matrix_popup(lv_scr_act(), set_speed_mult_text, speed_mult_columns, 3);
+static void openSpeedMultPanel(lv_event_t * e){
+    CreateFullscreenButtonMatrixPopup(lv_scr_act(), setSpeedMultText, SPEED_MULT_COLUMNS, 3);
     lv_msg_send(DATA_PRINTER_DATA, &printer);
 }
 
-static void open_extrude_mult_panel(lv_event_t * e){
-    lv_create_fullscreen_button_matrix_popup(lv_scr_act(), set_extrude_mult_text, extrude_mult_columns, 2);
+static void openExtrudeMultPanel(lv_event_t * e){
+    CreateFullscreenButtonMatrixPopup(lv_scr_act(), setExtrudeMultText, EXTRUDE_MULT_COLUMNS, 2);
     lv_msg_send(DATA_PRINTER_DATA, &printer);
 }
 
-void create_state_button(lv_obj_t * root, lv_event_cb_t label, lv_event_cb_t button){
+void createStateButton(lv_obj_t * root, lv_event_cb_t label, lv_event_cb_t button){
     lv_obj_t * btn = lv_btn_create(root);
     lv_obj_set_size(btn, CYD_SCREEN_PANEL_WIDTH_PX / 2 - CYD_SCREEN_GAP_PX * 3, CYD_SCREEN_MIN_BUTTON_HEIGHT_PX);
     lv_obj_add_event_cb(btn, button, LV_EVENT_CLICKED, NULL);
@@ -174,45 +174,45 @@ void create_state_button(lv_obj_t * root, lv_event_cb_t label, lv_event_cb_t but
     lv_obj_align(label_obj, LV_ALIGN_CENTER, 0, 0);
 }
 
-static void label_pos(lv_event_t * e){
+static void labelPos(lv_event_t * e){
     lv_obj_t * label = lv_event_get_target(e);
     char x_pos_buff[32];
     sprintf(x_pos_buff, "X%.2f Y%.2f", printer.position[0], printer.position[1]);
     lv_label_set_text(label, x_pos_buff);
 }
 
-static void label_filament_used_m(lv_event_t * e){
+static void labelFilamentUsedM(lv_event_t * e){
     lv_obj_t * label = lv_event_get_target(e);
     char filament_buff[32];
-    sprintf(filament_buff, "%.2f m", printer.filament_used_mm / 1000);
+    sprintf(filament_buff, "%.2f m", printer.feedrateMmPerS / 1000);
     lv_label_set_text(label, filament_buff);
 }
 
-static void label_total_layers(lv_event_t * e){
+static void labelTotalLayers(lv_event_t * e){
     lv_obj_t * label = lv_event_get_target(e);
     char layers_buff[32];
-    sprintf(layers_buff, "%d of %d", printer.current_layer, printer.total_layers);
+    sprintf(layers_buff, "%d of %d", printer.currentLayer, printer.totalLayers);
     lv_label_set_text(label, layers_buff);
 }
 
-static void label_pressure_advance(lv_event_t * e){
+static void labelPressureAdvance(lv_event_t * e){
     lv_obj_t * label = lv_event_get_target(e);
     char pressure_buff[32];
-    sprintf(pressure_buff, "%.3f (%.2fs)", printer.pressure_advance, printer.smooth_time);
+    sprintf(pressure_buff, "%.3f (%.2fs)", printer.pressureAdvance, printer.smoothTime);
     lv_label_set_text(label, pressure_buff);
 }
 
-static void label_feedrate(lv_event_t * e){
+static void labelFeedrate(lv_event_t * e){
     lv_obj_t * label = lv_event_get_target(e);
     char feedrate_buff[32];
-    sprintf(feedrate_buff, "%d mm/s", printer.feedrate_mm_per_s);
+    sprintf(feedrate_buff, "%d mm/s", printer.feedrateMmPerS);
     lv_label_set_text(label, feedrate_buff);
 }
 
-void create_stat_text_block(lv_obj_t * root, const char* label, lv_event_cb_t value){
-    lv_obj_t * panel = lv_create_empty_panel(root);
+void createStatTextBlock(lv_obj_t * root, const char* label, lv_event_cb_t value){
+    lv_obj_t * panel = CreateEmptyPanel(root);
     lv_obj_set_size(panel, LV_SIZE_CONTENT, LV_SIZE_CONTENT);
-    lv_layout_flex_column(panel , LV_FLEX_ALIGN_START, CYD_SCREEN_GAP_PX / 2, CYD_SCREEN_GAP_PX / 2);
+    LayoutFlexColumn(panel , LV_FLEX_ALIGN_START, CYD_SCREEN_GAP_PX / 2, CYD_SCREEN_GAP_PX / 2);
     lv_obj_set_flex_align(panel, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START);
 
     lv_obj_t * label_obj = lv_label_create(panel);
@@ -224,32 +224,33 @@ void create_stat_text_block(lv_obj_t * root, const char* label, lv_event_cb_t va
     lv_msg_subscribe_obj(DATA_PRINTER_DATA, value_obj, NULL);
 }
 
-void stats_panel_init(lv_obj_t* panel) {
+void statsPanelInit(lv_obj_t* panel) {
     auto panel_width = CYD_SCREEN_PANEL_WIDTH_PX / 2 - CYD_SCREEN_GAP_PX * 3;
 
-    lv_obj_t * left_panel = lv_create_empty_panel(panel);
+    lv_obj_t * left_panel = CreateEmptyPanel(panel);
     lv_obj_set_size(left_panel, panel_width, CYD_SCREEN_HEIGHT_PX - CYD_SCREEN_GAP_PX * 2);
-    lv_layout_flex_column(left_panel);
+    LayoutFlexColumn(left_panel);
     lv_obj_set_flex_align(left_panel, LV_FLEX_ALIGN_SPACE_BETWEEN, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START);
     lv_obj_align(left_panel, LV_ALIGN_TOP_LEFT, CYD_SCREEN_GAP_PX, CYD_SCREEN_GAP_PX);
 
-    create_stat_text_block(left_panel, "Position:", label_pos);
+    createStatTextBlock(left_panel, "Position:", labelPos);
 
     if (printer.state != PRINTER_STATE_IDLE){
-        create_stat_text_block(left_panel, "Filament Used:", label_filament_used_m);
-        create_stat_text_block(left_panel, "Layer:", label_total_layers);
+        createStatTextBlock(left_panel, "Filament Used:", labelFilamentUsedM);
+        createStatTextBlock(left_panel, "Layer:", labelTotalLayers);
     }
 
-    create_stat_text_block(left_panel, "Pressure Advance:", label_pressure_advance);
-    create_stat_text_block(left_panel, "Feedrate:", label_feedrate);
+    createStatTextBlock(left_panel, "Pressure Advance:", labelPressureAdvance);
 
-    lv_obj_t * right_panel = lv_create_empty_panel(panel);
+    createStatTextBlock(left_panel, "Feedrate:", labelFeedrate);
+
+    lv_obj_t * right_panel = CreateEmptyPanel(panel);
     lv_obj_set_size(right_panel, panel_width, CYD_SCREEN_HEIGHT_PX - CYD_SCREEN_GAP_PX * 2);
-    lv_layout_flex_column(right_panel, LV_FLEX_ALIGN_CENTER);
+    LayoutFlexColumn(right_panel, LV_FLEX_ALIGN_CENTER);
     lv_obj_align(right_panel, LV_ALIGN_TOP_RIGHT, -1 * CYD_SCREEN_GAP_PX, CYD_SCREEN_GAP_PX);
     
-    create_state_button(right_panel, set_fan_speed_text, open_fan_speed_panel);
-    create_state_button(right_panel, set_zoffset_text, open_zoffset_panel);
-    create_state_button(right_panel, set_speed_mult_text, open_speed_mult_panel);
-    create_state_button(right_panel, set_extrude_mult_text, open_extrude_mult_panel);
+    createStateButton(right_panel, setFanSpeedText, openFanSpeedPanel);
+    createStateButton(right_panel, setZOffsetText, openZOffsetPanel);
+    createStateButton(right_panel, setSpeedMultText, openSpeedMultPanel);
+    createStateButton(right_panel, setExtrudeMultText, openExtrudeMultPanel);
 }

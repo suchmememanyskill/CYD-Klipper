@@ -1,6 +1,6 @@
 #pragma once
 
-enum {
+enum PRINTER_STATE {
     PRINTER_STATE_ERROR = 0,
     PRINTER_STATE_IDLE = 1,
     PRINTER_STATE_PRINTING = 2,
@@ -9,32 +9,32 @@ enum {
 
 extern const char* printer_state_messages[];
 
-typedef struct _Printer {
+typedef struct {
     unsigned char state;
-    char* state_message;
-    float extruder_temp;
-    float extruder_target_temp;
-    float bed_temp;
-    float bed_target_temp;
+    char* stateMessage;
+    float extruderTemp;
+    float extruderTargetTemp;
+    float bedTemp;
+    float bedTargetTemp;
     float position[3];
-    unsigned char can_extrude;
-    unsigned char homed_axis;
-    unsigned char absolute_coords;
-    float elapsed_time_s;
-    float remaining_time_s;
-    float filament_used_mm;
-    char* print_filename; 
-    float print_progress; // 0 -> 1
-    float fan_speed; // 0 -> 1
-    float gcode_offset[3];
-    float speed_mult;
-    float extrude_mult;
-    int total_layers;
-    int current_layer;
-    float pressure_advance;
-    float smooth_time;
-    int feedrate_mm_per_s;
-    int slicer_estimated_print_time_s;
+    unsigned char canExtrude;
+    unsigned char homedAxis;
+    unsigned char absoluteCoords;
+    float elapsedTime;
+    float remainingTime;
+    float filamentUsedMm;
+    char* printFilename;
+    float printProgress; // 0 -> 1
+    float fanSpeed; // 0 -> 1
+    float gcodeOffset[3];
+    float speedMult;
+    float extrudeMult;
+    int totalLayers;
+    int currentLayer;
+    float pressureAdvance;
+    float smoothTime;
+    int feedrateMmPerS;
+    int slicerEstimatedPrintTime;
 } Printer;
 
 extern Printer printer;
@@ -44,10 +44,10 @@ extern int klipper_request_consecutive_fail_count;
 #define DATA_PRINTER_DATA 2
 #define DATA_PRINTER_TEMP_PRESET 3
 
-void data_loop();
-void data_setup();
-void send_gcode(bool wait, const char* gcode);
-void move_printer(const char* axis, float amount, bool relative);
+void dataLoop();
+void dataSetup();
+void sendGcode(bool wait, const char* gcode);
+void movePrinter(const char* axis, float amount, bool relative);
 
-void freeze_request_thread();
-void unfreeze_request_thread();
+void freezeRequestThread();
+void unfreezeRequestThread();
