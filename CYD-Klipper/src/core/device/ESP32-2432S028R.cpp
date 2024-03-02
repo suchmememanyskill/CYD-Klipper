@@ -86,7 +86,7 @@ void screen_setup()
     tft.setRotation(global_config.rotateScreen ? 3 : 1);
     tft.fillScreen(TFT_BLACK);
     set_invert_display();
-
+    set_screen_brightness();
     touchscreen_spi.begin(XPT2046_CLK, XPT2046_MISO, XPT2046_MOSI, XPT2046_CS);
     touchscreen.begin(touchscreen_spi);
 

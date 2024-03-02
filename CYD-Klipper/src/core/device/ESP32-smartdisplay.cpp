@@ -1,4 +1,3 @@
-
 #ifdef CYD_SCREEN_DRIVER_ESP32_SMARTDISPLAY
 
 #include "../screen_driver.h"
