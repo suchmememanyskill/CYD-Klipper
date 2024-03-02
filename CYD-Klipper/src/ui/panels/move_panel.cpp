@@ -118,7 +118,7 @@ inline void RootPanelSteppersLocked(lv_obj_t * rootPanel){
     lv_label_set_text(label, LV_SYMBOL_EYE_CLOSE " Unlock");
     lv_obj_center(label);
 
-    btn = lvBtnCreate(homeButtonRow);
+    btn = lv_btn_create(homeButtonRow);
     lv_obj_set_height(btn, CYD_SCREEN_MIN_BUTTON_HEIGHT_PX);
     lv_obj_add_event_cb(btn, SwitchToStatPanel, LV_EVENT_CLICKED, NULL);
     lv_obj_set_flex_grow(btn, 1);
@@ -140,7 +140,7 @@ inline void RootPanelSteppersLocked(lv_obj_t * rootPanel){
 
         for (int col = 0; col < 6; col++)
         {
-            btn = lvBtnCreate(rowPanel);
+            btn = lv_btn_create(rowPanel);
             lv_obj_set_height(btn, CYD_SCREEN_MIN_BUTTON_HEIGHT_PX);
             lv_obj_add_event_cb(btn, buttonCallbacks[row], LV_EVENT_CLICKED, (void*)(OFFSETS[row] + col));
             lv_obj_set_flex_grow(btn, 1);
@@ -188,7 +188,7 @@ static void RootPanelStateUpdate(lv_event_t * e){
 
 void MovePanelInit(lv_obj_t* panel){
     if (printer.state == PRINTER_STATE_PRINTING){
-        stats_panel_init(panel);
+        statsPanelInit(panel);
         return;
     }
 
