@@ -130,6 +130,9 @@ void create_settings_widget(const char* label_text, lv_obj_t* object, lv_obj_t* 
     lv_obj_set_style_line_color(line, lv_color_hex(0xAAAAAA), 0);
 }
 
+#define DROPDOWN_WIDTH CYD_SCREEN_MIN_BUTTON_WIDTH_PX * 3.75
+#define TOGGLE_WIDTH CYD_SCREEN_MIN_BUTTON_WIDTH_PX * 2
+
 void settings_panel_init(lv_obj_t* panel){
     lv_obj_t * toggle = NULL;
     lv_obj_t * btn = NULL;
@@ -162,7 +165,7 @@ void settings_panel_init(lv_obj_t* panel){
 
 #ifndef CYD_SCREEN_DISABLE_INVERT_COLORS
     toggle = lv_switch_create(panel);
-    lv_obj_set_width(toggle, CYD_SCREEN_MIN_BUTTON_WIDTH_PX * 2);
+    lv_obj_set_width(toggle, TOGGLE_WIDTH);
     lv_obj_add_event_cb(toggle, invert_color_switch, LV_EVENT_VALUE_CHANGED, NULL);
 
     if (global_config.invertColors)
@@ -172,7 +175,7 @@ void settings_panel_init(lv_obj_t* panel){
 #endif // CYD_SCREEN_DISABLE_INVERT_COLORS
 
     toggle = lv_switch_create(panel);
-    lv_obj_set_width(toggle, CYD_SCREEN_MIN_BUTTON_WIDTH_PX * 2);
+    lv_obj_set_width(toggle, TOGGLE_WIDTH);
     lv_obj_add_event_cb(toggle, light_mode_switch, LV_EVENT_VALUE_CHANGED, NULL);
 
     if (global_config.lightMode)
@@ -183,12 +186,14 @@ void settings_panel_init(lv_obj_t* panel){
     dropdown = lv_dropdown_create(panel);
     lv_dropdown_set_options(dropdown, "Blue\nGreen\nGrey\nYellow\nOrange\nRed\nPurple");
     lv_dropdown_set_selected(dropdown, global_config.color_scheme);
+    lv_obj_set_width(dropdown, DROPDOWN_WIDTH);
     lv_obj_add_event_cb(dropdown, theme_dropdown, LV_EVENT_VALUE_CHANGED, NULL);
 
     create_settings_widget("Theme", dropdown, panel);
 
     dropdown = lv_dropdown_create(panel);
     lv_dropdown_set_options(dropdown, brightness_options);
+    lv_obj_set_width(dropdown, DROPDOWN_WIDTH);
     lv_obj_add_event_cb(dropdown, brightness_dropdown, LV_EVENT_VALUE_CHANGED, NULL);
 
     for (int i = 0; i < SIZEOF(brightness_options_values); i++){
@@ -203,6 +208,7 @@ void settings_panel_init(lv_obj_t* panel){
 #ifndef CYD_SCREEN_DISABLE_TIMEOUT
     dropdown = lv_dropdown_create(panel);
     lv_dropdown_set_options(dropdown, wake_timeout_options);
+    lv_obj_set_width(dropdown, DROPDOWN_WIDTH);
     lv_obj_add_event_cb(dropdown, wake_timeout_dropdown, LV_EVENT_VALUE_CHANGED, NULL);
 
     for (int i = 0; i < SIZEOF(wake_timeout_options_values); i++){
@@ -217,13 +223,14 @@ void settings_panel_init(lv_obj_t* panel){
 
     dropdown = lv_dropdown_create(panel);
     lv_dropdown_set_options(dropdown, estimated_time_options);
+    lv_obj_set_width(dropdown, DROPDOWN_WIDTH);
     lv_obj_add_event_cb(dropdown, estimated_time_dropdown, LV_EVENT_VALUE_CHANGED, NULL);
 
     lv_dropdown_set_selected(dropdown, global_config.remaining_time_calc_mode);
     create_settings_widget("Estimated Time", dropdown, panel);
 
     toggle = lv_switch_create(panel);
-    lv_obj_set_width(toggle, CYD_SCREEN_MIN_BUTTON_WIDTH_PX * 2);
+    lv_obj_set_width(toggle, TOGGLE_WIDTH);
     lv_obj_add_event_cb(toggle, rotate_screen_switch, LV_EVENT_VALUE_CHANGED, NULL);
 
     if (global_config.rotateScreen)
@@ -233,7 +240,7 @@ void settings_panel_init(lv_obj_t* panel){
 
 #ifndef CYD_SCREEN_DISABLE_TIMEOUT
     toggle = lv_switch_create(panel);
-    lv_obj_set_width(toggle, CYD_SCREEN_MIN_BUTTON_WIDTH_PX * 2);
+    lv_obj_set_width(toggle, TOGGLE_WIDTH);
     lv_obj_add_event_cb(toggle, on_during_print_switch, LV_EVENT_VALUE_CHANGED, NULL);
 
     if (global_config.onDuringPrint)
@@ -243,7 +250,7 @@ void settings_panel_init(lv_obj_t* panel){
 #endif
 
     toggle = lv_switch_create(panel);
-    lv_obj_set_width(toggle, CYD_SCREEN_MIN_BUTTON_WIDTH_PX * 2);
+    lv_obj_set_width(toggle, TOGGLE_WIDTH);
     lv_obj_add_event_cb(toggle, auto_ota_update_switch, LV_EVENT_VALUE_CHANGED, NULL);
 
     if (global_config.autoOtaUpdate)
