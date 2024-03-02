@@ -1,7 +1,7 @@
 #include "gcode_img.h"
 #include "lvgl.h"
 #include "ui_utils.h"
-#include <esp.h>
+#include <Esp.h>
 #include <ArduinoJson.h>
 #include "../conf/global_config.h"
 #include <HTTPClient.h>
