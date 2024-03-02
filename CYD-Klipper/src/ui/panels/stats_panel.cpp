@@ -228,7 +228,7 @@ void stats_panel_init(lv_obj_t* panel) {
     auto panel_width = CYD_SCREEN_PANEL_WIDTH_PX / 2 - CYD_SCREEN_GAP_PX * 3;
 
     lv_obj_t * left_panel = lv_create_empty_panel(panel);
-    lv_obj_set_size(left_panel, panel_width, CYD_SCREEN_HEIGHT_PX - CYD_SCREEN_GAP_PX * 2);
+    lv_obj_set_size(left_panel, panel_width, CYD_SCREEN_PANEL_HEIGHT_PX - CYD_SCREEN_GAP_PX * 2);
     lv_layout_flex_column(left_panel);
     lv_obj_set_flex_align(left_panel, LV_FLEX_ALIGN_SPACE_BETWEEN, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START);
     lv_obj_align(left_panel, LV_ALIGN_TOP_LEFT, CYD_SCREEN_GAP_PX, CYD_SCREEN_GAP_PX);
@@ -244,7 +244,7 @@ void stats_panel_init(lv_obj_t* panel) {
     create_stat_text_block(left_panel, "Feedrate:", label_feedrate);
 
     lv_obj_t * right_panel = lv_create_empty_panel(panel);
-    lv_obj_set_size(right_panel, panel_width, CYD_SCREEN_HEIGHT_PX - CYD_SCREEN_GAP_PX * 2);
+    lv_obj_set_size(right_panel, panel_width, CYD_SCREEN_PANEL_HEIGHT_PX - CYD_SCREEN_GAP_PX * 2);
     lv_layout_flex_column(right_panel, LV_FLEX_ALIGN_CENTER);
     lv_obj_align(right_panel, LV_ALIGN_TOP_RIGHT, -1 * CYD_SCREEN_GAP_PX, CYD_SCREEN_GAP_PX);
     

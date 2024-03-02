@@ -25,13 +25,14 @@ void lv_touch_intercept_calibration(lv_indev_drv_t *indev_driver, lv_indev_data_
     original_touch_driver(indev_driver, data);
 
     if (data->state == LV_INDEV_STATE_PR){
-        point[0] = data->point.x;
-        point[1] = data->point.y;
-
+        lv_coord_t local_point[] = {data->point.x, data->point.y};
         while (data->state == LV_INDEV_STATE_PR){
             original_touch_driver(indev_driver, data);
             delay(20);    
         }
+
+        point[0] = local_point[0];
+        point[1] = local_point[1];
     }
 
     data->state = LV_INDEV_STATE_REL;
@@ -101,6 +102,8 @@ void lv_do_calibration(){
             break;
         }
     }
+
+    delay(300);
 
     lv_coord_t x1 = point[0];
     lv_coord_t y1 = point[1];
@@ -267,6 +270,7 @@ void lv_setup()
 
     screen_timer_setup();
     screen_timer_start();
+    set_screen_brightness();
 }
 
 bool is_screen_asleep()

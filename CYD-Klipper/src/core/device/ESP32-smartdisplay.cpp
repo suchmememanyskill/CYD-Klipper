@@ -15,7 +15,8 @@ void screen_setBrightness(byte brightness)
     smartdisplay_lcd_set_backlight(brightness / 255.0f);
 }
 
-void set_invert_display(){
+void set_invert_display()
+{
     lv_obj_invalidate(lv_scr_act());
 }
 
@@ -33,6 +34,23 @@ void lv_screen_intercept(_lv_disp_drv_t *disp_drv, const lv_area_t *area, lv_col
     original_screen_driver(disp_drv, area, color_p);
 }
 
+
+#ifndef ROTATION_INVERTED
+    #ifdef CYD_SCREEN_VERTICAL
+        #define ROTATION_INVERTED LV_DISP_ROT_180
+    #else
+        #define ROTATION_INVERTED LV_DISP_ROT_270
+    #endif
+#endif
+
+#ifndef ROTATION_NORMAL 
+    #ifdef CYD_SCREEN_VERTICAL
+        #define ROTATION_NORMAL LV_DISP_ROT_NONE
+    #else
+        #define ROTATION_NORMAL LV_DISP_ROT_90
+    #endif
+#endif
+
 void screen_setup()
 {
     smartdisplay_init();
@@ -44,7 +62,7 @@ void screen_setup()
     }
 #endif // CYD_SCREEN_DISABLE_INVERT_COLORS
 
-    lv_disp_set_rotation(lv_disp_get_default(), (global_config.rotateScreen) ? LV_DISP_ROT_270 : LV_DISP_ROT_90);
+    lv_disp_set_rotation(lv_disp_get_default(), (global_config.rotateScreen) ? ROTATION_INVERTED : ROTATION_NORMAL);
 }
 
 #endif // CYD_SCREEN_DRIVER_ESP32_SMARTDISPLAY

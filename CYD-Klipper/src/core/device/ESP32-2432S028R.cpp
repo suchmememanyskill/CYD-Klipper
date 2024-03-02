@@ -1,6 +1,10 @@
 #ifdef CYD_SCREEN_DRIVER_ESP32_2432S028R
 #include "../screen_driver.h"
 
+#ifdef CYD_SCREEN_VERTICAL
+    #error "Vertical screen not supported with the ESP32_2432S028R driver"
+#endif
+
 #include <SPI.h>
 #include <TFT_eSPI.h>
 #include "../../conf/global_config.h"
@@ -81,7 +85,6 @@ void screen_setup()
 
     tft.setRotation(global_config.rotateScreen ? 3 : 1);
     tft.fillScreen(TFT_BLACK);
-    set_screen_brightness();
     set_invert_display();
 
     touchscreen_spi.begin(XPT2046_CLK, XPT2046_MISO, XPT2046_MOSI, XPT2046_CS);

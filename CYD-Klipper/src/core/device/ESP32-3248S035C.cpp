@@ -1,4 +1,9 @@
 #ifdef CYD_SCREEN_DRIVER_ESP32_3248S035C
+#include "../screen_driver.h"
+
+#ifdef CYD_SCREEN_VERTICAL
+    #error "Vertical screen not supported with the ESP32_3248S035C driver"
+#endif
 
 #include "lvgl.h"
 #include <TAMC_GT911.h>
@@ -111,7 +116,6 @@ void screen_setup()
     ledcAttachPin(TFT_BL, 0);
     tft.setRotation(global_config.rotateScreen ? 3 : 1);
     tft.fillScreen(TFT_BLACK);
-    set_screen_brightness();
     set_invert_display();
     LED_init();
 
