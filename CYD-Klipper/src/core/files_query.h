@@ -13,10 +13,12 @@ typedef struct _FILESYSTEM_FOLDER {
     FILESYSTEM_FOLDER* folders;
 } FILESYSTEM_FOLDER;
 */
+#pragma once
+
 
 typedef struct _FILESYSTEM_FILE {
     char* name;
     float modified;
 } FILESYSTEM_FILE;
 
-FILESYSTEM_FILE* getFiles(int limit);
+FILESYSTEM_FILE* GetFiles(int limit);

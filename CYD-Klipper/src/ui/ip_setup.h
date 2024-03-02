@@ -1,2 +1,4 @@
-void ip_init();
-void ip_ok();
+#pragma once
+
+void IpInit();
+void IpOk();

@@ -1,10 +1,10 @@
 #pragma once
 
-void setScreenBrightness();
-void setScreenTimerPeriod();
-void screenTimerWake();
-void screenTimerStart();
-void screenTimerStop();
-void setColorScheme();
-void lvSetup();
-bool isScreenAsleep();
+void SetScreenBrightness();
+void SetScreenTimerPeriod();
+void ScreenTimerWake();
+void ScreenTimerStart();
+void ScreenTimerStop();
+void SetColorScheme();
+void LvSetup();
+bool IsScreenAsleep();

@@ -87,7 +87,7 @@ static void BtnPrintFileVerify(lv_event_t * e){
 
 void PrintPanelInit(lv_obj_t* panel){
     if (printer.state == PRINTER_STATE_PRINTING || printer.state == PRINTER_STATE_PAUSED){
-        progressPanelInit(panel);
+        ProgressPanelInit(panel);
         return;
     }
 
@@ -98,7 +98,7 @@ void PrintPanelInit(lv_obj_t* panel){
     lv_obj_set_size(list, CYD_SCREEN_PANEL_WIDTH_PX, CYD_SCREEN_HEIGHT_PX);
     lv_obj_align(list, LV_ALIGN_CENTER, 0, 0);
 
-    FILESYSTEM_FILE* files = getFiles(25);
+    FILESYSTEM_FILE* files = GetFiles(25);
     int count = 0;
     while (files != NULL && files->name != NULL && count <= 20){
         lv_obj_t * btn = lv_list_add_btn(list, LV_SYMBOL_FILE, files->name);

@@ -36,28 +36,58 @@ void LvTouchInterceptCalibration(lv_indev_drv_t *indev_driver, lv_indev_data_t *
 
     data->state = LV_INDEV_STATE_REL;
 }
-
-void LvTouchIntercept(lv_indev_drv_t *indev_driver, lv_indev_data_t *data)
+bool IsScreenAsleep()
 {
-    originalTouchDriver(indev_driver, data);
-
-    if (data->state == LV_INDEV_STATE_PR) {
-        if (IsScreenAsleep()) {
-            while (data->state == LV_INDEV_STATE_PR) {
-                originalTouchDriver(indev_driver, data);
-                delay(20);
-            }
-
-            data->state = LV_INDEV_STATE_REL;
-        }
-
-        ScreenTimerWake();
-#ifndef CYD_SCREEN_DISABLE_TOUCH_CALIBRATION
-        data->point.x = round((data->point.x * globalConfig.screenCalXMult) + globalConfig.screenCalXOffset);
-        data->point.y = round((data->point.y * globalConfig.screenCalYMult) + globalConfig.screenCalYOffset);
-#endif // CYD_SCREEN_DISABLE_TOUCH_CALIBRATION
-    }
+    return isScreenInSleep;
 }
+
+void SetScreenBrightness()
+{
+    if (globalConfig.brightness < 32)
+        SetScreenBrightness(255);
+    else
+        SetScreenBrightness(globalConfig.brightness);
+}
+
+
+void ScreenTimerSleep(lv_timer_t *timer)
+{
+#ifndef CYD_SCREEN_DISABLE_TIMEOUT
+    SetScreenBrightness(0);
+    isScreenInSleep = true;
+
+    // Screen is off, no need to make the cpu run fast, the user won't notice ;)
+    setCpuFrequencyMhz(CPU_FREQ_LOW);
+    Serial.printf("CPU Speed: %d MHz\n", ESP.getCpuFreqMHz());
+#endif
+}
+
+void ScreenTimerSetup()
+{
+    screenSleepTimer = lv_timer_create(ScreenTimerSleep, globalConfig.screenTimeout * 1000 * 60, NULL);
+    lv_timer_pause(screenSleepTimer);
+}
+
+void ScreenTimerStart()
+{
+    lv_timer_resume(screenSleepTimer);
+}
+
+void ScreenTimerStop()
+{
+    lv_timer_pause(screenSleepTimer);
+}
+
+void ScreenTimerPeriod(unsigned int period)
+{
+    lv_timer_set_period(screenSleepTimer, period);
+}
+
+void SetScreenTimerPeriod()
+{
+    ScreenTimerPeriod(globalConfig.screenTimeout * 1000 * 60);
+}
+
 
 void LvDoCalibration(){
     if (globalConfig.screenCalibrated){
@@ -140,12 +170,24 @@ void LvDoCalibration(){
     lv_obj_clean(lv_scr_act());
 }
 
-void SetScreenBrightness()
+void SetColorScheme()
 {
-    if (globalConfig.brightness < 32)
-        screen_setBrightness(255);
-    else
-        screen_setBrightness(globalConfig.brightness);
+    lv_disp_t *dispp = lv_disp_get_default();
+    lv_color_t mainColor = {0};
+    ColorDef colorDef = colorDefs[globalConfig.colorScheme];
+
+    if (colorDefs[globalConfig.colorScheme].primaryColorLight > 0){
+        mainColor = lv_palette_lighten(colorDef.primaryColor, colorDef.primaryColorLight);
+    }
+    else if (colorDefs[globalConfig.colorScheme].primaryColorLight < 0) {
+        mainColor = lv_palette_darken(colorDef.primaryColor, colorDef.primaryColorLight * -1);
+    }
+    else {
+        mainColor = lv_palette_main(colorDefs[globalConfig.colorScheme].primaryColor);
+    }
+
+    lv_theme_t *theme = lv_theme_default_init(dispp, mainColor, lv_palette_main(colorDef.secondaryColor), !globalConfig.lightMode, &CYD_SCREEN_FONT);
+    lv_disp_set_theme(dispp, theme);
 }
 
 void ScreenTimerWake()
@@ -166,62 +208,27 @@ void ScreenTimerWake()
 #endif
 }
 
-void ScreenTimerSleep(lv_timer_t *timer)
+
+void LvTouchIntercept(lv_indev_drv_t *indev_driver, lv_indev_data_t *data)
 {
-#ifndef CYD_SCREEN_DISABLE_TIMEOUT
-    screen_setBrightness(0);
-    isScreenInSleep = true;
+    originalTouchDriver(indev_driver, data);
 
-    // Screen is off, no need to make the cpu run fast, the user won't notice ;)
-    setCpuFrequencyMhz(CPU_FREQ_LOW);
-    Serial.printf("CPU Speed: %d MHz\n", ESP.getCpuFreqMHz());
-#endif
-}
+    if (data->state == LV_INDEV_STATE_PR) {
+        if (IsScreenAsleep()) {
+            while (data->state == LV_INDEV_STATE_PR) {
+                originalTouchDriver(indev_driver, data);
+                delay(20);
+            }
 
-void ScreenTimerSetup()
-{
-    screenSleepTimer = lv_timer_create(ScreenTimerSleep, globalConfig.screenTimeout * 1000 * 60, NULL);
-    lv_timer_pause(screenSleepTimer);
-}
+            data->state = LV_INDEV_STATE_REL;
+        }
 
-void ScreenTimerStart()
-{
-    lv_timer_resume(screenSleepTimer);
-}
-
-void ScreenTimerStop()
-{
-    lv_timer_pause(screenSleepTimer);
-}
-
-void ScreenTimerPeriod(unsigned int period)
-{
-    lv_timer_set_period(screenSleepTimer, period);
-}
-
-void SetScreenTimerPeriod()
-{
-    ScreenTimerPeriod(globalConfig.screenTimeout * 1000 * 60);
-}
-
-void SetColorScheme()
-{
-    lv_disp_t *dispp = lv_disp_get_default();
-    lv_color_t mainColor = {0};
-    ColorDef colorDef = colorDefs[globalConfig.colorScheme];
-
-    if (colorDefs[globalConfig.colorScheme].primaryColorLight > 0){
-        mainColor = lv_palette_lighten(colorDef.primaryColor, colorDef.primaryColorLight);
+        ScreenTimerWake();
+#ifndef CYD_SCREEN_DISABLE_TOUCH_CALIBRATION
+        data->point.x = round((data->point.x * globalConfig.screenCalXMult) + globalConfig.screenCalXOffset);
+        data->point.y = round((data->point.y * globalConfig.screenCalYMult) + globalConfig.screenCalYOffset);
+#endif // CYD_SCREEN_DISABLE_TOUCH_CALIBRATION
     }
-    else if (colorDefs[globalConfig.colorScheme].primaryColorLight < 0) {
-        mainColor = lv_palette_darken(colorDef.primaryColor, colorDef.primaryColorLight * -1);
-    }
-    else {
-        mainColor = lv_palette_main(colorDefs[globalConfig.colorScheme].primaryColor);
-    }
-
-    lv_theme_t *theme = lv_theme_default_init(dispp, mainColor, lv_palette_main(colorDef.secondaryColor), !globalConfig.lightMode, &CYD_SCREEN_FONT);
-    lv_disp_set_theme(dispp, theme);
 }
 
 void LvSetup()
@@ -243,9 +250,4 @@ void LvSetup()
 
     ScreenTimerSetup();
     ScreenTimerStart();
-}
-
-bool IsScreenAsleep()
-{
-    return isScreenInSleep;
 }

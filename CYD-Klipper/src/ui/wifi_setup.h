@@ -1,2 +1,4 @@
-void wifi_init();
-void wifi_ok();
+#pragma once
+
+void WifiInit();
+void WifiOk();

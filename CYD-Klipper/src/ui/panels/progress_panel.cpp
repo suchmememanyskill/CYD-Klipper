@@ -5,7 +5,7 @@
 
 char timeBuffer[12];
 
-char* timeDisplay(unsigned long time){
+char* TimeDisplay(unsigned long time){
     unsigned long hours = time / 3600;
     unsigned long minutes = (time % 3600) / 60;
     unsigned long seconds = (time % 3600) % 60;
@@ -13,41 +13,41 @@ char* timeDisplay(unsigned long time){
     return timeBuffer;
 }
 
-static void progressBarUpdate(lv_event_t* e){
+static void ProgressBarUpdate(lv_event_t* e){
     lv_obj_t * bar = lv_event_get_target(e);
     lv_bar_set_value(bar, printer.printProgress * 100, LV_ANIM_ON);
 }
 
-static void updatePrinterDataElapsedTime(lv_event_t * e){
+static void UpdatePrinterDataElapsedTime(lv_event_t * e){
     lv_obj_t * label = lv_event_get_target(e);
-    lv_label_set_text(label, timeDisplay(printer.elapsedTime));
+    lv_label_set_text(label, TimeDisplay(printer.elapsedTime));
 }
 
-static void updatePrinterDataRemainingTime(lv_event_t * e){
+static void UpdatePrinterDataRemainingTime(lv_event_t * e){
     lv_obj_t * label = lv_event_get_target(e);
-    lv_label_set_text(label, timeDisplay(printer.remainingTime));
+    lv_label_set_text(label, TimeDisplay(printer.remainingTime));
 }
 
-static void updatePrinterDataPercentage(lv_event_t * e){
+static void UpdatePrinterDataPercentage(lv_event_t * e){
     lv_obj_t * label = lv_event_get_target(e);
     char percentageBuffer[12];
     sprintf(percentageBuffer, "%.2f%%", printer.printProgress * 100);
     lv_label_set_text(label, percentageBuffer);
 }
 
-static void btnClickStop(lv_event_t * e){
-    sendGcode(true, "CANCEL_PRINT");
+static void BtnClickStop(lv_event_t * e){
+    SendGcode(true, "CANCEL_PRINT");
 }
 
-static void btnClickPause(lv_event_t * e){
-    sendGcode(true, "PAUSE");
+static void BtnClickPause(lv_event_t * e){
+    SendGcode(true, "PAUSE");
 }
 
-static void btnClickResume(lv_event_t * e){
-    sendGcode(true, "RESUME");
+static void BtnClickResume(lv_event_t * e){
+    SendGcode(true, "RESUME");
 }
 
-void progressPanelInit(lv_obj_t* panel){
+void ProgressPanelInit(lv_obj_t* panel){
     auto panelWidth = CYD_SCREEN_PANEL_WIDTH_PX - CYD_SCREEN_GAP_PX * 3;
     const auto buttonSizeMult = 1.3f;
 
@@ -65,7 +65,7 @@ void progressPanelInit(lv_obj_t* panel){
     // Progress Bar
     lv_obj_t * bar = lv_bar_create(centerPanel);
     lv_obj_set_size(bar, panelWidth, CYD_SCREEN_MIN_BUTTON_HEIGHT_PX * 0.75f);
-    lv_obj_add_event_cb(bar, progressBarUpdate, LV_EVENT_MSG_RECEIVED, NULL);
+    lv_obj_add_event_cb(bar, ProgressBarUpdate, LV_EVENT_MSG_RECEIVED, NULL);
     lv_msg_subsribe_obj(DATA_PRINTER_DATA, bar, NULL);
 
     // Time
@@ -76,28 +76,28 @@ void progressPanelInit(lv_obj_t* panel){
     label = lv_label_create(timeEstPanel);
     lv_label_set_text(label, "???");
     lv_obj_align(label, LV_ALIGN_LEFT_MID, 0, 0);
-    lv_obj_add_event_cb(label, updatePrinterDataElapsedTime, LV_EVENT_MSG_RECEIVED, NULL);
+    lv_obj_add_event_cb(label, UpdatePrinterDataElapsedTime, LV_EVENT_MSG_RECEIVED, NULL);
     lv_msg_subsribe_obj(DATA_PRINTER_DATA, label, NULL);
 
     // Remaining Time
     label = lv_label_create(timeEstPanel);
     lv_label_set_text(label, "???");
     lv_obj_align(label, LV_ALIGN_RIGHT_MID, 0, 0);
-    lv_obj_add_event_cb(label, updatePrinterDataRemainingTime, LV_EVENT_MSG_RECEIVED, NULL);
+    lv_obj_add_event_cb(label, UpdatePrinterDataRemainingTime, LV_EVENT_MSG_RECEIVED, NULL);
     lv_msg_subsribe_obj(DATA_PRINTER_DATA, label, NULL);
 
     // Percentage
     label = lv_label_create(timeEstPanel);
     lv_label_set_text(label, "???");
     lv_obj_align(label, LV_ALIGN_CENTER, 0, 0);
-    lv_obj_add_event_cb(label, updatePrinterDataPercentage, LV_EVENT_MSG_RECEIVED, NULL);
+    lv_obj_add_event_cb(label, UpdatePrinterDataPercentage, LV_EVENT_MSG_RECEIVED, NULL);
     lv_msg_subsribe_obj(DATA_PRINTER_DATA, label, NULL);
 
     // Stop Button
     lv_obj_t * btn = lv_btn_create(panel);
     lv_obj_align(btn, LV_ALIGN_BOTTOM_RIGHT, -1 * CYD_SCREEN_GAP_PX, -1 * CYD_SCREEN_GAP_PX);
     lv_obj_set_size(btn, CYD_SCREEN_MIN_BUTTON_WIDTH_PX * buttonSizeMult, CYD_SCREEN_MIN_BUTTON_HEIGHT_PX * buttonSizeMult);
-    lv_obj_add_event_cb(btn, btnClickStop, LV_EVENT_CLICKED, NULL);
+    lv_obj_add_event_cb(btn, BtnClickStop, LV_EVENT_CLICKED, NULL);
 
     label = lv_label_create(btn);
     lv_label_set_text(label, LV_SYMBOL_STOP);
@@ -106,7 +106,7 @@ void progressPanelInit(lv_obj_t* panel){
     // Resume Button
     if (printer.state == PRINTER_STATE_PAUSED){
         btn = lv_btn_create(panel);
-        lv_obj_add_event_cb(btn, btnClickResume, LV_EVENT_CLICKED, NULL);
+        lv_obj_add_event_cb(btn, BtnClickResume, LV_EVENT_CLICKED, NULL);
 
         label = lv_label_create(btn);
         lv_label_set_text(label, LV_SYMBOL_PLAY);
@@ -115,7 +115,7 @@ void progressPanelInit(lv_obj_t* panel){
     // Pause Button
     else {
         btn = lv_btn_create(panel);
-        lv_obj_add_event_cb(btn, btnClickPause, LV_EVENT_CLICKED, NULL);
+        lv_obj_add_event_cb(btn, BtnClickPause, LV_EVENT_CLICKED, NULL);
 
         label = lv_label_create(btn);
         lv_label_set_text(label, LV_SYMBOL_PAUSE);

@@ -9,8 +9,8 @@
 // Always has +1 entry with a null'd name
 FILESYSTEM_FILE* lastQuery = NULL;
 
-FILESYSTEM_FILE* getFiles(int limit){
-    freezeRequestThread();
+FILESYSTEM_FILE* GetFiles(int limit){
+    FreezeRequestThread();
 
     if (lastQuery != NULL){
         FILESYSTEM_FILE* current = lastQuery;
@@ -96,7 +96,7 @@ FILESYSTEM_FILE* getFiles(int limit){
             free(file.name);
         }
 
-        unfreezeRequestThread();
+        UnfreezeRequestThread();
         return NULL;
     }
 
@@ -110,6 +110,6 @@ FILESYSTEM_FILE* getFiles(int limit){
 
     Serial.printf("Heap space post-file-parse: %d bytes\n", esp_get_free_heap_size());
     Serial.printf("Got %d files. Request took %dms, parsing took %dms\n", files.size(), timerParse - timerRequest, millis() - timerParse);
-    unfreezeRequestThread();
+    UnfreezeRequestThread();
     return lastQuery;
 }

@@ -18,7 +18,7 @@ char filenameBuff[512] = {0};
 SemaphoreHandle_t freezeRenderThreadSemaphore, freezeRequestThreadSemaphore;
 const long dataUpdateInterval = 780;
 
-void semaphoreInit()
+void SemaphoreInit()
 {
     freezeRenderThreadSemaphore = xSemaphoreCreateMutex();
     freezeRequestThreadSemaphore = xSemaphoreCreateMutex();
@@ -26,27 +26,27 @@ void semaphoreInit()
     xSemaphoreGive(freezeRequestThreadSemaphore);
 }
 
-void freezeRequestThread()
+void FreezeRequestThread()
 {
     xSemaphoreTake(freezeRequestThreadSemaphore, portMAX_DELAY);
 }
 
-void unfreezeRequestThread()
+void UnfreezeRequestThread()
 {
     xSemaphoreGive(freezeRequestThreadSemaphore);
 }
 
-void freezeRenderThread()
+void FreezeRenderThread()
 {
     xSemaphoreTake(freezeRenderThreadSemaphore, portMAX_DELAY);
 }
 
-void unfreezeRenderThread()
+void UnfreezeRenderThread()
 {
     xSemaphoreGive(freezeRenderThreadSemaphore);
 }
 
-void sendGcode(bool wait, const char *gcode)
+void SendGcode(bool wait, const char *gcode)
 {
     Serial.printf("Sending gcode: %s\n", gcode);
     char buff[256] = {};
@@ -72,7 +72,7 @@ void sendGcode(bool wait, const char *gcode)
     }
 }
 
-int getSlicerTimeEstimateS()
+int GetSlicerTimeEstimateS()
 {
     if (printer.state == PRINTER_STATE_IDLE)
         return 0;
@@ -100,7 +100,7 @@ int getSlicerTimeEstimateS()
     return timeEstimateS;
 }
 
-void movePrinter(const char *axis, float amount, bool relative)
+void MovePrinter(const char *axis, float amount, bool relative)
 {
     if (!printer.homedAxis || printer.state == PRINTER_STATE_PRINTING)
         return;
@@ -112,31 +112,31 @@ void movePrinter(const char *axis, float amount, bool relative)
 
     if (absoluteCoords && relative)
     {
-        sendGcode(true, "G91");
+        SendGcode(true, "G91");
     }
     else if (!absoluteCoords && !relative)
     {
-        sendGcode(true, "G90");
+        SendGcode(true, "G90");
     }
 
     sprintf(gcode, "G1 %s%s%.3f F6000", axis, extra, amount);
-    sendGcode(true, gcode);
+    SendGcode(true, gcode);
 
     if (absoluteCoords && relative)
     {
-        sendGcode(true, "G90");
+        SendGcode(true, "G90");
     }
     else if (!absoluteCoords && !relative)
     {
-        sendGcode(true, "G91");
+        SendGcode(true, "G91");
     }
 }
 
 int lastSlicerTimeQuery = -15000;
 
-void fetchPrinterData()
+void FetchPrinterData()
 {
-    freezeRequestThread();
+    FreezeRequestThread();
     char buff[256] = {};
     sprintf(buff, "http://%s:%d/printer/objects/query?extruder&heater_bed&toolhead&gcode_move&virtual_sdcard&print_stats&webhooks&fan", globalConfig.klipperHost, globalConfig.klipperPort);
     HTTPClient client;
@@ -157,8 +157,8 @@ void fetchPrinterData()
         bool emitStateUpdate = false;
         int printerState = printer.state;
         delay(10);
-        unfreezeRequestThread();
-        freezeRenderThread();
+        UnfreezeRequestThread();
+        FreezeRenderThread();
 
         if (status.containsKey("webhooks"))
         {
@@ -317,45 +317,45 @@ void fetchPrinterData()
         {
             delay(10);
             lastSlicerTimeQuery = millis();
-            printer.slicerEstimatedPrintTime = getSlicerTimeEstimateS();
+            printer.slicerEstimatedPrintTime = GetSlicerTimeEstimateS();
         }
 
-        unfreezeRenderThread();
+        UnfreezeRenderThread();
     }
     else
     {
         klipperRequestConsecutiveFailCount++;
         Serial.printf("Failed to fetch printer data: %d\n", httpCode);
-        unfreezeRequestThread();
+        UnfreezeRequestThread();
     }
 }
 
-void dataLoop()
+void DataLoop()
 {
     // Causes other threads that are trying to lock the thread to actually lock it
-    unfreezeRenderThread();
+    UnfreezeRenderThread();
     delay(1);
-    freezeRenderThread();
+    FreezeRenderThread();
 }
 
-void dataLoopBackground(void *param)
+void DataLoopBackground(void *param)
 {
     esp_task_wdt_init(10, true);
     while (true)
     {
         delay(dataUpdateInterval);
-        fetchPrinterData();
+        FetchPrinterData();
     }
 }
 
 TaskHandle_t backgroundLoop;
 
-void dataSetup()
+void DataSetup()
 {
-    semaphoreInit();
+    SemaphoreInit();
     printer.printFilename = filenameBuff;
-    fetchPrinterData();
-    macrosQuerySetup();
-    freezeRenderThread();
-    xTaskCreatePinnedToCore(dataLoopBackground, "data_loop_background", 5000, NULL, 0, &backgroundLoop, 0);
+    FetchPrinterData();
+    MacrosQuerySetup();
+    FreezeRenderThread();
+    xTaskCreatePinnedToCore(DataLoopBackground, "data_loop_background", 5000, NULL, 0, &backgroundLoop, 0);
 }

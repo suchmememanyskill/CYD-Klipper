@@ -5,29 +5,29 @@
 #include "ui_utils.h"
 #include <stdio.h>
 
-static lv_style_t nav_button_style;
+static lv_style_t navButtonStyle;
 
-static char temp_buffer[10];
-static char z_pos_buffer[10];
-static char time_buffer[10];
+static char tempBuffer[10];
+static char zPosBuffer[10];
+static char timeBuffer[10];
 
-static lv_style_t nav_button_text_style;
+static lv_style_t navButtonTextStyle;
 
-static void update_printer_data_z_pos(lv_event_t * e) {
+static void UpdatePrinterDataZPos(lv_event_t * e) {
     lv_obj_t * label = lv_event_get_target(e);
 
-    sprintf(z_pos_buffer, "Z%.2f", printer.position[2]);
-    lv_label_set_text(label, z_pos_buffer);
+    sprintf(zPosBuffer, "Z%.2f", printer.position[2]);
+    lv_label_set_text(label, zPosBuffer);
 }
 
-static void update_printer_data_temp(lv_event_t * e) {
+static void UpdatePrinterDataTemp(lv_event_t * e) {
     lv_obj_t * label = lv_event_get_target(e);
 
-    sprintf(temp_buffer, "%.0f/%.0f", printer.extruder_temp, printer.bed_temp);
-    lv_label_set_text(label, temp_buffer);
+    sprintf(tempBuffer, "%.0f/%.0f", printer.extruderTemp, printer.bedTemp);
+    lv_label_set_text(label, tempBuffer);
 }
 
-static void update_printer_data_time(lv_event_t * e){
+static void UpdatePrinterDataTime(lv_event_t * e){
     lv_obj_t * label = lv_event_get_target(e);
 
     if (printer.state == PRINTER_STATE_IDLE){
@@ -40,115 +40,115 @@ static void update_printer_data_time(lv_event_t * e){
         return;
     }
 
-    unsigned long time = printer.remaining_time_s;
+    unsigned long time = printer.remainingTime;
     unsigned long hours = time / 3600;
     unsigned long minutes = (time % 3600) / 60;
     unsigned long seconds = (time % 3600) % 60;
 
     if (hours >= 10){
-        sprintf(time_buffer, "%luh", hours);
+        sprintf(timeBuffer, "%luh", hours);
     } else if (hours >= 1){
-        sprintf(time_buffer, "%luh%02lum", hours, minutes);
+        sprintf(timeBuffer, "%luh%02lum", hours, minutes);
     } else {
-        sprintf(time_buffer, "%lum", minutes);
+        sprintf(timeBuffer, "%lum", minutes);
     }
 
-    lv_label_set_text(label, time_buffer);
+    lv_label_set_text(label, timeBuffer);
 }
 
-static void btn_click_files(lv_event_t * e){
-    nav_buttons_setup(0);
+static void BtnClickFiles(lv_event_t * e){
+    NavButtonsSetup(0);
 }
 
-static void btn_click_move(lv_event_t * e){
-    nav_buttons_setup(1);
+static void BtnClickMove(lv_event_t * e){
+    NavButtonsSetup(1);
 }
 
-static void btn_click_extrude(lv_event_t * e){
-    nav_buttons_setup(2);
+static void BtnClickExtrude(lv_event_t * e){
+    NavButtonsSetup(2);
 }
 
-static void btn_click_settings(lv_event_t * e){
-    nav_buttons_setup(3);
+static void BtnClickSettings(lv_event_t * e){
+    NavButtonsSetup(3);
 }
 
-static void btn_click_macros(lv_event_t * e){
-    nav_buttons_setup(4);
+static void BtnClickMacros(lv_event_t * e){
+    NavButtonsSetup(4);
 }
 
-void create_button(const char* icon, const char* name, lv_event_cb_t button_click, lv_event_cb_t label_update, lv_obj_t * root){
+void CreateButton(const char* icon, const char* name, lv_event_cb_t buttonClick, lv_event_cb_t labelUpdate, lv_obj_t * root){
     lv_obj_t* btn = lv_btn_create(root);
     lv_obj_set_flex_grow(btn, 1);
     lv_obj_set_width(btn, CYD_SCREEN_SIDEBAR_SIZE_PX);
-    lv_obj_add_style(btn, &nav_button_style, 0);
-    if (button_click != NULL)
-        lv_obj_add_event_cb(btn, button_click, LV_EVENT_CLICKED, NULL);
+    lv_obj_add_style(btn, &navButtonStyle, 0);
+    if (buttonClick != NULL)
+        lv_obj_add_event_cb(btn, buttonClick, LV_EVENT_CLICKED, NULL);
 
     lv_obj_t* label = lv_label_create(btn);
     lv_label_set_text(label, icon);
     lv_obj_align(label, LV_ALIGN_CENTER, 0, -1 * CYD_SCREEN_GAP_PX);
-    
+
     label = lv_label_create(btn);
     lv_label_set_text(label, name);
     lv_obj_align(label, LV_ALIGN_CENTER, 0, CYD_SCREEN_GAP_PX);
-    lv_obj_add_event_cb(label, label_update, LV_EVENT_MSG_RECEIVED, NULL);
+    lv_obj_add_event_cb(label, labelUpdate, LV_EVENT_MSG_RECEIVED, NULL);
     lv_msg_subsribe_obj(DATA_PRINTER_DATA, label, NULL);
-    lv_obj_add_style(label, &nav_button_text_style, 0);
+    lv_obj_add_style(label, &navButtonTextStyle, 0);
 }
 
-void nav_buttons_setup(unsigned char active_panel){
+void NavButtonsSetup(unsigned char activePanel){
     lv_obj_clean(lv_scr_act());
     lv_obj_clear_flag(lv_scr_act(), LV_OBJ_FLAG_SCROLLABLE);
 
-    lv_obj_t * root_panel = lv_create_empty_panel(lv_scr_act());
-    lv_obj_set_size(root_panel, CYD_SCREEN_SIDEBAR_SIZE_PX, CYD_SCREEN_HEIGHT_PX); 
-    lv_obj_align(root_panel, LV_ALIGN_TOP_LEFT, 0, 0);
-    lv_layout_flex_column(root_panel, LV_FLEX_ALIGN_START, 0, 0);
+    lv_obj_t * rootPanel = CreateEmptyPanel(lv_scr_act());
+    lv_obj_set_size(rootPanel, CYD_SCREEN_SIDEBAR_SIZE_PX, CYD_SCREEN_HEIGHT_PX);
+    lv_obj_align(rootPanel, LV_ALIGN_TOP_LEFT, 0, 0);
+    LayoutFlexColumn(rootPanel, LV_FLEX_ALIGN_START, 0, 0);
 
     // Files/Print
-    create_button(LV_SYMBOL_COPY, "Idle", btn_click_files, update_printer_data_time, root_panel);
+    CreateButton(LV_SYMBOL_COPY, "Idle", BtnClickFiles, UpdatePrinterDataTime, rootPanel);
 
     // Move
-    create_button(printer.state == PRINTER_STATE_PRINTING ? LV_SYMBOL_EDIT : LV_SYMBOL_CHARGE, "Z?", btn_click_move, update_printer_data_z_pos, root_panel);
+    CreateButton(printer.state == PRINTER_STATE_PRINTING ? LV_SYMBOL_EDIT : LV_SYMBOL_CHARGE, "Z?", BtnClickMove, UpdatePrinterDataZPos, rootPanel);
 
     // Extrude/Temp
-    create_button(LV_SYMBOL_WARNING, "?/?", btn_click_extrude, update_printer_data_temp, root_panel);
+    CreateButton(LV_SYMBOL_WARNING, "?/?", BtnClickExtrude, UpdatePrinterDataTemp, rootPanel);
 
     // Macros
-    create_button(LV_SYMBOL_GPS, "Macro", btn_click_macros, NULL, root_panel);
+    CreateButton(LV_SYMBOL_GPS, "Macro", BtnClickMacros, NULL, rootPanel);
 
-    lv_obj_t * panel = lv_create_empty_panel(lv_scr_act());
+    lv_obj_t * panel = CreateEmptyPanel(lv_scr_act());
     lv_obj_set_size(panel, CYD_SCREEN_PANEL_WIDTH_PX, CYD_SCREEN_HEIGHT_PX);
     lv_obj_align(panel, LV_ALIGN_TOP_RIGHT, 0, 0);
 
-    switch (active_panel){
+    switch (activePanel){
         case 0:
-            print_panel_init(panel);
+            PrintPanelInit(panel);
             break;
         case 1:
-            move_panel_init(panel);
+            MovePanelInit(panel);
             break;
         case 2:
-            temp_panel_init(panel);
+            TempPanelInit(panel);
             break;
         case 3:
-            settings_panel_init(panel);
+            SettingsPanelInit(panel);
             break;
         case 4:
-            macros_panel_init(panel);
+            MacrosPanelInit(panel);
             break;
         case 5:
-            stats_panel_init(panel);
+            StatsPanelInit(panel);
             break;
     }
 
     lv_msg_send(DATA_PRINTER_DATA, &printer);
 }
 
-void nav_style_setup(){
-    lv_style_init(&nav_button_style);
-    lv_style_set_radius(&nav_button_style, 0);
+void NavStyleSetup(){
+    lv_style_init(&navButtonStyle);
+    lv_style_set_radius(&navButtonStyle, 0);
 
-    lv_style_init(&nav_button_text_style);
-    lv_style_set_text_font(&nav_button_text_style, &CYD_SCREEN_FONT_SMALL);
+    lv_style_init(&navButtonTextStyle);
+    lv_style_set_text_font(&navButtonTextStyle, &CYD_SCREEN_FONT_SMALL);
 }

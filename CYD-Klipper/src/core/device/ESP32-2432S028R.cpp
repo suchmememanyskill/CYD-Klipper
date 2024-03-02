@@ -25,7 +25,7 @@ static lv_color_t buf[CYD_SCREEN_HEIGHT_PX * CYD_SCREEN_WIDTH_PX / 10];
 
 TFT_eSPI tft = TFT_eSPI();
 
-void screenSetBrightness(byte brightness)
+void SetScreenBrightness(byte brightness)
 {
     // calculate duty, 4095 from 2 ^ 12 - 1
     uint32_t duty = (4095 / 255) * brightness;
@@ -34,7 +34,7 @@ void screenSetBrightness(byte brightness)
     ledcWrite(0, duty);
 }
 
-void screenLvFlush(lv_disp_drv_t *disp, const lv_area_t *area, lv_color_t *color_p)
+void ScreenLvFlush(lv_disp_drv_t *disp, const lv_area_t *area, lv_color_t *color_p)
 {
     uint32_t w = (area->x2 - area->x1 + 1);
     uint32_t h = (area->y2 - area->y1 + 1);
@@ -47,7 +47,7 @@ void screenLvFlush(lv_disp_drv_t *disp, const lv_area_t *area, lv_color_t *color
     lv_disp_flush_ready(disp);
 }
 
-void screenLvTouchRead(lv_indev_drv_t *indev_driver, lv_indev_data_t *data)
+void ScreenLvTouchRead(lv_indev_drv_t *indev_driver, lv_indev_data_t *data)
 {
     if (touchscreen.tirqTouched() && touchscreen.touched())
     {
@@ -62,11 +62,11 @@ void screenLvTouchRead(lv_indev_drv_t *indev_driver, lv_indev_data_t *data)
     }
 }
 
-void setInvertDisplay(){
+void SetInvertDisplay(){
     tft.invertDisplay(globalConfig.invertColors);
 }
 
-void screenSetup()
+void SetupScreen()
 {
     touchscreenSpi.begin(XPT2046_CLK, XPT2046_MISO, XPT2046_MOSI, XPT2046_CS);
     touchscreen.begin(touchscreenSpi);
@@ -81,8 +81,8 @@ void screenSetup()
 
     tft.setRotation(globalConfig.rotateScreen ? 3 : 1);
     tft.fillScreen(TFT_BLACK);
-    set_screen_brightness();
-    setInvertDisplay();
+    SetScreenBrightness();
+    SetInvertDisplay();
 
     touchscreenSpi.begin(XPT2046_CLK, XPT2046_MISO, XPT2046_MOSI, XPT2046_CS);
     touchscreen.begin(touchscreenSpi);
@@ -94,7 +94,7 @@ void screenSetup()
     lv_disp_drv_init(&disp_drv);
     disp_drv.hor_res = CYD_SCREEN_WIDTH_PX;
     disp_drv.ver_res = CYD_SCREEN_HEIGHT_PX;
-    disp_drv.flush_cb = screenLvFlush;
+    disp_drv.flush_cb = ScreenLvFlush;
     disp_drv.draw_buf = &drawBuf;
     lv_disp_drv_register(&disp_drv);
 
@@ -102,7 +102,7 @@ void screenSetup()
     static lv_indev_drv_t indev_drv;
     lv_indev_drv_init(&indev_drv);
     indev_drv.type = LV_INDEV_TYPE_POINTER;
-    indev_drv.read_cb = screenLvTouchRead;
+    indev_drv.read_cb = ScreenLvTouchRead;
     lv_indev_drv_register(&indev_drv);
 }
 

@@ -1,10 +1,10 @@
-#include <Preferences.h>
+
 #include "global_config.h"
+#include <Preferences.h>
 #include "lvgl.h"
-
+#include <array>
 GlobalConfig globalConfig = {0};
-
-const ColorDef colorDefs[] = {
+ColorDef colorDefs[] = {
     {LV_PALETTE_BLUE, 0, LV_PALETTE_RED},
     {LV_PALETTE_LIME, -2, LV_PALETTE_PURPLE},
     {LV_PALETTE_GREY, 0, LV_PALETTE_CYAN},
@@ -13,7 +13,6 @@ const ColorDef colorDefs[] = {
     {LV_PALETTE_RED, 0, LV_PALETTE_GREEN},
     {LV_PALETTE_PURPLE, 0, LV_PALETTE_GREY},
 };
-
 void WriteGlobalConfig() {
     Preferences preferences;
     preferences.begin(GLOBAL_CONFIG_NAMESPACE, false);

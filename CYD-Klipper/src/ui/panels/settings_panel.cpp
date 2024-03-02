@@ -18,7 +18,7 @@ static void InvertColorSwitch(lv_event_t *e)
     bool checked = (state & LV_STATE_CHECKED == LV_STATE_CHECKED);
     globalConfig.invertColors = checked;
     WriteGlobalConfig();
-    setInvertDisplay();
+    SetInvertDisplay();
 }
 
 static void ResetCalibrationClick(lv_event_t *e)
@@ -43,7 +43,7 @@ static void LightModeSwitch(lv_event_t *e)
     bool checked = (state & LV_STATE_CHECKED == LV_STATE_CHECKED);
     globalConfig.lightMode = checked;
     WriteGlobalConfig();
-    setColorScheme();
+    SetColorScheme();
 }
 
 static void ThemeDropdown(lv_event_t *e)
@@ -51,7 +51,7 @@ static void ThemeDropdown(lv_event_t *e)
     lv_obj_t *dropdown = lv_event_get_target(e);
     auto selected = lv_dropdown_get_selected(dropdown);
     globalConfig.colorScheme = selected;
-    setColorScheme();
+    SetColorScheme();
     WriteGlobalConfig();
 }
 
@@ -63,7 +63,7 @@ static void BrightnessDropdown(lv_event_t *e)
     lv_obj_t *dropdown = lv_event_get_target(e);
     auto selected = lv_dropdown_get_selected(dropdown);
     globalConfig.brightness = brightness_options_values[selected];
-    setScreenBrightness();
+    SetScreenBrightness();
     WriteGlobalConfig();
 }
 
@@ -75,7 +75,7 @@ static void WakeTimeoutDropdown(lv_event_t *e)
     lv_obj_t *dropdown = lv_event_get_target(e);
     auto selected = lv_dropdown_get_selected(dropdown);
     globalConfig.screenTimeout = wake_timeout_options_values[selected];
-    setScreenTimerPeriod();
+    SetScreenTimerPeriod();
     WriteGlobalConfig();
 }
 
@@ -94,13 +94,13 @@ static void OnDuringPrintSwitch(lv_event_t *e)
     auto state = lv_obj_get_state(lv_event_get_target(e));
     bool checked = (state & LV_STATE_CHECKED == LV_STATE_CHECKED);
     globalConfig.onDuringPrint = checked;
-    check_if_screen_needs_to_be_disabled();
+    CheckIfScreenNeedsToBeDisabled();
     WriteGlobalConfig();
 }
 
 static void BtnOtaDoUpdate(lv_event_t *e)
 {
-    set_ready_for_ota_update();
+    SetReadyForOtaUpdate();
 }
 
 static void AutoOtaUpdateSwitch(lv_event_t *e)
@@ -275,13 +275,13 @@ void SettingsPanelInit(lv_obj_t *panel)
 
     CreateSettingsWidget("Version", label, panel, false);
 
-    if (ota_has_update())
+    if (OtaHasUpdate())
     {
         btn = lv_btn_create(panel);
         lv_obj_add_event_cb(btn, BtnOtaDoUpdate, LV_EVENT_CLICKED, NULL);
 
         label = lv_label_create(btn);
-        lv_label_set_text_fmt(label, "Update to %s", ota_new_version_name().c_str());
+        lv_label_set_text_fmt(label, "Update to %s", OtaNewVersionName().c_str());
         lv_obj_center(label);
 
         CreateSettingsWidget("Device", btn, panel);

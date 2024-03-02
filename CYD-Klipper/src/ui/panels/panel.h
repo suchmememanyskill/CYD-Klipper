@@ -1,13 +1,15 @@
+#pragma once
+
 #include "lvgl.h"
 #include "../../core/macros_query.h"
 
 #define SIZEOF(arr) (sizeof(arr) / sizeof(*arr))
 
-void settingsPanelInit(lv_obj_t* panel);
-void tempPanelInit(lv_obj_t* panel);
-void printPanelInit(lv_obj_t* panel);
-void movePanelInit(lv_obj_t* panel);
-void progressPanelInit(lv_obj_t* panel);
-void macrosPanelInit(lv_obj_t* panel);
-void statsPanelInit(lv_obj_t* panel);
-void macrosPanelAddPowerDevicesToPanel(lv_obj_t * panel, PowerQuery query);
+void SettingsPanelInit(lv_obj_t* panel);
+void TempPanelInit(lv_obj_t* panel);
+void PrintPanelInit(lv_obj_t* panel);
+void MovePanelInit(lv_obj_t* panel);
+void ProgressPanelInit(lv_obj_t* panel);
+void MacrosPanelInit(lv_obj_t* panel);
+void StatsPanelInit(lv_obj_t* panel);
+void MacrosPanelAddPowerDevicesToPanel(lv_obj_t * panel, PowerQueryT query);

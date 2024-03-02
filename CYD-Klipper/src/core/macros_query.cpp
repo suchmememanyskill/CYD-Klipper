@@ -13,7 +13,7 @@ static char* powerDevices[16] = {0};
 static bool powerDeviceStates[16] = {0};
 static int powerDevicesCount = 0;
 
-static void _macrosQueryInternal(){
+static void MacrosQueryInternal(){
     String url = "http://" + String(globalConfig.klipperHost) + ":" + String(globalConfig.klipperPort) + "/printer/gcode/help";
     HTTPClient client;
     client.useHTTP10(true);
@@ -46,7 +46,7 @@ static void _macrosQueryInternal(){
     }
 }
 
-void powerDevicesClear(){
+void PowerDevicesClear(){
     for (int i = 0; i < powerDevicesCount; i++){
         free(powerDevices[i]);
     }
@@ -54,7 +54,7 @@ void powerDevicesClear(){
     powerDevicesCount = 0;
 }
 
-void _powerDevicesQueryInternal(){
+void PowerDevicesQueryInternal(){
     String url = "http://" + String(globalConfig.klipperHost) + ":" + String(globalConfig.klipperPort) + "/machine/device_power/devices";
     HTTPClient client;
     client.useHTTP10(true);
@@ -71,7 +71,7 @@ void _powerDevicesQueryInternal(){
         deserializeJson(doc, client.getStream());
         auto result = doc["result"]["devices"].as<JsonArray>();
 
-        powerDevicesClear();
+        PowerDevicesClear();
 
         for (auto i : result){
             const char * deviceName = i["device"];
@@ -89,8 +89,8 @@ static void OnStateChange(void * s, lv_msg_t * m) {
         return;
     }
 
-    _macrosQueryInternal();
-    _powerDevicesQueryInternal();
+    MacrosQueryInternal();
+    PowerDevicesQueryInternal();
 }
 
 bool SetPowerState(const char* deviceName, bool state) {
@@ -115,11 +115,11 @@ bool SetPowerState(const char* deviceName, bool state) {
     return true;
 }
 
-MACROSQUERY MacrosQuery() {
+MacrosQueryT MacrosQuery() {
     return {(const char**)macros, (unsigned int)macrosCount};
 }
 
-POWERQUERY PowerDevicesQuery() {
+PowerQueryT PowerDevicesQuery() {
     return {(const char**)powerDevices, (const bool*)powerDeviceStates, (unsigned int)powerDevicesCount};
 }
 

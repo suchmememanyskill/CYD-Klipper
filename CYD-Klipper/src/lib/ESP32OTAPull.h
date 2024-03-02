@@ -21,7 +21,7 @@ private:
     String cVersion = "";
     bool downgradesAllowed = false;
 
-    int downloadJson(const char* url, String& payload)
+    int DownloadJson(const char* url, String& payload)
     {
         HTTPClient http;
         http.begin(url);
@@ -39,7 +39,7 @@ private:
         return httpResponseCode;
     }
 
-    int doOtaUpdate(const char* url, ActionType action)
+    int DoOtaUpdate(const char* url, ActionType action)
     {
         HTTPClient http;
         http.begin(url);
@@ -102,7 +102,7 @@ private:
 public:
     /// @brief Return the version string of the binary, as reported by the JSON
     /// @return The firmware version
-    String getVersion()
+    String GetVersion()
     {
         return cVersion;
     }
@@ -110,7 +110,7 @@ public:
     /// @brief Override the default "Device" id (MAC Address)
     /// @param device A string identifying the particular device (instance) (typically e.g., a MAC address)
     /// @return The current Esp32OtaPull object for chaining
-    Esp32OtaPull &overrideDevice(const char *device)
+    Esp32OtaPull &OverrideDevice(const char *device)
     {
         this->device = device;
         return *this;
@@ -119,7 +119,7 @@ public:
         /// @brief Override the default "Board" value of ARDUINO_BOARD
     /// @param board A string identifying the board (class) being targeted
     /// @return The current Esp32OtaPull object for chaining
-    Esp32OtaPull &overrideBoard(const char *board)
+    Esp32OtaPull &OverrideBoard(const char *board)
     {
         this->board = board;
         return *this;
@@ -128,7 +128,7 @@ public:
     /// @brief Specify a configuration string that must match any "Config" in JSON
     /// @param config An arbitrary string showing the current configuration
     /// @return The current Esp32OtaPull object for chaining
-    Esp32OtaPull &setConfig(const char *config)
+    Esp32OtaPull &SetConfig(const char *config)
     {
         this->config = config;
         return *this;
@@ -137,7 +137,7 @@ public:
     /// @brief Specify whether downgrades (posted version is lower) are allowed
     /// @param allowDowngrades true if downgrades are allowed
     /// @return The current Esp32OtaPull object for chaining
-    Esp32OtaPull &allowDowngrades(bool allowDowngrades)
+    Esp32OtaPull &AllowDowngrades(bool allowDowngrades)
     {
         this->downgradesAllowed = allowDowngrades;
         return *this;
@@ -146,7 +146,7 @@ public:
     /// @brief Specify a callback function to monitor update progress
     /// @param callback Pointer to a function that is called repeatedly during update
     /// @return The current Esp32OtaPull object for chaining
-    Esp32OtaPull &setCallback(void (*callback)(int offset, int totallength))
+    Esp32OtaPull &SetCallback(void (*callback)(int offset, int totallength))
     {
         this->callback = callback;
         return *this;
@@ -157,13 +157,13 @@ public:
     /// @param currentVersion The version # of the current (i.e. to be replaced) sketch
     /// @param action The action to be performed.  May be any of DONT_DO_UPDATE, UPDATE_BUT_NO_BOOT, UPDATE_AND_BOOT (default)
     /// @return ErrorCode or HTTP failure code (see enum above)
-    int checkForOtaUpdate(const char* jsonUrl, const char *currentVersion, ActionType action = UPDATE_AND_BOOT)
+    int CheckForOtaUpdate(const char* jsonUrl, const char *currentVersion, ActionType action = UPDATE_AND_BOOT)
     {
         currentVersion = currentVersion == NULL ? "" : currentVersion;
 
         // Downloading OTA Json...
         String payload;
-        int httpResponseCode = downloadJson(jsonUrl, payload);
+        int httpResponseCode = DownloadJson(jsonUrl, payload);
         if (httpResponseCode != 200)
             return httpResponseCode > 0 ? httpResponseCode : HTTP_FAILED;
 
@@ -193,7 +193,7 @@ public:
             {
                 if (cVersion.isEmpty() || cVersion > String(currentVersion) ||
                     (downgradesAllowed && cVersion != String(currentVersion)))
-                    return action == DONT_DO_UPDATE ? UPDATE_AVAILABLE : doOtaUpdate(config["URL"], action);
+                    return action == DONT_DO_UPDATE ? UPDATE_AVAILABLE : DoOtaUpdate(config["URL"], action);
                 foundProfile = true;
             }
         }

@@ -10,19 +10,19 @@ static bool lastHomingState = false;
 static void XLineButtonPress(lv_event_t * e) {
     float* dataPointer = (float*)lv_event_get_user_data(e);
     float data = *dataPointer;
-    movePrinter("X", data, true);
+    MovePrinter("X", data, true);
 }
 
 static void YLineButtonPress(lv_event_t * e) {
     float* dataPointer = (float*)lv_event_get_user_data(e);
     float data = *dataPointer;
-    movePrinter("Y", data, true);
+    MovePrinter("Y", data, true);
 }
 
 static void ZLineButtonPress(lv_event_t * e) {
     float* dataPointer = (float*)lv_event_get_user_data(e);
     float data = *dataPointer;
-    movePrinter("Z", data, true);
+    MovePrinter("Z", data, true);
 }
 
 char xPosBuff[12];
@@ -73,19 +73,19 @@ static void HomeButtonClick(lv_event_t * e) {
     if (printer.state == PRINTER_STATE_PRINTING)
         return;
 
-    sendGcode(false, "G28");
+    SendGcode(false, "G28");
 }
 
 static void DisableSteppersClick(lv_event_t * e) {
     if (printer.state == PRINTER_STATE_PRINTING)
         return;
 
-    sendGcode(true, "M18");
+    SendGcode(true, "M18");
 }
 
 static void SwitchToStatPanel(lv_event_t * e) {
     lv_obj_t * panel = lv_event_get_target(e);
-    nav_buttons_setup(5);
+    NavButtonsSetup(5);
 }
 
 inline void RootPanelSteppersLocked(lv_obj_t * rootPanel){
@@ -188,7 +188,7 @@ static void RootPanelStateUpdate(lv_event_t * e){
 
 void MovePanelInit(lv_obj_t* panel){
     if (printer.state == PRINTER_STATE_PRINTING){
-        statsPanelInit(panel);
+        StatsPanelInit(panel);
         return;
     }
 

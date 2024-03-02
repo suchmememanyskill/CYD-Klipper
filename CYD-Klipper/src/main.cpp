@@ -14,28 +14,28 @@ void setup() {
     Serial.begin(115200);
     Serial.println("Hello World");
     LoadGlobalConfig();
-    setupScreen();
-    lvSetup();
+    SetupScreen();
+    LvSetup();
     Serial.println("Screen init done");
     
-    wifi_init();
-    ota_init();
-    ip_init();
-    dataSetup();
+    WifiInit();
+    OtaInit();
+    IpInit();
+    DataSetup();
 
-    nav_style_setup();
-    main_ui_setup();
+    NavStyleSetup();
+    MainUiSetup();
 }
 
 void loop(){
-    wifi_ok();
-    ip_ok();
-    dataLoop();
+    WifiOk();
+    IpOk();
+    DataLoop();
     lv_timer_handler();
     lv_task_handler();
 
-    if (is_ready_for_ota_update())
+    if (IsReadyForOtaUpdate())
     {
-        ota_do_update();
+        OtaDoUpdate();
     }
 }

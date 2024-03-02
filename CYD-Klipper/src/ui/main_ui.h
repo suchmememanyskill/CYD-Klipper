@@ -1,2 +1,4 @@
-void main_ui_setup();
-void check_if_screen_needs_to_be_disabled();
+#pragma once
+
+void MainUiSetup();
+void CheckIfScreenNeedsToBeDisabled();

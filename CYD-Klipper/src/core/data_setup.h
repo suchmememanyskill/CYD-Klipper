@@ -7,7 +7,7 @@ enum PRINTER_STATE {
     PRINTER_STATE_PAUSED = 3,
 };
 
-extern const char* printer_state_messages[];
+extern const char* printerStateMessages[];
 
 typedef struct {
     unsigned char state;
@@ -38,16 +38,16 @@ typedef struct {
 } Printer;
 
 extern Printer printer;
-extern int klipper_request_consecutive_fail_count;
+extern int klipperRequestConsecutiveFailCount;
 
 #define DATA_PRINTER_STATE 1
 #define DATA_PRINTER_DATA 2
 #define DATA_PRINTER_TEMP_PRESET 3
 
-void dataLoop();
-void dataSetup();
-void sendGcode(bool wait, const char* gcode);
-void movePrinter(const char* axis, float amount, bool relative);
+void DataLoop();
+void DataSetup();
+void SendGcode(bool wait, const char* gcode);
+void MovePrinter(const char* axis, float amount, bool relative);
 
-void freezeRequestThread();
-void unfreezeRequestThread();
+void FreezeRequestThread();
+void UnfreezeRequestThread();

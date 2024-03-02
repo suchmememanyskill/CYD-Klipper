@@ -3,17 +3,17 @@
 typedef struct {
     const char** macros;
     uint32_t count;
-} MacrosQuery;
+} MacrosQueryT;
 
 typedef struct {
     const char** powerDevices;
     const bool* powerStates;
     uint32_t count;
-} PowerQuery;
+} PowerQueryT;
 
-MacrosQuery macrosQuery();
-PowerQuery powerDevicesQuery();
-void macrosQuerySetup();
-bool setPowerState(const char* deviceName, bool state);
-void powerDevicesQueryInternal();
-void powerDevicesClear();
+MacrosQueryT MacrosQuery();
+PowerQueryT PowerDevicesQuery();
+void MacrosQuerySetup();
+bool SetPowerState(const char* deviceName, bool state);
+void PowerDevicesQueryInternal();
+void PowerDevicesClear();

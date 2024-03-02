@@ -21,19 +21,19 @@ static char bedBuff[40];
 static bool editMode = false;
 lv_obj_t* rootPanel;
 
-static void updatePrinterDataHotendTemp(lv_event_t * e) {
+static void UpdatePrinterDataHotendTemp(lv_event_t * e) {
     lv_obj_t * label = lv_event_get_target(e);
     sprintf(hotendBuff, "Hotend: %.0f C (Target: %.0f C)", printer.extruderTemp, printer.extruderTargetTemp);
     lv_label_set_text(label, hotendBuff);
 }
 
-static void updatePrinterDataBedTemp(lv_event_t * e) {
+static void UpdatePrinterDataBedTemp(lv_event_t * e) {
     lv_obj_t * label = lv_event_get_target(e);
     sprintf(bedBuff, "Bed: %.0f C (Target: %.0f C)", printer.bedTemp, printer.bedTargetTemp);
     lv_label_set_text(label, bedBuff);
 }
 
-static short getTempPreset(int target) {
+static short GetTempPreset(int target) {
     switch (target) {
         case TARGET_HOTEND_CONFIG_1:
             return globalConfig.hotendPresets[0];
@@ -52,10 +52,10 @@ static short getTempPreset(int target) {
     }
 }
 
-static void updateTempPresetLabel(lv_event_t * e) {
+static void UpdateTempPresetLabel(lv_event_t * e) {
     lv_obj_t * label = lv_event_get_target(e);
     int target = static_cast<int>(reinterpret_cast<intptr_t>(lv_event_get_user_data(e)));
-    short value = getTempPreset(target);
+    short value = GetTempPreset(target);
 
     String textLabel = String(value) + " C";
     lv_label_set_text(label, textLabel.c_str());
@@ -66,7 +66,7 @@ void UpdateConfig() {
     lv_msg_send(DATA_PRINTER_TEMP_PRESET, &printer);
 }
 
-static void keyboardCallback(lv_event_t * e) {
+static void KeyboardCallback(lv_event_t * e) {
     lv_event_code_t code = lv_event_get_code(e);
     lv_obj_t * ta = lv_event_get_target(e);
     lv_obj_t * kb = (lv_obj_t *)lv_event_get_user_data(e);
@@ -84,11 +84,11 @@ static void keyboardCallback(lv_event_t * e) {
         switch (keyboardTarget) {
             case TARGET_HOTEND:
                 sprintf(gcode, "M104 S%d", temp);
-                sendGcode(true, gcode);
+                SendGcode(true, gcode);
                 break;
             case TARGET_BED:
                 sprintf(gcode, "M140 S%d", temp);
-                sendGcode(true, gcode);
+                SendGcode(true, gcode);
                 break;
             case TARGET_HOTEND_CONFIG_1:
                 globalConfig.hotendPresets[0] = temp;
@@ -123,7 +123,7 @@ static void keyboardCallback(lv_event_t * e) {
     }
 }
 
-static void showKeyboard(lv_event_t * e) {
+static void ShowKeyboard(lv_event_t * e) {
     lv_obj_t * parent = CreateEmptyPanel(rootPanel);
     lv_obj_set_style_bg_opa(parent, LV_OPA_50, 0);
     lv_obj_set_size(parent, CYD_SCREEN_PANEL_WIDTH_PX, CYD_SCREEN_HEIGHT_PX);
@@ -139,29 +139,29 @@ static void showKeyboard(lv_event_t * e) {
     lv_textarea_set_max_length(ta, 3);
     lv_textarea_set_one_line(ta, true);
     lv_textarea_set_text(ta, "");
-    lv_obj_add_event_cb(ta, keyboardCallback, LV_EVENT_ALL, keyboard);
+    lv_obj_add_event_cb(ta, KeyboardCallback, LV_EVENT_ALL, keyboard);
 
     lv_keyboard_set_mode(keyboard, LV_KEYBOARD_MODE_NUMBER);
     lv_keyboard_set_textarea(keyboard, ta);
 }
 
-static void showKeyboardWithHotend(lv_event_t * e) {
+static void ShowKeyboardWithHotend(lv_event_t * e) {
     keyboardTarget = TARGET_HOTEND;
-    showKeyboard(e);
+    ShowKeyboard(e);
 }
 
-static void showKeyboardWithBed(lv_event_t * e) {
+static void ShowKeyboardWithBed(lv_event_t * e) {
     keyboardTarget = TARGET_BED;
-    showKeyboard(e);
+    ShowKeyboard(e);
 }
 
-static void cooldownTemp(lv_event_t * e) {
+static void CooldownTemp(lv_event_t * e) {
     if (printer.state == PRINTER_STATE_PRINTING){
         return;
     }
 
-    sendGcode(true, "M104 S0");
-    sendGcode(true, "M140 S0");
+    SendGcode(true, "M104 S0");
+    SendGcode(true, "M140 S0");
 }
 
 static void btnExtrude(lv_event_t * e) {
@@ -169,17 +169,17 @@ static void btnExtrude(lv_event_t * e) {
         return;
     }
 
-    sendGcode(true, "M83");
-    sendGcode(true, "G1 E25 F300");
+    SendGcode(true, "M83");
+    SendGcode(true, "G1 E25 F300");
 }
 
 static void setTempViaPreset(lv_event_t * e) {
     int target = static_cast<int>(reinterpret_cast<intptr_t>(lv_event_get_user_data(e)));
-    int value = getTempPreset(target);
+    int value = GetTempPreset(target);
 
     if (editMode) {
         keyboardTarget = (TEMP_TARGET)target;
-        showKeyboard(e);
+        ShowKeyboard(e);
         return;
     }
 
@@ -189,7 +189,7 @@ static void setTempViaPreset(lv_event_t * e) {
     else
         sprintf(gcode, "M140 S%d", value);
 
-    sendGcode(true, gcode);
+    SendGcode(true, gcode);
 }
 
 static void btnToggleableEdit(lv_event_t * e) {
@@ -203,11 +203,11 @@ static void btnRetract(lv_event_t * e) {
         return;
     }
 
-    sendGcode(true, "M83");
-    sendGcode(true, "G1 E-25 F300");
+    SendGcode(true, "M83");
+    SendGcode(true, "G1 E-25 F300");
 }
 
-static void setChartRange(lv_event_t * e) {
+static void SetChartRange(lv_event_t * e) {
     lv_obj_t * chartObj = lv_event_get_target(e);
     lv_chart_t * chart = (lv_chart_t *)chartObj;
     int maxTemp = 0;
@@ -231,31 +231,31 @@ static void setChartRange(lv_event_t * e) {
     lv_chart_set_range(chartObj, LV_CHART_AXIS_PRIMARY_Y, 0, range);
 }
 
-static void setHotendTempChart(lv_event_t * e) {
+static void SetHotendTempChart(lv_event_t * e) {
     lv_obj_t * chart = lv_event_get_target(e);
     lv_chart_series_t * series = (lv_chart_series_t *)lv_event_get_user_data(e);
     lv_chart_set_next_value(chart, series, printer.extruderTemp);
 }
 
-static void setHotendTargetTempChart(lv_event_t * e) {
+static void SetHotendTargetTempChart(lv_event_t * e) {
     lv_obj_t * chart = lv_event_get_target(e);
     lv_chart_series_t * series = (lv_chart_series_t *)lv_event_get_user_data(e);
     lv_chart_set_next_value(chart, series, printer.extruderTargetTemp);
 }
 
-static void setBedTempChart(lv_event_t * e) {
+static void SetBedTempChart(lv_event_t * e) {
     lv_obj_t * chart = lv_event_get_target(e);
     lv_chart_series_t * series = (lv_chart_series_t *)lv_event_get_user_data(e);
     lv_chart_set_next_value(chart, series, printer.bedTemp);
 }
 
-static void setBedTargetTempChart(lv_event_t * e) {
+static void SetBedTargetTempChart(lv_event_t * e) {
     lv_obj_t * chart = lv_event_get_target(e);
     lv_chart_series_t * series = (lv_chart_series_t *)lv_event_get_user_data(e);
     lv_chart_set_next_value(chart, series, printer.bedTargetTemp);
 }
 
-void tempPanelInit(lv_obj_t * panel) {
+void TempPanelInit(lv_obj_t * panel) {
     const auto elementWidth = CYD_SCREEN_PANEL_WIDTH_PX - CYD_SCREEN_GAP_PX * 2;
     rootPanel = panel;
     editMode = false;
@@ -283,15 +283,13 @@ void tempPanelInit(lv_obj_t * panel) {
     lv_chart_series_t * ser3 = lv_chart_add_series(chart, lv_palette_main(LV_PALETTE_TEAL), LV_CHART_AXIS_PRIMARY_Y);
     lv_chart_set_all_value(chart, ser3, printer.bedTargetTemp);
     lv_chart_series_t * ser4 = lv_chart_add_series(chart, lv_palette_main(LV_PALETTE_BLUE), LV_CHART_AXIS_PRIMARY_Y);
-
-    lv_chart_series_t * ser4 = lv_chart_add_series(chart, lv_palette_main(LV_PALETTE_BLUE), LV_CHART_AXIS_PRIMARY_Y);
     lv_chart_set_all_value(chart, ser4, printer.bedTemp);
 
-    lv_obj_add_event_cb(chart, setHotendTargetTempChart, LV_EVENT_MSG_RECEIVED, ser1);
-    lv_obj_add_event_cb(chart, setHotendTempChart, LV_EVENT_MSG_RECEIVED, ser2);
-    lv_obj_add_event_cb(chart, setBedTargetTempChart, LV_EVENT_MSG_RECEIVED, ser3);
-    lv_obj_add_event_cb(chart, setBedTempChart, LV_EVENT_MSG_RECEIVED, ser4);
-    lv_obj_add_event_cb(chart, setChartRange, LV_EVENT_MSG_RECEIVED, NULL);
+    lv_obj_add_event_cb(chart, SetHotendTargetTempChart, LV_EVENT_MSG_RECEIVED, ser1);
+    lv_obj_add_event_cb(chart, SetHotendTempChart, LV_EVENT_MSG_RECEIVED, ser2);
+    lv_obj_add_event_cb(chart, SetBedTargetTempChart, LV_EVENT_MSG_RECEIVED, ser3);
+    lv_obj_add_event_cb(chart, SetBedTempChart, LV_EVENT_MSG_RECEIVED, ser4);
+    lv_obj_add_event_cb(chart, SetChartRange, LV_EVENT_MSG_RECEIVED, NULL);
     lv_msg_subscribe_obj(DATA_PRINTER_DATA, chart, NULL);
 
     lv_obj_t * single_screen_panel = CreateEmptyPanel(rootTempPanel);
@@ -308,7 +306,7 @@ void tempPanelInit(lv_obj_t * panel) {
 
         lv_obj_t * label = lv_label_create(temp_rows[tempIter]);
         lv_label_set_text(label, "???");
-        lv_obj_add_event_cb(label, (tempIter == 0) ? updatePrinterDataHotendTemp : updatePrinterDataBedTemp, LV_EVENT_MSG_RECEIVED, NULL);
+        lv_obj_add_event_cb(label, (tempIter == 0) ? UpdatePrinterDataHotendTemp : UpdatePrinterDataBedTemp, LV_EVENT_MSG_RECEIVED, NULL);
         lv_msg_subscribe_obj(DATA_PRINTER_DATA, label, NULL);
         lv_obj_set_width(label, elementWidth);
 
@@ -325,12 +323,12 @@ void tempPanelInit(lv_obj_t * panel) {
             label = lv_label_create(btn);
             lv_label_set_text(label, "???");
             lv_obj_center(label);
-            lv_obj_add_event_cb(label, updateTempPresetLabel, LV_EVENT_MSG_RECEIVED, reinterpret_cast<void*>(TARGET_HOTEND_CONFIG_1 + buttonIter + tempIter * 3));
+            lv_obj_add_event_cb(label, UpdateTempPresetLabel, LV_EVENT_MSG_RECEIVED, reinterpret_cast<void*>(TARGET_HOTEND_CONFIG_1 + buttonIter + tempIter * 3));
             lv_msg_subscribe_obj(DATA_PRINTER_TEMP_PRESET, label, NULL);
         }
 
         lv_obj_t * btn = lv_btn_create(button_temp_rows[tempIter]);
-        lv_obj_add_event_cb(btn, (tempIter == 0) ? showKeyboardWithHotend : showKeyboardWithBed, LV_EVENT_CLICKED, panel);
+        lv_obj_add_event_cb(btn, (tempIter == 0) ? ShowKeyboardWithHotend : ShowKeyboardWithBed, LV_EVENT_CLICKED, panel);
         lv_obj_set_flex_grow(btn, 1);
         lv_obj_set_height(btn, CYD_SCREEN_MIN_BUTTON_HEIGHT_PX);
 
@@ -370,7 +368,7 @@ void tempPanelInit(lv_obj_t * panel) {
 
     btn = lv_btn_create(bottom_panel);
     lv_obj_set_flex_grow(btn, 1);
-    lv_obj_add_event_cb(btn, cooldownTemp, LV_EVENT_CLICKED, NULL);
+    lv_obj_add_event_cb(btn, CooldownTemp, LV_EVENT_CLICKED, NULL);
     lv_obj_set_height(btn, CYD_SCREEN_MIN_BUTTON_HEIGHT_PX);
 
     label = lv_label_create(btn);

@@ -4,26 +4,26 @@
 #include "ui_utils.h"
 #include "WiFi.h"
 
-void wifi_init_inner();
+void WifiInitInner();
 
-static void reset_btn_event_handler(lv_event_t * e) {
+static void ResetBtnEventHandler(lv_event_t * e) {
     lv_event_code_t code = lv_event_get_code(e);
 
     if(code == LV_EVENT_CLICKED) {
-        global_config.wifiConfigured = false;
-        wifi_init_inner();
+        globalConfig.wifiConfigured = false;
+        WifiInitInner();
     }
 }
 
-static void refresh_btn_event_handler(lv_event_t * e){
+static void RefreshBtnEventHandler(lv_event_t * e){
     lv_event_code_t code = lv_event_get_code(e);
 
     if(code == LV_EVENT_CLICKED) {
-        wifi_init_inner();
+        WifiInitInner();
     }
 }
 
-static void ta_event_cb(lv_event_t * e) {
+static void TaEventCb(lv_event_t * e) {
     lv_event_code_t code = lv_event_get_code(e);
     lv_obj_t * ta = lv_event_get_target(e);
 
@@ -33,28 +33,28 @@ static void ta_event_cb(lv_event_t * e) {
         int len = strlen(txt);
         if (len > 0)
         {
-            global_config.wifiConfigured = true;
-            strcpy(global_config.wifiPassword, txt);
+            globalConfig.wifiConfigured = true;
+            strcpy(globalConfig.wifiPassword, txt);
             WriteGlobalConfig();
-            wifi_init_inner();
+            WifiInitInner();
         }
     }
     else if (code == LV_EVENT_CANCEL)
     {
-        wifi_init_inner();
+        WifiInitInner();
     }
 }
 
-void wifi_pass_entry(const char* ssid){
+void WifiPassEntry(const char* ssid){
     lv_obj_clean(lv_scr_act());
 
-    lv_obj_t * root = lv_create_empty_panel(lv_scr_act());
+    lv_obj_t * root = CreateEmptyPanel(lv_scr_act());
     lv_obj_set_size(root, CYD_SCREEN_WIDTH_PX, CYD_SCREEN_HEIGHT_PX);
-    lv_layout_flex_column(root);
+    LayoutFlexColumn(root);
 
-    lv_obj_t * top_root = lv_create_empty_panel(root);
+    lv_obj_t * top_root = CreateEmptyPanel(root);
     lv_obj_set_width(top_root, CYD_SCREEN_WIDTH_PX);
-    lv_layout_flex_column(top_root);
+    LayoutFlexColumn(top_root);
     lv_obj_set_flex_grow(top_root, 1);
     lv_obj_set_style_pad_all(top_root, CYD_SCREEN_GAP_PX, 0);
 
@@ -66,38 +66,38 @@ void wifi_pass_entry(const char* ssid){
     lv_textarea_set_one_line(passEntry, true);
     lv_textarea_set_text(passEntry, "");
     lv_obj_set_width(passEntry, CYD_SCREEN_WIDTH_PX - CYD_SCREEN_GAP_PX * 2);
-    lv_obj_add_event_cb(passEntry, ta_event_cb, LV_EVENT_ALL, NULL);
+    lv_obj_add_event_cb(passEntry, TaEventCb, LV_EVENT_ALL, NULL);
     lv_obj_set_flex_grow(passEntry, 1);
 
     lv_obj_t * keyboard = lv_keyboard_create(root);
     lv_keyboard_set_textarea(keyboard, passEntry);
 }
 
-static void wifi_btn_event_handler(lv_event_t * e){
+static void WifiBtnEventHandler(lv_event_t * e){
     lv_event_code_t code = lv_event_get_code(e);
 
     if(code == LV_EVENT_CLICKED) {
         delay(100);
         char* ssid = (char*)e->user_data;
-        strcpy(global_config.wifiSSID, ssid);
+        strcpy(globalConfig.wifiSsid, ssid);
         Serial.println(ssid);
-        wifi_pass_entry(ssid);
+        WifiPassEntry(ssid);
     }
 }
 
-void wifi_init_inner(){
+void WifiInitInner(){
     WiFi.disconnect();
     lv_obj_clean(lv_scr_act());
 
-    if (global_config.wifiConfigured){
-        WiFi.begin(global_config.wifiSSID, global_config.wifiPassword);
-        
+    if (globalConfig.wifiConfigured){
+        WiFi.begin(globalConfig.wifiSsid, globalConfig.wifiPassword);
+
         lv_obj_t * label = lv_label_create(lv_scr_act());
         lv_label_set_text(label, "Connecting to WiFi");
         lv_obj_align(label, LV_ALIGN_CENTER, 0, 0);
 
         lv_obj_t * resetBtn = lv_btn_create(lv_scr_act());
-        lv_obj_add_event_cb(resetBtn, reset_btn_event_handler, LV_EVENT_CLICKED, NULL);
+        lv_obj_add_event_cb(resetBtn, ResetBtnEventHandler, LV_EVENT_CLICKED, NULL);
         lv_obj_set_height(resetBtn, CYD_SCREEN_MIN_BUTTON_HEIGHT_PX);
         lv_obj_align(resetBtn, LV_ALIGN_CENTER, 0, CYD_SCREEN_GAP_PX + CYD_SCREEN_MIN_BUTTON_HEIGHT_PX);
 
@@ -106,7 +106,7 @@ void wifi_init_inner(){
         lv_obj_center(label);
 
         return;
-    } 
+    }
 
     lv_obj_t * label = lv_label_create(lv_scr_act());
     lv_label_set_text(label, "Scanning for networks...");
@@ -118,20 +118,20 @@ void wifi_init_inner(){
 
     lv_obj_clean(lv_scr_act());
 
-    lv_obj_t * root = lv_create_empty_panel(lv_scr_act());
+    lv_obj_t * root = CreateEmptyPanel(lv_scr_act());
     lv_obj_set_size(root, CYD_SCREEN_WIDTH_PX, CYD_SCREEN_HEIGHT_PX);
-    lv_layout_flex_column(root);
+    LayoutFlexColumn(root);
     lv_obj_set_style_pad_all(root, CYD_SCREEN_GAP_PX, 0);
 
-    lv_obj_t * top_row = lv_create_empty_panel(root);
+    lv_obj_t * top_row = CreateEmptyPanel(root);
     lv_obj_set_size(top_row, CYD_SCREEN_WIDTH_PX - CYD_SCREEN_GAP_PX * 2, LV_SIZE_CONTENT);
-    lv_layout_flex_row(top_row, LV_FLEX_ALIGN_SPACE_BETWEEN);
+    LayoutFlexRow(top_row, LV_FLEX_ALIGN_SPACE_BETWEEN);
 
     label = lv_label_create(top_row);
     lv_label_set_text(label, "Select a network");
 
     lv_obj_t * refreshBtn = lv_btn_create(top_row);
-    lv_obj_add_event_cb(refreshBtn, reset_btn_event_handler, LV_EVENT_ALL, NULL);
+    lv_obj_add_event_cb(refreshBtn, ResetBtnEventHandler, LV_EVENT_ALL, NULL);
     lv_obj_set_size(refreshBtn, CYD_SCREEN_MIN_BUTTON_WIDTH_PX, CYD_SCREEN_MIN_BUTTON_HEIGHT_PX);
 
     label = lv_label_create(refreshBtn);
@@ -159,11 +159,11 @@ void wifi_init_inner(){
         ssid_copy[j] = '\0';
 
         lv_obj_t * btn = lv_list_add_btn(list, LV_SYMBOL_WIFI, ssid_copy);
-        lv_obj_add_event_cb(btn, wifi_btn_event_handler, LV_EVENT_ALL, (void*)ssid_copy);
+        lv_obj_add_event_cb(btn, WifiBtnEventHandler, LV_EVENT_ALL, (void*)ssid_copy);
     }
 }
 
-const char* errs[] = {
+const char* ERRS[] = {
     "Idle",
     "No SSID Available",
     "Scan Completed",
@@ -173,25 +173,25 @@ const char* errs[] = {
     "Disconnected"
 };
 
-const int print_freq = 1000;
+const int PRINT_FREQ = 1000;
 int print_timer = 0;
 
-void wifi_init(){
+void WifiInit(){
     WiFi.mode(WIFI_STA);
-    wifi_init_inner();
+    WifiInitInner();
 
-    while (!global_config.wifiConfigured || WiFi.status() != WL_CONNECTED){
-        if (millis() - print_timer > print_freq){
+    while (!globalConfig.wifiConfigured || WiFi.status() != WL_CONNECTED){
+        if (millis() - print_timer > PRINT_FREQ){
             print_timer = millis();
-            Serial.printf("WiFi Status: %s\n", errs[WiFi.status()]);
+            Serial.printf("WiFi Status: %s\n", ERRS[WiFi.status()]);
         }
-        
+
         lv_timer_handler();
         lv_task_handler();
     }
 }
 
-void wifi_ok(){
+void WifiOk(){
     if (WiFi.status() != WL_CONNECTED){
         ESP.restart();
     }
