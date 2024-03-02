@@ -7,6 +7,7 @@
 #include <HTTPClient.h>
 #include "../ui_utils.h"
 #include "../../core/lv_setup.h"
+#include "../gcode_img.h"
 
 FILESYSTEM_FILE* selected_file = NULL;
 
@@ -83,6 +84,14 @@ static void btn_print_file_verify(lv_event_t * e){
     label = lv_label_create(btn);
     lv_label_set_text(label, LV_SYMBOL_OK);
     lv_obj_center(label);
+
+    lv_obj_t* img = show_gcode_img(selected_file->name);
+
+    if (img != NULL){
+        lv_obj_set_parent(img, panel);
+        lv_obj_align(img, LV_ALIGN_BOTTOM_MID, 0, 0);
+        //lv_obj_set_size(img, CYD_SCREEN_MIN_BUTTON_WIDTH_PX * button_size_mult, CYD_SCREEN_MIN_BUTTON_HEIGHT_PX * button_size_mult);
+    }
 }
 
 void print_panel_init(lv_obj_t* panel){

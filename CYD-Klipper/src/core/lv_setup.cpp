@@ -271,6 +271,7 @@ void lv_setup()
     screen_timer_setup();
     screen_timer_start();
     set_screen_brightness();
+    lv_png_init();
 }
 
 bool is_screen_asleep()
