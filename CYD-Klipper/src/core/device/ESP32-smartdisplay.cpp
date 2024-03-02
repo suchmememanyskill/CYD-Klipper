@@ -15,7 +15,8 @@ void screen_setBrightness(byte brightness)
     smartdisplay_lcd_set_backlight(brightness / 255.0f);
 }
 
-void set_invert_display(){
+void set_invert_display()
+{
     lv_obj_invalidate(lv_scr_act());
 }
 
@@ -33,12 +34,21 @@ void lv_screen_intercept(_lv_disp_drv_t *disp_drv, const lv_area_t *area, lv_col
     original_screen_driver(disp_drv, area, color_p);
 }
 
-#ifdef CYD_SCREEN_VERTICAL
-#define ROTATION_INVERTED LV_DISP_ROT_180
-#define ROTATION_NORMAL LV_DISP_ROT_NONE
-#else
-#define ROTATION_INVERTED LV_DISP_ROT_270
-#define ROTATION_NORMAL LV_DISP_ROT_90
+
+#ifndef ROTATION_INVERTED
+    #ifdef CYD_SCREEN_VERTICAL
+        #define ROTATION_INVERTED LV_DISP_ROT_180
+    #else
+        #define ROTATION_INVERTED LV_DISP_ROT_270
+    #endif
+#endif
+
+#ifndef ROTATION_NORMAL 
+    #ifdef CYD_SCREEN_VERTICAL
+        #define ROTATION_NORMAL LV_DISP_ROT_NONE
+    #else
+        #define ROTATION_NORMAL LV_DISP_ROT_90
+    #endif
 #endif
 
 void screen_setup()
