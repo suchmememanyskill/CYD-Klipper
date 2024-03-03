@@ -253,6 +253,8 @@ void set_color_scheme()
 
 void lv_setup()
 {
+    set_screen_brightness();
+
     lv_indev_t * display_driver = lv_indev_get_next(NULL);
 
     if (original_touch_driver == NULL) 
@@ -270,7 +272,6 @@ void lv_setup()
 
     screen_timer_setup();
     screen_timer_start();
-    set_screen_brightness();
     lv_png_init();
 }
 
