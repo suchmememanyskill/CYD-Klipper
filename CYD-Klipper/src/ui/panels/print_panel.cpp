@@ -4,10 +4,11 @@
 #include "../../core/files_query.h"
 #include "../../conf/global_config.h"
 #include <HardwareSerial.h>
-#include <HTTPClient.h>
 #include "../ui_utils.h"
 #include "../../core/lv_setup.h"
 #include "../gcode_img.h"
+#include "../../core/http_client.h"
+#include <UrlEncode.h>
 
 FILESYSTEM_FILE* selected_file = NULL;
 
@@ -15,32 +16,7 @@ static void btn_print_file(lv_event_t * e){
     lv_obj_t * panel = (lv_obj_t*)lv_event_get_user_data(e);
     lv_obj_del(panel);
 
-    char* buff = (char*)malloc(128 + (strlen(selected_file->name) * 3));
-    sprintf(buff, "http://%s:%d/printer/print/start?filename=", global_config.klipperHost, global_config.klipperPort);
-
-    char* ptr = buff + strlen(buff);
-    int filename_length = strlen(selected_file->name);
-    for (int i = 0; i < filename_length; i++){
-        char c = selected_file->name[i];
-        if (c == ' '){
-            *ptr = '%';
-            ptr++;
-            *ptr = '2';
-            ptr++;
-            *ptr = '0';
-        } else {
-            *ptr = c;
-        }
-        ptr++;
-    }
-
-    *ptr = 0;
-
-    HTTPClient client;
-    client.begin(buff);
-
-    if (global_config.auth_configured)
-        client.addHeader("X-Api-Key", global_config.klipper_auth);
+    SETUP_HTTP_CLIENT("/printer/print/start?filename=" + urlEncode(selected_file->name));
 
     int httpCode = client.POST("");
     Serial.printf("Print start: HTTP %d\n", httpCode);

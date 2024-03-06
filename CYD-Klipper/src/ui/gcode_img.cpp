@@ -4,7 +4,7 @@
 #include <Esp.h>
 #include <ArduinoJson.h>
 #include "../conf/global_config.h"
-#include <HTTPClient.h>
+#include "../core/http_client.h"
 
 static unsigned char * data_png = NULL;
 static char img_filename_path[256] = {0};
@@ -17,11 +17,10 @@ bool has_128_128_gcode(const char* filename)
         return false;
     }
 
-    String url = "http://" + String(global_config.klipperHost) + ":" + String(global_config.klipperPort) + "/server/files/thumbnails?filename=" + String(filename);
-    HTTPClient client;
+    SETUP_HTTP_CLIENT("/server/files/thumbnails?filename=" + String(filename));
+
     int httpCode = 0;
     try {
-        client.begin(url.c_str());
         httpCode = client.GET();
     }
     catch (...){
@@ -72,11 +71,10 @@ lv_obj_t* draw_gcode_img()
         return NULL;
     }
 
-    HTTPClient client;
+    SETUP_HTTP_CLIENT_FULL("/server/files/gcodes/" + String(img_filename_path), false, 2000);
+
     int httpCode = 0;
     try {
-        String img_url = "http://" + String(global_config.klipperHost) + ":" + String(global_config.klipperPort) + "/server/files/gcodes/" + String(img_filename_path);
-        client.begin(img_url);
         httpCode = client.GET();
     }
     catch (...){

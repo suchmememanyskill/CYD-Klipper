@@ -6,6 +6,7 @@
 #include "ui_utils.h"
 #include "../core/macros_query.h"
 #include "panels/panel.h"
+#include "../core/http_client.h"
 
 bool connect_ok = false;
 lv_obj_t * hostEntry;
@@ -36,19 +37,11 @@ enum connection_status_t {
 };
 
 connection_status_t verify_ip(){
-    HTTPClient client;
-    String url = "http://" + String(global_config.klipperHost) + ":" + String(global_config.klipperPort) + "/printer/info";
+    SETUP_HTTP_CLIENT_FULL("/printer/info", true, 1000);
+
     int httpCode;
     try {
-        client.setTimeout(500);
-        client.setConnectTimeout(1000);
-        client.begin(url.c_str());
-
-        if (global_config.auth_configured)
-            client.addHeader("X-Api-Key", global_config.klipper_auth);
-
         httpCode = client.GET();
-        Serial.printf("%d %s\n", httpCode, url.c_str());
 
         if (httpCode == 401)
             return CONNECT_AUTH_REQUIRED;

@@ -2,11 +2,11 @@
 #include "data_setup.h"
 #include "lvgl.h"
 #include "../conf/global_config.h"
-#include <HTTPClient.h>
 #include <ArduinoJson.h>
 #include <esp_task_wdt.h>
 #include "macros_query.h"
 #include <UrlEncode.h>
+#include "http_client.h"
 
 const char *printer_state_messages[] = {
     "Error",
@@ -45,22 +45,12 @@ void unfreeze_render_thread(){
 void send_gcode(bool wait, const char *gcode)
 {
     Serial.printf("Sending gcode: %s\n", gcode);
-    char buff[256] = {};
-    sprintf(buff, "http://%s:%d/printer/gcode/script?script=%s", global_config.klipperHost, global_config.klipperPort, urlEncode(gcode).c_str());
-    HTTPClient client;
-    client.begin(buff);
 
-    if (global_config.auth_configured)
-        client.addHeader("X-Api-Key", global_config.klipper_auth);
-
-    if (!wait)
-    {
-        client.setTimeout(1000);
-    }
-
+    SETUP_HTTP_CLIENT_FULL("/printer/gcode/script?script=" + urlEncode(gcode), false, wait ? 5000 : 750);
     try
     {
-        client.GET();
+        int result = client.GET();
+        Serial.printf("Send gcode result: %d\n", result);
     }
     catch (...)
     {
@@ -75,14 +65,7 @@ int get_slicer_time_estimate_s()
     
     delay(10);
 
-    char buff[256] = {};
-    sprintf(buff, "http://%s:%d/server/files/metadata?filename=%s", global_config.klipperHost, global_config.klipperPort, urlEncode(printer.print_filename).c_str());
-    HTTPClient client;
-    client.useHTTP10(true);
-    client.begin(buff);
-
-    if (global_config.auth_configured)
-        client.addHeader("X-Api-Key", global_config.klipper_auth);
+    SETUP_HTTP_CLIENT("/server/files/metadata?filename=" + urlEncode(printer.print_filename));
 
     int httpCode = client.GET();
 
@@ -128,14 +111,7 @@ int last_slicer_time_query = -15000;
 void fetch_printer_data()
 {
     freeze_request_thread();
-    char buff[256] = {};
-    sprintf(buff, "http://%s:%d/printer/objects/query?extruder&heater_bed&toolhead&gcode_move&virtual_sdcard&print_stats&webhooks&fan", global_config.klipperHost, global_config.klipperPort);
-    HTTPClient client;
-    client.useHTTP10(true);
-    client.begin(buff);
-
-    if (global_config.auth_configured)
-        client.addHeader("X-Api-Key", global_config.klipper_auth);
+    SETUP_HTTP_CLIENT("/printer/objects/query?extruder&heater_bed&toolhead&gcode_move&virtual_sdcard&print_stats&webhooks&fan")
 
     int httpCode = client.GET();
     delay(10);

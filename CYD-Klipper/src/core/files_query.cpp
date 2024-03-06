@@ -2,9 +2,9 @@
 #include "files_query.h"
 #include "../conf/global_config.h"
 #include "data_setup.h"
-#include <HTTPClient.h>
 #include <ArduinoJson.h>
 #include <HardwareSerial.h>
+#include "http_client.h"
 
 // Always has +1 entry with a null'd name
 FILESYSTEM_FILE* last_query = NULL;
@@ -27,15 +27,7 @@ FILESYSTEM_FILE* get_files(int limit){
     std::list<FILESYSTEM_FILE> files;
 
     auto timer_request = millis();
-    char buff[256] = {};
-    sprintf(buff, "http://%s:%d/server/files/list", global_config.klipperHost, global_config.klipperPort);
-    HTTPClient client;
-    client.useHTTP10(true);
-    client.setTimeout(5000);
-    client.begin(buff);
-
-    if (global_config.auth_configured)
-        client.addHeader("X-Api-Key", global_config.klipper_auth);
+    SETUP_HTTP_CLIENT_FULL("/server/files/list", true, 5000);
 
     int httpCode = client.GET();
     auto timer_parse = millis();

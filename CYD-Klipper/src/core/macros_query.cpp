@@ -1,10 +1,10 @@
 #include "lvgl.h"
 #include "macros_query.h"
 #include "./data_setup.h"
-#include <HTTPClient.h>
 #include "../conf/global_config.h"
 #include <ArduinoJson.h>
 #include <UrlEncode.h>
+#include "http_client.h"
 
 static char* macros[64] = {0};
 static int macros_count = 0;
@@ -14,13 +14,7 @@ static bool power_device_states[16] = {0};
 static int power_devices_count = 0;
 
 static void _macros_query_internal(){
-    String url = "http://" + String(global_config.klipperHost) + ":" + String(global_config.klipperPort) + "/printer/gcode/help";
-    HTTPClient client;
-    client.useHTTP10(true);
-    client.begin(url.c_str());
-
-    if (global_config.auth_configured)
-        client.addHeader("X-Api-Key", global_config.klipper_auth);
+    SETUP_HTTP_CLIENT("/printer/gcode/help")
 
     int httpCode = client.GET();
     if (httpCode == 200){
@@ -55,15 +49,7 @@ void power_devices_clear(){
 }
 
 void _power_devices_query_internal(){
-    String url = "http://" + String(global_config.klipperHost) + ":" + String(global_config.klipperPort) + "/machine/device_power/devices";
-    HTTPClient client;
-    client.useHTTP10(true);
-    client.setTimeout(500);
-    client.setConnectTimeout(1000);
-    client.begin(url.c_str());
-
-    if (global_config.auth_configured)
-        client.addHeader("X-Api-Key", global_config.klipper_auth);
+    SETUP_HTTP_CLIENT("/machine/device_power/devices")
 
     int httpCode = client.GET();
     if (httpCode == 200){
@@ -94,13 +80,7 @@ static void on_state_change(void * s, lv_msg_t * m) {
 }
 
 bool set_power_state(const char* device_name, bool state) {
-    String url = "http://" + String(global_config.klipperHost) + ":" + String(global_config.klipperPort) + "/machine/device_power/device?device=" + urlEncode(device_name) + "&action=" + (state ? "on" : "off");
-    HTTPClient client;
-    client.useHTTP10(true);
-    client.begin(url.c_str());
-
-    if (global_config.auth_configured)
-        client.addHeader("X-Api-Key", global_config.klipper_auth);
+    SETUP_HTTP_CLIENT("/machine/device_power/device?device=" + urlEncode(device_name) + "&action=" + (state ? "on" : "off"));
 
     if (client.POST("") != 200)
         return false;
