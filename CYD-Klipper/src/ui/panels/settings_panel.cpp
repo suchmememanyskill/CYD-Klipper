@@ -7,6 +7,7 @@
 #include <Esp.h>
 #include "../../core/lv_setup.h"
 #include "../ota_setup.h"
+#include "../nav_buttons.h"
 
 #ifndef REPO_VERSION
     #define REPO_VERSION "Unknown"
@@ -15,39 +16,44 @@
 static void invert_color_switch(lv_event_t * e){
     auto state = lv_obj_get_state(lv_event_get_target(e));
     bool checked = (state & LV_STATE_CHECKED == LV_STATE_CHECKED);
-    global_config.invertColors = checked;
-    WriteGlobalConfig();
+    get_current_printer_config()->invert_colors = checked;
+    write_global_config();
     set_invert_display();
 }
 
 static void reset_calibration_click(lv_event_t * e){
-    global_config.screenCalibrated = false;
-    WriteGlobalConfig();
+    global_config.screen_calibrated = false;
+    write_global_config();
     ESP.restart();
 }
 
 static void reset_wifi_click(lv_event_t * e){
-    global_config.wifiConfigured = false;
-    global_config.ipConfigured = false;
-    global_config.auth_configured = false;
-    WriteGlobalConfig();
+    global_config.wifi_configured = false;
+    write_global_config();
+    ESP.restart();
+}
+
+static void reset_ip_click(lv_event_t * e){
+    get_current_printer_config()->ip_configured = false;
+    get_current_printer_config()->auth_configured = false;
+    write_global_config();
     ESP.restart();
 }
 
 static void light_mode_switch(lv_event_t * e){
     auto state = lv_obj_get_state(lv_event_get_target(e));
     bool checked = (state & LV_STATE_CHECKED == LV_STATE_CHECKED);
-    global_config.lightMode = checked;
-    WriteGlobalConfig();
+    get_current_printer_config()->light_mode = checked;
+    write_global_config();
     set_color_scheme();
 }
 
 static void theme_dropdown(lv_event_t * e){
     lv_obj_t * dropdown = lv_event_get_target(e);
     auto selected = lv_dropdown_get_selected(dropdown);
-    global_config.color_scheme = selected;
+    get_current_printer_config()->color_scheme = selected;
     set_color_scheme();
-    WriteGlobalConfig();
+    write_global_config();
 }
 
 const char* brightness_options = "100%\n75%\n50%\n25%";
@@ -58,7 +64,7 @@ static void brightness_dropdown(lv_event_t * e){
     auto selected = lv_dropdown_get_selected(dropdown);
     global_config.brightness = brightness_options_values[selected];
     set_screen_brightness();
-    WriteGlobalConfig();
+    write_global_config();
 }
 
 const char* wake_timeout_options = "1m\n2m\n5m\n10m\n15m\n30m\n1h\n2h\n4h";
@@ -67,26 +73,26 @@ const char  wake_timeout_options_values[] = { 1, 2, 5, 10, 15, 30, 60, 120, 240 
 static void wake_timeout_dropdown(lv_event_t * e){
     lv_obj_t * dropdown = lv_event_get_target(e);
     auto selected = lv_dropdown_get_selected(dropdown);
-    global_config.screenTimeout = wake_timeout_options_values[selected];
+    global_config.screen_timeout = wake_timeout_options_values[selected];
     set_screen_timer_period();
-    WriteGlobalConfig();
+    write_global_config();
 }
 
 static void rotate_screen_switch(lv_event_t* e){
     auto state = lv_obj_get_state(lv_event_get_target(e));
     bool checked = (state & LV_STATE_CHECKED == LV_STATE_CHECKED);
-    global_config.rotateScreen = checked;
-    global_config.screenCalibrated = false;
-    WriteGlobalConfig();
+    global_config.rotate_screen = checked;
+    global_config.screen_calibrated = false;
+    write_global_config();
     ESP.restart();
 }
 
 static void on_during_print_switch(lv_event_t* e){
     auto state = lv_obj_get_state(lv_event_get_target(e));
     bool checked = (state & LV_STATE_CHECKED == LV_STATE_CHECKED);
-    global_config.onDuringPrint = checked;
+    global_config.on_during_print = checked;
     check_if_screen_needs_to_be_disabled();
-    WriteGlobalConfig();
+    write_global_config();
 }
 
 static void btn_ota_do_update(lv_event_t * e){
@@ -96,16 +102,24 @@ static void btn_ota_do_update(lv_event_t * e){
 static void auto_ota_update_switch(lv_event_t* e){
     auto state = lv_obj_get_state(lv_event_get_target(e));
     bool checked = (state & LV_STATE_CHECKED == LV_STATE_CHECKED);
-    global_config.autoOtaUpdate = checked;
-    WriteGlobalConfig();
+    global_config.auto_ota_update = checked;
+    write_global_config();
+}
+
+static void multi_printer_switch(lv_event_t* e){
+    auto state = lv_obj_get_state(lv_event_get_target(e));
+    bool checked = (state & LV_STATE_CHECKED == LV_STATE_CHECKED);
+    global_config.multi_printer_mode = checked;
+    write_global_config();
+    nav_buttons_setup(3);
 }
 
 const char* estimated_time_options = "Percentage\nInterpolated\nSlicer";
 
 static void estimated_time_dropdown(lv_event_t * e){
     lv_obj_t * dropdown = lv_event_get_target(e);
-    global_config.remaining_time_calc_mode = lv_dropdown_get_selected(dropdown);
-    WriteGlobalConfig();
+    get_current_printer_config()->remaining_time_calc_mode = lv_dropdown_get_selected(dropdown);
+    write_global_config();
 }
 
 const static lv_point_t line_points[] = { {0, 0}, {(short int)((CYD_SCREEN_PANEL_WIDTH_PX - CYD_SCREEN_GAP_PX * 2) * 0.85f), 0} };
@@ -152,6 +166,15 @@ void settings_panel_init(lv_obj_t* panel){
 
     create_settings_widget("Configure WiFi", btn, panel);
 
+    btn = lv_btn_create(panel);
+    lv_obj_add_event_cb(btn, reset_ip_click, LV_EVENT_CLICKED, NULL);
+
+    label = lv_label_create(btn);
+    lv_label_set_text(label, "Restart");
+    lv_obj_center(label);
+
+    create_settings_widget("Configure IP", btn, panel);
+
 #ifndef CYD_SCREEN_DISABLE_TOUCH_CALIBRATION
     btn = lv_btn_create(panel);
     lv_obj_add_event_cb(btn, reset_calibration_click, LV_EVENT_CLICKED, NULL);
@@ -168,7 +191,7 @@ void settings_panel_init(lv_obj_t* panel){
     lv_obj_set_width(toggle, TOGGLE_WIDTH);
     lv_obj_add_event_cb(toggle, invert_color_switch, LV_EVENT_VALUE_CHANGED, NULL);
 
-    if (global_config.invertColors)
+    if (get_current_printer_config()->invert_colors)
         lv_obj_add_state(toggle, LV_STATE_CHECKED);
 
     create_settings_widget("Invert Colors", toggle, panel);
@@ -178,14 +201,14 @@ void settings_panel_init(lv_obj_t* panel){
     lv_obj_set_width(toggle, TOGGLE_WIDTH);
     lv_obj_add_event_cb(toggle, light_mode_switch, LV_EVENT_VALUE_CHANGED, NULL);
 
-    if (global_config.lightMode)
+    if (get_current_printer_config()->light_mode)
         lv_obj_add_state(toggle, LV_STATE_CHECKED);
 
     create_settings_widget("Light Mode", toggle, panel);
 
     dropdown = lv_dropdown_create(panel);
     lv_dropdown_set_options(dropdown, "Blue\nGreen\nGrey\nYellow\nOrange\nRed\nPurple");
-    lv_dropdown_set_selected(dropdown, global_config.color_scheme);
+    lv_dropdown_set_selected(dropdown, get_current_printer_config()->color_scheme);
     lv_obj_set_width(dropdown, DROPDOWN_WIDTH);
     lv_obj_add_event_cb(dropdown, theme_dropdown, LV_EVENT_VALUE_CHANGED, NULL);
 
@@ -212,7 +235,7 @@ void settings_panel_init(lv_obj_t* panel){
     lv_obj_add_event_cb(dropdown, wake_timeout_dropdown, LV_EVENT_VALUE_CHANGED, NULL);
 
     for (int i = 0; i < SIZEOF(wake_timeout_options_values); i++){
-        if (wake_timeout_options_values[i] == global_config.screenTimeout){
+        if (wake_timeout_options_values[i] == global_config.screen_timeout){
             lv_dropdown_set_selected(dropdown, i);
             break;
         }
@@ -226,14 +249,14 @@ void settings_panel_init(lv_obj_t* panel){
     lv_obj_set_width(dropdown, DROPDOWN_WIDTH);
     lv_obj_add_event_cb(dropdown, estimated_time_dropdown, LV_EVENT_VALUE_CHANGED, NULL);
 
-    lv_dropdown_set_selected(dropdown, global_config.remaining_time_calc_mode);
+    lv_dropdown_set_selected(dropdown, get_current_printer_config()->remaining_time_calc_mode);
     create_settings_widget("Estimated Time", dropdown, panel);
 
     toggle = lv_switch_create(panel);
     lv_obj_set_width(toggle, TOGGLE_WIDTH);
     lv_obj_add_event_cb(toggle, rotate_screen_switch, LV_EVENT_VALUE_CHANGED, NULL);
 
-    if (global_config.rotateScreen)
+    if (global_config.rotate_screen)
         lv_obj_add_state(toggle, LV_STATE_CHECKED);
     
     create_settings_widget("Rotate Screen", toggle, panel);
@@ -243,7 +266,7 @@ void settings_panel_init(lv_obj_t* panel){
     lv_obj_set_width(toggle, TOGGLE_WIDTH);
     lv_obj_add_event_cb(toggle, on_during_print_switch, LV_EVENT_VALUE_CHANGED, NULL);
 
-    if (global_config.onDuringPrint)
+    if (global_config.on_during_print)
         lv_obj_add_state(toggle, LV_STATE_CHECKED);
 
     create_settings_widget("Screen On During Print", toggle, panel);
@@ -251,9 +274,18 @@ void settings_panel_init(lv_obj_t* panel){
 
     toggle = lv_switch_create(panel);
     lv_obj_set_width(toggle, TOGGLE_WIDTH);
+    lv_obj_add_event_cb(toggle, multi_printer_switch, LV_EVENT_VALUE_CHANGED, NULL);
+
+    if (global_config.multi_printer_mode)
+        lv_obj_add_state(toggle, LV_STATE_CHECKED);
+    
+    create_settings_widget("Multi Printer Mode", toggle, panel);
+
+    toggle = lv_switch_create(panel);
+    lv_obj_set_width(toggle, TOGGLE_WIDTH);
     lv_obj_add_event_cb(toggle, auto_ota_update_switch, LV_EVENT_VALUE_CHANGED, NULL);
 
-    if (global_config.autoOtaUpdate)
+    if (global_config.auto_ota_update)
         lv_obj_add_state(toggle, LV_STATE_CHECKED);
 
     create_settings_widget("Auto Update", toggle, panel);

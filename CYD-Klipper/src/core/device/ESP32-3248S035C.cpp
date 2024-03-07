@@ -65,7 +65,7 @@ void screen_lv_touchRead(lv_indev_drv_t *indev_driver, lv_indev_data_t *data)
         {
             uint16_t magicX; // fix GT911 driver - orientation and handle rotation
             uint16_t magicY;
-            if (!global_config.rotateScreen)
+            if (!global_config.rotate_screen)
             {
                 magicY = tp.points[i].x;
                 magicX = TOUCH_HEIGHT - tp.points[i].y;
@@ -84,7 +84,7 @@ void screen_lv_touchRead(lv_indev_drv_t *indev_driver, lv_indev_data_t *data)
 
 void set_invert_display()
 {
-    tft.invertDisplay(global_config.invertColors);
+    tft.invertDisplay(get_current_printer_config()->invert_colors);
 }
 
 void set_LED_color(uint8_t rgbVal[3])
@@ -114,7 +114,7 @@ void screen_setup()
     tft.init();
     ledcSetup(0, 5000, 12);
     ledcAttachPin(TFT_BL, 0);
-    tft.setRotation(global_config.rotateScreen ? 3 : 1);
+    tft.setRotation(global_config.rotate_screen ? 3 : 1);
     tft.fillScreen(TFT_BLACK);
     set_invert_display();
     LED_init();

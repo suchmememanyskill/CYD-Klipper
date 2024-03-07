@@ -36,17 +36,17 @@ static void update_printer_data_bed_temp(lv_event_t * e){
 static short get_temp_preset(int target){
     switch (target){
         case TARGET_HOTEND_CONFIG_1:
-            return global_config.hotend_presets[0];
+            return get_current_printer_config()->hotend_presets[0];
         case TARGET_HOTEND_CONFIG_2:
-            return global_config.hotend_presets[1];
+            return get_current_printer_config()->hotend_presets[1];
         case TARGET_HOTEND_CONFIG_3:
-            return global_config.hotend_presets[2];
+            return get_current_printer_config()->hotend_presets[2];
         case TARGET_BED_CONFIG_1:
-            return global_config.bed_presets[0];
+            return get_current_printer_config()->bed_presets[0];
         case TARGET_BED_CONFIG_2:
-            return global_config.bed_presets[1];
+            return get_current_printer_config()->bed_presets[1];
         case TARGET_BED_CONFIG_3:
-            return global_config.bed_presets[2];
+            return get_current_printer_config()->bed_presets[2];
         default:
             return -1;
     }
@@ -62,7 +62,7 @@ static void update_temp_preset_label(lv_event_t * e){
 }
 
 void UpdateConfig(){
-    WriteGlobalConfig();
+    write_global_config();
     lv_msg_send(DATA_PRINTER_TEMP_PRESET, &printer);
 }
 
@@ -91,27 +91,27 @@ static void keyboard_callback(lv_event_t * e){
                 send_gcode(true, gcode);
                 break;
             case TARGET_HOTEND_CONFIG_1:
-                global_config.hotend_presets[0] = temp;
+                get_current_printer_config()->hotend_presets[0] = temp;
                 UpdateConfig();
                 break;
             case TARGET_HOTEND_CONFIG_2:
-                global_config.hotend_presets[1] = temp;
+                get_current_printer_config()->hotend_presets[1] = temp;
                 UpdateConfig();
                 break;
             case TARGET_HOTEND_CONFIG_3:
-                global_config.hotend_presets[2] = temp;
+                get_current_printer_config()->hotend_presets[2] = temp;
                 UpdateConfig();
                 break;
             case TARGET_BED_CONFIG_1:
-                global_config.bed_presets[0] = temp;
+                get_current_printer_config()->bed_presets[0] = temp;
                 UpdateConfig();
                 break;
             case TARGET_BED_CONFIG_2:
-                global_config.bed_presets[1] = temp;
+                get_current_printer_config()->bed_presets[1] = temp;
                 UpdateConfig();
                 break;
             case TARGET_BED_CONFIG_3:
-                global_config.bed_presets[2] = temp;
+                get_current_printer_config()->bed_presets[2] = temp;
                 UpdateConfig();
                 break;
         }

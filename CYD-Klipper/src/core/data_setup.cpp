@@ -14,6 +14,7 @@ const char *printer_state_messages[] = {
     "Printing"};
 
 Printer printer = {0};
+PrinterMinimal *printer_minimal;
 int klipper_request_consecutive_fail_count = 0;
 char filename_buff[512] = {0};
 SemaphoreHandle_t freezeRenderThreadSemaphore, freezeRequestThreadSemaphore;
@@ -49,8 +50,7 @@ void send_gcode(bool wait, const char *gcode)
     SETUP_HTTP_CLIENT_FULL("/printer/gcode/script?script=" + urlEncode(gcode), false, wait ? 5000 : 750);
     try
     {
-        int result = client.GET();
-        Serial.printf("Send gcode result: %d\n", result);
+        client.GET();
     }
     catch (...)
     {
@@ -111,6 +111,7 @@ int last_slicer_time_query = -15000;
 void fetch_printer_data()
 {
     freeze_request_thread();
+    PRINTER_CONFIG *config = get_current_printer_config();
     SETUP_HTTP_CLIENT("/printer/objects/query?extruder&heater_bed&toolhead&gcode_move&virtual_sdcard&print_stats&webhooks&fan")
 
     int httpCode = client.GET();
@@ -247,15 +248,15 @@ void fetch_printer_data()
                     remaining_time_s_slicer = printer.slicer_estimated_print_time_s - printer.elapsed_time_s;
                 }
 
-                if (remaining_time_s_slicer <= 0 || global_config.remaining_time_calc_mode == REMAINING_TIME_CALC_PERCENTAGE)
+                if (remaining_time_s_slicer <= 0 || config->remaining_time_calc_mode == REMAINING_TIME_CALC_PERCENTAGE)
                 {
                     printer.remaining_time_s = remaining_time_s_percentage;
                 }
-                else if (global_config.remaining_time_calc_mode == REMAINING_TIME_CALC_INTERPOLATED)
+                else if (config->remaining_time_calc_mode == REMAINING_TIME_CALC_INTERPOLATED)
                 {
                     printer.remaining_time_s = remaining_time_s_percentage * printer.print_progress + remaining_time_s_slicer * (1 - printer.print_progress);
                 }
-                else if (global_config.remaining_time_calc_mode == REMAINING_TIME_CALC_SLICER)
+                else if (config->remaining_time_calc_mode == REMAINING_TIME_CALC_SLICER)
                 {
                     printer.remaining_time_s = remaining_time_s_slicer;
                 }
@@ -297,6 +298,94 @@ void fetch_printer_data()
     }
 }
 
+void fetch_printer_data_minimal()
+{
+    PrinterMinimal data[PRINTER_CONFIG_COUNT] = {0};
+
+    for (int i = 0; i < PRINTER_CONFIG_COUNT; i++){
+        PRINTER_CONFIG *config = &global_config.printer_config[i];
+
+        if (!config->ip_configured)
+        {
+            data[i].online = false;
+            continue;
+        }
+
+        delay(10);
+        HTTPClient client;
+        configure_http_client(client, "http://" + String(config->klipper_host) + ":" + String(config->klipper_port) + "/printer/objects/query?webhooks&print_stats&virtual_sdcard", true, 1000);
+        freeze_request_thread();
+
+        int httpCode = client.GET();
+        delay(10);
+        if (httpCode == 200)
+        {
+            data[i].online = true;
+            JsonDocument doc;
+            deserializeJson(doc, client.getStream());
+            auto status = doc["result"]["status"];
+
+            unfreeze_request_thread();
+
+            if (status.containsKey("webhooks"))
+            {
+                const char *state = status["webhooks"]["state"];
+
+                if (strcmp(state, "ready") == 0 && data[i].state == PRINTER_STATE_ERROR)
+                {
+                    data[i].state = PRINTER_STATE_IDLE;
+                }
+                else if (strcmp(state, "shutdown") == 0 && data[i].state != PRINTER_STATE_ERROR)
+                {
+                    data[i].state = PRINTER_STATE_ERROR;
+                }
+            }
+
+            if (printer_minimal->state != PRINTER_STATE_ERROR)
+            {
+                if (status.containsKey("virtual_sdcard"))
+                {
+                    data[i].print_progress = status["virtual_sdcard"]["progress"];
+                }
+
+                if (status.containsKey("print_stats"))
+                {
+                    const char *state = status["print_stats"]["state"];
+
+                    if (state == nullptr)
+                    {
+                        data[i].state = PRINTER_STATE_ERROR;
+                    }
+                    else if (strcmp(state, "printing") == 0)
+                    {
+                        data[i].state = PRINTER_STATE_PRINTING;
+                    }
+                    else if (strcmp(state, "paused") == 0)
+                    {
+                        data[i].state = PRINTER_STATE_PAUSED;
+                    }
+                    else if (strcmp(state, "complete") == 0 || strcmp(state, "cancelled") == 0 || strcmp(state, "standby") == 0)
+                    {
+                        data[i].state = PRINTER_STATE_IDLE;
+                    }
+                }
+            }
+
+            Serial.printf("Record: %d %f %d\n", data[i].online, data[i].print_progress, data[i].state);
+        }
+        else 
+        {
+            printer_minimal->online = false;
+            unfreeze_request_thread();
+        }
+    }
+
+    freeze_render_thread();
+    memcpy(printer_minimal, data, sizeof(PrinterMinimal) * PRINTER_CONFIG_COUNT);
+    lv_msg_send(DATA_PRINTER_MINIMAL, NULL);
+    unfreeze_render_thread();
+}
+
 void data_loop()
 {
     // Causes other threads that are trying to lock the thread to actually lock it
@@ -307,9 +396,16 @@ void data_loop()
 
 void data_loop_background(void * param){
     esp_task_wdt_init(10, true);
+    int loop_iter = 20;
     while (true){
         delay(data_update_interval);
         fetch_printer_data();
+        if (global_config.multi_printer_mode) {
+            if (loop_iter++ > 20){
+                fetch_printer_data_minimal();
+                loop_iter = 0;
+            }
+        }
     }
 }
 
@@ -317,9 +413,11 @@ TaskHandle_t background_loop;
 
 void data_setup()
 {
+    printer_minimal = (PrinterMinimal *)calloc(sizeof(PrinterMinimal), PRINTER_CONFIG_COUNT);
     semaphore_init();
     printer.print_filename = filename_buff;
     fetch_printer_data();
+
     macros_query_setup();
     freeze_render_thread();
     xTaskCreatePinnedToCore(data_loop_background, "data_loop_background", 5000, NULL, 0, &background_loop, 0);
