@@ -86,5 +86,6 @@ void load_global_config();
 PRINTER_CONFIG* get_current_printer_config();
 int get_printer_config_count();
 void set_printer_config_index(int index);
+int get_printer_config_free_index();
 
 #endif // !_GLOBAL_CONFIG_INIT

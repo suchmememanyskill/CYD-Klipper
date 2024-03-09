@@ -90,8 +90,11 @@ void set_printer_config_index(int index)
             new_config->bed_presets[i] = old_config->bed_presets[i];
         }
 
+        write_global_config();
         ESP.restart();
     }    
+
+    write_global_config();
 }
 
 void load_global_config() 

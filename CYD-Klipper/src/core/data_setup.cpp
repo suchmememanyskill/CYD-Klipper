@@ -341,7 +341,7 @@ void fetch_printer_data_minimal()
                 }
             }
 
-            if (printer_minimal->state != PRINTER_STATE_ERROR)
+            if (data[i].state != PRINTER_STATE_ERROR)
             {
                 if (status.containsKey("virtual_sdcard"))
                 {
