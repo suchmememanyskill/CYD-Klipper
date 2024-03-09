@@ -44,11 +44,7 @@ void screen_setup()
     }
 #endif // CYD_SCREEN_DISABLE_INVERT_COLORS
 
-#ifdef CYD_SCREEN_IS_PORTRAIT
-    lv_disp_set_rotation(lv_disp_get_default(), (global_config.rotateScreen) ? LV_DISP_ROT_180 : LV_DISP_ROT_NONE);
-#else 
     lv_disp_set_rotation(lv_disp_get_default(), (global_config.rotateScreen) ? LV_DISP_ROT_270 : LV_DISP_ROT_90);
-#endif // CYD_SCREEN_IS_PORTRAIT
 }
 
 #endif // CYD_SCREEN_DRIVER_ESP32_SMARTDISPLAY
