@@ -5,16 +5,23 @@
 #include "../core/http_client.h"
 #include "../core/lv_setup.h"
 #include "../core/macros_query.h"
+#include "../core/screen_driver.h"
+
+void switch_printer(int index)
+{
+    set_printer_config_index(index);
+    set_color_scheme();
+    set_invert_display();
+    _macros_query_internal();
+    _power_devices_query_internal();
+}
 
 static void btn_switch_printer(lv_event_t *e){
     lv_obj_t *btn = lv_event_get_target(e);
     PRINTER_CONFIG * config = (PRINTER_CONFIG*)lv_event_get_user_data(e);
     int index = config - global_config.printer_config;
 
-    set_printer_config_index(index);
-    set_color_scheme();
-    _macros_query_internal();
-    _power_devices_query_internal();
+    switch_printer(index);
 
     lv_obj_del(lv_obj_get_parent(lv_obj_get_parent(btn)));
 }

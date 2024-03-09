@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include "../nav_buttons.h"
 #include "../../core/macros_query.h"
+#include "../switch_printer.h"
 
 const char * printer_status[] = {
     "Error",
@@ -148,10 +149,7 @@ static void btn_printer_activate(lv_event_t * e)
     PRINTER_CONFIG * config = (PRINTER_CONFIG*)lv_event_get_user_data(e);
     int index = config - global_config.printer_config;
 
-    set_printer_config_index(index);
-    set_color_scheme();
-    _macros_query_internal();
-    _power_devices_query_internal();
+    switch_printer(index);
     lv_msg_send(DATA_PRINTER_MINIMAL, NULL);
 }
 
