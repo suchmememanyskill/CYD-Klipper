@@ -313,7 +313,7 @@ void fetch_printer_data_minimal()
 
         delay(10);
         HTTPClient client;
-        configure_http_client(client, "http://" + String(config->klipper_host) + ":" + String(config->klipper_port) + "/printer/objects/query?webhooks&print_stats&virtual_sdcard", true, 1000);
+        configure_http_client(client, get_full_url("/printer/objects/query?webhooks&print_stats&virtual_sdcard", config), true, 1000);
         freeze_request_thread();
 
         int httpCode = client.GET();
@@ -370,8 +370,6 @@ void fetch_printer_data_minimal()
                     }
                 }
             }
-
-            Serial.printf("Record: %d %f %d\n", data[i].online, data[i].print_progress, data[i].state);
         }
         else 
         {

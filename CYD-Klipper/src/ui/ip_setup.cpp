@@ -7,6 +7,7 @@
 #include "../core/macros_query.h"
 #include "panels/panel.h"
 #include "../core/http_client.h"
+#include "switch_printer.h"
 
 bool connect_ok = false;
 lv_obj_t * hostEntry;
@@ -161,6 +162,8 @@ void redraw_connect_screen(){
         lv_label_set_text(btn_label, "Power Devices");
         lv_obj_center(btn_label);
     }
+
+    draw_switch_printer_button();    
 }
 
 static bool auth_entry_done = false;

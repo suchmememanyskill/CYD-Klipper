@@ -43,3 +43,4 @@ void lv_create_custom_menu_entry(const char* label_text, lv_obj_t* object, lv_ob
 void lv_create_custom_menu_button(const char *label_text, lv_obj_t* root_panel, lv_event_cb_t on_click, const char *btn_text, void * user_data = NULL);
 void lv_create_custom_menu_switch(const char *label_text, lv_obj_t* root_panel, lv_event_cb_t on_toggle, bool state, void * user_data = NULL);
 void lv_create_custom_menu_dropdown(const char *label_text, lv_obj_t *root_panel, lv_event_cb_t on_change, const char *options, int index, void * user_data = NULL);
+void lv_create_custom_menu_label(const char *label_text, lv_obj_t* root_panel, const char *text);

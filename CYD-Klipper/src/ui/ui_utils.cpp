@@ -193,3 +193,10 @@ void lv_create_custom_menu_dropdown(const char *label_text, lv_obj_t *root_panel
 
     lv_create_custom_menu_entry(label_text, dropdown, root_panel, true);
 }
+
+void lv_create_custom_menu_label(const char *label_text, lv_obj_t* root_panel, const char *text)
+{
+    lv_obj_t * label = lv_label_create(lv_scr_act());
+    lv_label_set_text(label, text);
+    lv_create_custom_menu_entry(label_text, label, root_panel, false);
+}

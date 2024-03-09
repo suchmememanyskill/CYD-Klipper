@@ -1,5 +1,9 @@
 #include "http_client.h"
-#include "../conf/global_config.h"
+
+String get_full_url(String url_part, PRINTER_CONFIG * config)
+{
+    return "http://" + String(config->klipper_host) + ":" + String(config->klipper_port) + url_part;
+}
 
 String get_full_url(String url_part)
 {

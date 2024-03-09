@@ -173,25 +173,19 @@ void settings_panel_init(lv_obj_t* panel){
 
     lv_create_custom_menu_switch("Multi Printer Mode", panel, multi_printer_switch, global_config.multi_printer_mode);
     lv_create_custom_menu_switch("Auto Update", panel, auto_ota_update_switch, global_config.auto_ota_update);
-
-
-    lv_obj_t *label = lv_label_create(panel);
-    lv_label_set_text(label, REPO_VERSION "  ");
-    lv_create_custom_menu_entry("Version", label, panel, false);
+    lv_create_custom_menu_label("Version", panel, REPO_VERSION "  ");
 
     if (ota_has_update()){
         lv_obj_t *btn = lv_btn_create(panel);
         lv_obj_add_event_cb(btn, btn_ota_do_update, LV_EVENT_CLICKED, NULL);
 
-        label = lv_label_create(btn);
+        lv_obj_t *label = lv_label_create(btn);
         lv_label_set_text_fmt(label, "Update to %s", ota_new_version_name().c_str());
         lv_obj_center(label);
 
         lv_create_custom_menu_entry("Device", btn, panel);
     }
     else {
-        label = lv_label_create(panel);
-        lv_label_set_text(label, ARDUINO_BOARD "  ");
-        lv_create_custom_menu_entry("Device", label, panel, false);
+        lv_create_custom_menu_label("Device", panel, ARDUINO_BOARD "  ");
     }
 }
