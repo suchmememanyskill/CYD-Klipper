@@ -159,7 +159,7 @@ static void btn_printer_rename(lv_event_t * e)
     lv_obj_t * keyboard = lv_keyboard_create(parent);
 
     lv_obj_set_width(ta, CYD_SCREEN_WIDTH_PX * 0.75);
-    lv_textarea_set_max_length(ta, 16);
+    lv_textarea_set_max_length(ta, 24);
     lv_textarea_set_one_line(ta, true);
     lv_textarea_set_text(ta, keyboard_config->printer_name);
     lv_obj_add_event_cb(ta, keyboard_callback, LV_EVENT_ALL, keyboard);

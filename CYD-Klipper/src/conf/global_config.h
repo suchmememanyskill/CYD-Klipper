@@ -27,7 +27,7 @@ typedef struct _PRINTER_CONFIG {
         };
     };
 
-    char printer_name[17];
+    char printer_name[25];
     char klipper_host[65];
     char klipper_auth[33];
     unsigned short klipper_port;
