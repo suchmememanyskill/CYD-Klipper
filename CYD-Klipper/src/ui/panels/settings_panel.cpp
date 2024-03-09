@@ -57,7 +57,7 @@ static void theme_dropdown(lv_event_t * e){
 }
 
 const char* brightness_options = "100%\n75%\n50%\n25%";
-const char  brightness_options_values[] = { 255, 192, 128, 64 };
+const unsigned char  brightness_options_values[] = { 255, 192, 128, 64 };
 
 static void brightness_dropdown(lv_event_t * e){
     lv_obj_t * dropdown = lv_event_get_target(e);
@@ -122,193 +122,76 @@ static void estimated_time_dropdown(lv_event_t * e){
     write_global_config();
 }
 
-const static lv_point_t line_points[] = { {0, 0}, {(short int)((CYD_SCREEN_PANEL_WIDTH_PX - CYD_SCREEN_GAP_PX * 2) * 0.85f), 0} };
-
-void create_settings_widget(const char* label_text, lv_obj_t* object, lv_obj_t* root_panel, bool set_height = true){
-    lv_obj_t * panel = lv_create_empty_panel(root_panel);
-    lv_obj_set_size(panel, CYD_SCREEN_PANEL_WIDTH_PX - CYD_SCREEN_GAP_PX * 3, CYD_SCREEN_MIN_BUTTON_HEIGHT_PX);
-
-    lv_obj_t * label = lv_label_create(panel);
-    lv_label_set_text(label, label_text);
-    lv_obj_align(label, LV_ALIGN_LEFT_MID, 0, 0);
-
-    lv_obj_set_parent(object, panel);
-    lv_obj_align(object, LV_ALIGN_RIGHT_MID, 0, 0);
-
-    if (set_height)
-        lv_obj_set_height(object, CYD_SCREEN_MIN_BUTTON_HEIGHT_PX);
-
-    lv_obj_t * line = lv_line_create(root_panel);
-    lv_line_set_points(line, line_points, 2);
-    lv_obj_set_style_line_width(line, 1, 0);
-    lv_obj_set_style_line_color(line, lv_color_hex(0xAAAAAA), 0);
-}
-
-#define DROPDOWN_WIDTH CYD_SCREEN_MIN_BUTTON_WIDTH_PX * 3.75
-#define TOGGLE_WIDTH CYD_SCREEN_MIN_BUTTON_WIDTH_PX * 2
-
 void settings_panel_init(lv_obj_t* panel){
-    lv_obj_t * toggle = NULL;
-    lv_obj_t * btn = NULL;
-    lv_obj_t * label = NULL;
-    lv_obj_t * dropdown = NULL;
-
     lv_obj_set_style_pad_all(panel, CYD_SCREEN_GAP_PX, 0);
     lv_layout_flex_column(panel);
     lv_obj_set_scrollbar_mode(panel, LV_SCROLLBAR_MODE_OFF);
 
-    btn = lv_btn_create(panel);
-    lv_obj_add_event_cb(btn, reset_wifi_click, LV_EVENT_CLICKED, NULL);
-
-    label = lv_label_create(btn);
-    lv_label_set_text(label, "Restart");
-    lv_obj_center(label);
-
-    create_settings_widget("Configure WiFi", btn, panel);
-
-    btn = lv_btn_create(panel);
-    lv_obj_add_event_cb(btn, reset_ip_click, LV_EVENT_CLICKED, NULL);
-
-    label = lv_label_create(btn);
-    lv_label_set_text(label, "Restart");
-    lv_obj_center(label);
-
-    create_settings_widget("Configure IP", btn, panel);
+    lv_create_custom_menu_button("Configure WiFi", panel, reset_wifi_click, "Restart");
+    lv_create_custom_menu_button("Configure IP", panel, reset_ip_click, "Restart");
 
 #ifndef CYD_SCREEN_DISABLE_TOUCH_CALIBRATION
-    btn = lv_btn_create(panel);
-    lv_obj_add_event_cb(btn, reset_calibration_click, LV_EVENT_CLICKED, NULL);
-
-    label = lv_label_create(btn);
-    lv_label_set_text(label, "Restart");
-    lv_obj_center(label);
-
-    create_settings_widget("Calibrate Touch", btn, panel);
+    lv_create_custom_menu_button("Calibrate Touch", panel, reset_calibration_click, "Restart");
 #endif // CYD_SCREEN_DISABLE_TOUCH_CALIBRATION
 
 #ifndef CYD_SCREEN_DISABLE_INVERT_COLORS
-    toggle = lv_switch_create(panel);
-    lv_obj_set_width(toggle, TOGGLE_WIDTH);
-    lv_obj_add_event_cb(toggle, invert_color_switch, LV_EVENT_VALUE_CHANGED, NULL);
-
-    if (get_current_printer_config()->invert_colors)
-        lv_obj_add_state(toggle, LV_STATE_CHECKED);
-
-    create_settings_widget("Invert Colors", toggle, panel);
+    lv_create_custom_menu_switch("Invert Colors", panel, invert_color_switch, get_current_printer_config()->invert_colors);
 #endif // CYD_SCREEN_DISABLE_INVERT_COLORS
 
-    toggle = lv_switch_create(panel);
-    lv_obj_set_width(toggle, TOGGLE_WIDTH);
-    lv_obj_add_event_cb(toggle, light_mode_switch, LV_EVENT_VALUE_CHANGED, NULL);
+    lv_create_custom_menu_switch("Light Mode", panel, light_mode_switch, get_current_printer_config()->light_mode);
+    lv_create_custom_menu_dropdown("Theme", panel, theme_dropdown, "Blue\nGreen\nGrey\nYellow\nOrange\nRed\nPurple", get_current_printer_config()->color_scheme);
 
-    if (get_current_printer_config()->light_mode)
-        lv_obj_add_state(toggle, LV_STATE_CHECKED);
-
-    create_settings_widget("Light Mode", toggle, panel);
-
-    dropdown = lv_dropdown_create(panel);
-    lv_dropdown_set_options(dropdown, "Blue\nGreen\nGrey\nYellow\nOrange\nRed\nPurple");
-    lv_dropdown_set_selected(dropdown, get_current_printer_config()->color_scheme);
-    lv_obj_set_width(dropdown, DROPDOWN_WIDTH);
-    lv_obj_add_event_cb(dropdown, theme_dropdown, LV_EVENT_VALUE_CHANGED, NULL);
-
-    create_settings_widget("Theme", dropdown, panel);
-
-    dropdown = lv_dropdown_create(panel);
-    lv_dropdown_set_options(dropdown, brightness_options);
-    lv_obj_set_width(dropdown, DROPDOWN_WIDTH);
-    lv_obj_add_event_cb(dropdown, brightness_dropdown, LV_EVENT_VALUE_CHANGED, NULL);
-
+    int brightness_settings_index = 0;
     for (int i = 0; i < SIZEOF(brightness_options_values); i++){
         if (brightness_options_values[i] == global_config.brightness){
-            lv_dropdown_set_selected(dropdown, i);
+            brightness_settings_index = i;
             break;
         }
     }
 
-    create_settings_widget("Brightness", dropdown, panel);
+    lv_create_custom_menu_dropdown("Brightness", panel, brightness_dropdown, brightness_options, brightness_settings_index);
+
 
 #ifndef CYD_SCREEN_DISABLE_TIMEOUT
-    dropdown = lv_dropdown_create(panel);
-    lv_dropdown_set_options(dropdown, wake_timeout_options);
-    lv_obj_set_width(dropdown, DROPDOWN_WIDTH);
-    lv_obj_add_event_cb(dropdown, wake_timeout_dropdown, LV_EVENT_VALUE_CHANGED, NULL);
-
+    int wake_timeout_settings_index = 0;
     for (int i = 0; i < SIZEOF(wake_timeout_options_values); i++){
         if (wake_timeout_options_values[i] == global_config.screen_timeout){
-            lv_dropdown_set_selected(dropdown, i);
+            wake_timeout_settings_index = i;
             break;
         }
     }
 
-    create_settings_widget("Wake Timeout", dropdown, panel);
+    lv_create_custom_menu_dropdown("Wake Timeout", panel, wake_timeout_dropdown, wake_timeout_options, wake_timeout_settings_index);
 #endif
 
-    dropdown = lv_dropdown_create(panel);
-    lv_dropdown_set_options(dropdown, estimated_time_options);
-    lv_obj_set_width(dropdown, DROPDOWN_WIDTH);
-    lv_obj_add_event_cb(dropdown, estimated_time_dropdown, LV_EVENT_VALUE_CHANGED, NULL);
-
-    lv_dropdown_set_selected(dropdown, get_current_printer_config()->remaining_time_calc_mode);
-    create_settings_widget("Estimated Time", dropdown, panel);
-
-    toggle = lv_switch_create(panel);
-    lv_obj_set_width(toggle, TOGGLE_WIDTH);
-    lv_obj_add_event_cb(toggle, rotate_screen_switch, LV_EVENT_VALUE_CHANGED, NULL);
-
-    if (global_config.rotate_screen)
-        lv_obj_add_state(toggle, LV_STATE_CHECKED);
-    
-    create_settings_widget("Rotate Screen", toggle, panel);
+    lv_create_custom_menu_dropdown("Estimated Time", panel, estimated_time_dropdown, estimated_time_options, get_current_printer_config()->remaining_time_calc_mode);
+    lv_create_custom_menu_switch("Rotate Screen", panel, rotate_screen_switch, global_config.rotate_screen);
 
 #ifndef CYD_SCREEN_DISABLE_TIMEOUT
-    toggle = lv_switch_create(panel);
-    lv_obj_set_width(toggle, TOGGLE_WIDTH);
-    lv_obj_add_event_cb(toggle, on_during_print_switch, LV_EVENT_VALUE_CHANGED, NULL);
-
-    if (global_config.on_during_print)
-        lv_obj_add_state(toggle, LV_STATE_CHECKED);
-
-    create_settings_widget("Screen On During Print", toggle, panel);
+    lv_create_custom_menu_switch("Screen On During Print", panel, on_during_print_switch, global_config.on_during_print);
 #endif
 
-    toggle = lv_switch_create(panel);
-    lv_obj_set_width(toggle, TOGGLE_WIDTH);
-    lv_obj_add_event_cb(toggle, multi_printer_switch, LV_EVENT_VALUE_CHANGED, NULL);
+    lv_create_custom_menu_switch("Multi Printer Mode", panel, multi_printer_switch, global_config.multi_printer_mode);
+    lv_create_custom_menu_switch("Auto Update", panel, auto_ota_update_switch, global_config.auto_ota_update);
 
-    if (global_config.multi_printer_mode)
-        lv_obj_add_state(toggle, LV_STATE_CHECKED);
-    
-    create_settings_widget("Multi Printer Mode", toggle, panel);
 
-    toggle = lv_switch_create(panel);
-    lv_obj_set_width(toggle, TOGGLE_WIDTH);
-    lv_obj_add_event_cb(toggle, auto_ota_update_switch, LV_EVENT_VALUE_CHANGED, NULL);
-
-    if (global_config.auto_ota_update)
-        lv_obj_add_state(toggle, LV_STATE_CHECKED);
-
-    create_settings_widget("Auto Update", toggle, panel);
-
-    label = lv_label_create(panel);
+    lv_obj_t *label = lv_label_create(panel);
     lv_label_set_text(label, REPO_VERSION "  ");
-
-    create_settings_widget("Version", label, panel, false);
+    lv_create_custom_menu_entry("Version", label, panel, false);
 
     if (ota_has_update()){
-        btn = lv_btn_create(panel);
+        lv_obj_t *btn = lv_btn_create(panel);
         lv_obj_add_event_cb(btn, btn_ota_do_update, LV_EVENT_CLICKED, NULL);
 
         label = lv_label_create(btn);
         lv_label_set_text_fmt(label, "Update to %s", ota_new_version_name().c_str());
         lv_obj_center(label);
 
-        create_settings_widget("Device", btn, panel);
+        lv_create_custom_menu_entry("Device", btn, panel);
     }
     else {
         label = lv_label_create(panel);
         lv_label_set_text(label, ARDUINO_BOARD "  ");
-
-        create_settings_widget("Device", label, panel, false);
+        lv_create_custom_menu_entry("Device", label, panel, false);
     }
 }

@@ -5,6 +5,7 @@
 #include "../../core/lv_setup.h"
 #include <stdio.h>
 #include "../nav_buttons.h"
+#include "../../core/macros_query.h"
 
 const char * printer_status[] = {
     "Error",
@@ -109,21 +110,13 @@ static void btn_disable_if_controlled_or_offline(lv_event_t * e)
 PRINTER_CONFIG * keyboard_config = NULL;
 
 static void keyboard_callback(lv_event_t * e){
-    lv_event_code_t code = lv_event_get_code(e);
     lv_obj_t * ta = lv_event_get_target(e);
     lv_obj_t * kb = (lv_obj_t *)lv_event_get_user_data(e);
     
-    if (code == LV_EVENT_READY) {
-        const char * text = lv_textarea_get_text(ta);
-        strcpy(keyboard_config->printer_name, text);
-        write_global_config();
-        lv_msg_send(DATA_PRINTER_MINIMAL, NULL);
-    }
-
-    if(code == LV_EVENT_DEFOCUSED || code == LV_EVENT_CANCEL || code == LV_EVENT_READY) {
-        lv_keyboard_set_textarea(kb, NULL);
-        lv_obj_del(lv_obj_get_parent(kb));
-    }
+    const char * text = lv_textarea_get_text(ta);
+    strcpy(keyboard_config->printer_name, text);
+    write_global_config();
+    lv_msg_send(DATA_PRINTER_MINIMAL, NULL);
 }
 
 static void btn_printer_delete(lv_event_t * e)
@@ -146,24 +139,7 @@ static void btn_printer_delete(lv_event_t * e)
 static void btn_printer_rename(lv_event_t * e)
 {
     keyboard_config = (PRINTER_CONFIG*)lv_event_get_user_data(e);
-
-    lv_obj_t * parent = lv_create_empty_panel(lv_scr_act());
-    lv_obj_set_style_bg_opa(parent, LV_OPA_50, 0); 
-    lv_obj_set_size(parent, CYD_SCREEN_WIDTH_PX, CYD_SCREEN_HEIGHT_PX);
-    lv_layout_flex_column(parent, LV_FLEX_ALIGN_SPACE_BETWEEN);
-
-    lv_obj_t * empty_panel = lv_create_empty_panel(parent);
-    lv_obj_set_flex_grow(empty_panel, 1);
-
-    lv_obj_t * ta = lv_textarea_create(parent);
-    lv_obj_t * keyboard = lv_keyboard_create(parent);
-
-    lv_obj_set_width(ta, CYD_SCREEN_WIDTH_PX * 0.75);
-    lv_textarea_set_max_length(ta, 24);
-    lv_textarea_set_one_line(ta, true);
-    lv_textarea_set_text(ta, keyboard_config->printer_name);
-    lv_obj_add_event_cb(ta, keyboard_callback, LV_EVENT_ALL, keyboard);
-    lv_keyboard_set_textarea(keyboard, ta);
+    lv_create_keyboard_text_entry(keyboard_callback, LV_KEYBOARD_MODE_TEXT_LOWER, CYD_SCREEN_WIDTH_PX * 0.75, 24, keyboard_config->printer_name, false);
 }
 
 static void btn_printer_activate(lv_event_t * e)
@@ -174,6 +150,8 @@ static void btn_printer_activate(lv_event_t * e)
 
     set_printer_config_index(index);
     set_color_scheme();
+    _macros_query_internal();
+    _power_devices_query_internal();
     lv_msg_send(DATA_PRINTER_MINIMAL, NULL);
 }
 
