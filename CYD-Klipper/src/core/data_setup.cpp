@@ -7,6 +7,7 @@
 #include "macros_query.h"
 #include <UrlEncode.h>
 #include "http_client.h"
+#include "../ui/ui_utils.h"
 
 const char *printer_state_messages[] = {
     "Error",
@@ -112,7 +113,7 @@ void fetch_printer_data()
 {
     freeze_request_thread();
     PRINTER_CONFIG *config = get_current_printer_config();
-    SETUP_HTTP_CLIENT("/printer/objects/query?extruder&heater_bed&toolhead&gcode_move&virtual_sdcard&print_stats&webhooks&fan")
+    SETUP_HTTP_CLIENT("/printer/objects/query?extruder&heater_bed&toolhead&gcode_move&virtual_sdcard&print_stats&webhooks&fan&display_status")
 
     int httpCode = client.GET();
     delay(10);
@@ -235,8 +236,11 @@ void fetch_printer_data()
                 }
             }
 
-            // TODO: make a call to /server/files/metadata to get more accurate time estimates
-            // https://moonraker.readthedocs.io/en/latest/web_api/#server-administration
+            if (status.containsKey("display_status"))
+            {
+                const char* message = status["display_status"]["message"];
+                lv_create_popup_message(message, 10000);
+            }
 
             if (printer.state == PRINTER_STATE_PRINTING && printer.print_progress > 0)
             {
@@ -418,5 +422,5 @@ void data_setup()
 
     macros_query_setup();
     freeze_render_thread();
-    xTaskCreatePinnedToCore(data_loop_background, "data_loop_background", 5000, NULL, 0, &background_loop, 0);
+    xTaskCreatePinnedToCore(data_loop_background, "data_loop_background", 5000, NULL, 2, &background_loop, 0);
 }

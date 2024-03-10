@@ -2,6 +2,7 @@
 #include "ui_utils.h"
 #include "../core/data_setup.h"
 #include "../core/lv_setup.h"
+#include <ErriezCRC32.h>
 
 lv_obj_t* lv_create_empty_panel(lv_obj_t* root) {
     lv_obj_t* panel = lv_obj_create(root); 
@@ -199,4 +200,54 @@ void lv_create_custom_menu_label(const char *label_text, lv_obj_t* root_panel, c
     lv_obj_t * label = lv_label_create(lv_scr_act());
     lv_label_set_text(label, text);
     lv_create_custom_menu_entry(label_text, label, root_panel, false);
+}
+
+uint32_t message_hash = 0;
+lv_timer_t* timer = NULL;
+
+void on_timer_destroy(lv_event_t * e)
+{
+    lv_timer_del(timer);
+    timer = NULL;
+    Serial.println("Timer destroy");
+}
+
+void timer_callback(lv_timer_t *timer)
+{
+    lv_obj_t * panel = (lv_obj_t *)timer->user_data;
+    lv_obj_del(panel);
+    Serial.println("Timer callback");
+}
+
+void lv_create_popup_message(const char* message, uint16_t timeout_ms)
+{
+    Serial.println("Hello");
+    if (message == nullptr || timer != NULL) 
+    {
+        return;
+    }
+
+    uint32_t new_hash = crc32String(message);
+
+    if (new_hash == message_hash) 
+    {
+        return;
+    }
+
+    message_hash = new_hash;
+
+    lv_obj_t* panel = lv_obj_create(lv_scr_act()); 
+    lv_obj_set_style_pad_all(panel, CYD_SCREEN_GAP_PX, CYD_SCREEN_GAP_PX);
+    lv_obj_set_size(panel, CYD_SCREEN_PANEL_WIDTH_PX - CYD_SCREEN_GAP_PX * 2, LV_SIZE_CONTENT);
+    lv_layout_flex_column(panel, LV_FLEX_ALIGN_CENTER);
+    lv_obj_align(panel, LV_ALIGN_TOP_RIGHT, -CYD_SCREEN_GAP_PX, CYD_SCREEN_GAP_PX);
+    lv_obj_add_event_cb(panel, on_timer_destroy, LV_EVENT_DELETE, NULL);
+    lv_obj_set_style_border_color(panel, lv_color_hex(0xFF0000), 0);
+
+    lv_obj_t* label = lv_label_create(panel);
+    lv_label_set_text_fmt(label, "%s", message);
+    lv_obj_set_size(label, CYD_SCREEN_PANEL_WIDTH_PX - CYD_SCREEN_GAP_PX * 6, LV_SIZE_CONTENT);
+    lv_label_set_long_mode(label, LV_LABEL_LONG_WRAP);
+
+    timer = lv_timer_create(timer_callback, timeout_ms,  panel);
 }
