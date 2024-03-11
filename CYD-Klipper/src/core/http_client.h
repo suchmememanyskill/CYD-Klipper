@@ -1,8 +1,10 @@
 #pragma once
 
 #include <HTTPClient.h>
+#include "../conf/global_config.h"
 
 String get_full_url(String url_part);
+String get_full_url(String url_part, PRINTER_CONFIG * config);
 
 void configure_http_client(HTTPClient &client, String url, bool stream = true, int timeout = 1000);
 

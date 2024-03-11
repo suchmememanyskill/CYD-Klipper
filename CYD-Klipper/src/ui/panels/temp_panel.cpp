@@ -36,17 +36,17 @@ static void update_printer_data_bed_temp(lv_event_t * e){
 static short get_temp_preset(int target){
     switch (target){
         case TARGET_HOTEND_CONFIG_1:
-            return global_config.hotend_presets[0];
+            return get_current_printer_config()->hotend_presets[0];
         case TARGET_HOTEND_CONFIG_2:
-            return global_config.hotend_presets[1];
+            return get_current_printer_config()->hotend_presets[1];
         case TARGET_HOTEND_CONFIG_3:
-            return global_config.hotend_presets[2];
+            return get_current_printer_config()->hotend_presets[2];
         case TARGET_BED_CONFIG_1:
-            return global_config.bed_presets[0];
+            return get_current_printer_config()->bed_presets[0];
         case TARGET_BED_CONFIG_2:
-            return global_config.bed_presets[1];
+            return get_current_printer_config()->bed_presets[1];
         case TARGET_BED_CONFIG_3:
-            return global_config.bed_presets[2];
+            return get_current_printer_config()->bed_presets[2];
         default:
             return -1;
     }
@@ -62,97 +62,67 @@ static void update_temp_preset_label(lv_event_t * e){
 }
 
 void UpdateConfig(){
-    WriteGlobalConfig();
+    write_global_config();
     lv_msg_send(DATA_PRINTER_TEMP_PRESET, &printer);
 }
 
 static void keyboard_callback(lv_event_t * e){
-    lv_event_code_t code = lv_event_get_code(e);
     lv_obj_t * ta = lv_event_get_target(e);
     lv_obj_t * kb = (lv_obj_t *)lv_event_get_user_data(e);
 
-    if (code == LV_EVENT_READY) {
-        const char * text = lv_textarea_get_text(ta);
+    const char * text = lv_textarea_get_text(ta);
 
-        int temp = atoi(text);
-        if (temp < 0 || temp > 500){
-            return;
-        }
+    int temp = atoi(text);
+    if (temp < 0 || temp > 500){
+        return;
+    }
 
-        char gcode[64];
+    char gcode[64];
         
-        switch (keyboard_target){
-            case TARGET_HOTEND:
-                sprintf(gcode, "M104 S%d", temp);
-                send_gcode(true, gcode);
-                break;
-            case TARGET_BED:
-                sprintf(gcode, "M140 S%d", temp);
-                send_gcode(true, gcode);
-                break;
-            case TARGET_HOTEND_CONFIG_1:
-                global_config.hotend_presets[0] = temp;
-                UpdateConfig();
-                break;
-            case TARGET_HOTEND_CONFIG_2:
-                global_config.hotend_presets[1] = temp;
-                UpdateConfig();
-                break;
-            case TARGET_HOTEND_CONFIG_3:
-                global_config.hotend_presets[2] = temp;
-                UpdateConfig();
-                break;
-            case TARGET_BED_CONFIG_1:
-                global_config.bed_presets[0] = temp;
-                UpdateConfig();
-                break;
-            case TARGET_BED_CONFIG_2:
-                global_config.bed_presets[1] = temp;
-                UpdateConfig();
-                break;
-            case TARGET_BED_CONFIG_3:
-                global_config.bed_presets[2] = temp;
-                UpdateConfig();
-                break;
-        }
+    switch (keyboard_target){
+        case TARGET_HOTEND:
+            sprintf(gcode, "M104 S%d", temp);
+            send_gcode(true, gcode);
+            break;
+        case TARGET_BED:
+            sprintf(gcode, "M140 S%d", temp);
+            send_gcode(true, gcode);
+            break;
+        case TARGET_HOTEND_CONFIG_1:
+            get_current_printer_config()->hotend_presets[0] = temp;
+            UpdateConfig();
+            break;
+        case TARGET_HOTEND_CONFIG_2:
+            get_current_printer_config()->hotend_presets[1] = temp;
+            UpdateConfig();
+            break;
+        case TARGET_HOTEND_CONFIG_3:
+            get_current_printer_config()->hotend_presets[2] = temp;
+            UpdateConfig();
+            break;
+        case TARGET_BED_CONFIG_1:
+            get_current_printer_config()->bed_presets[0] = temp;
+            UpdateConfig();
+            break;
+        case TARGET_BED_CONFIG_2:
+            get_current_printer_config()->bed_presets[1] = temp;
+            UpdateConfig();
+            break;
+        case TARGET_BED_CONFIG_3:
+            get_current_printer_config()->bed_presets[2] = temp;
+            UpdateConfig();
+            break;
     }
-
-    if(code == LV_EVENT_DEFOCUSED || code == LV_EVENT_CANCEL || code == LV_EVENT_READY) {
-        lv_keyboard_set_textarea(kb, NULL);
-        lv_obj_del(lv_obj_get_parent(kb));
-    }
-}
-
-static void show_keyboard(lv_event_t * e){
-    lv_obj_t * parent = lv_create_empty_panel(root_panel);
-    lv_obj_set_style_bg_opa(parent, LV_OPA_50, 0); 
-    lv_obj_set_size(parent, CYD_SCREEN_PANEL_WIDTH_PX, CYD_SCREEN_PANEL_HEIGHT_PX);
-    lv_layout_flex_column(parent, LV_FLEX_ALIGN_SPACE_BETWEEN);
-
-    lv_obj_t * empty_panel = lv_create_empty_panel(parent);
-    lv_obj_set_flex_grow(empty_panel, 1);
-
-    lv_obj_t * ta = lv_textarea_create(parent);
-    lv_obj_t * keyboard = lv_keyboard_create(parent);
-
-    lv_obj_set_width(ta, CYD_SCREEN_PANEL_WIDTH_PX / 2);
-    lv_textarea_set_max_length(ta, 3);
-    lv_textarea_set_one_line(ta, true);
-    lv_textarea_set_text(ta, "");
-    lv_obj_add_event_cb(ta, keyboard_callback, LV_EVENT_ALL, keyboard);
-
-    lv_keyboard_set_mode(keyboard, LV_KEYBOARD_MODE_NUMBER);
-    lv_keyboard_set_textarea(keyboard, ta);
 }
 
 static void show_keyboard_with_hotend(lv_event_t * e){
     keyboard_target = TARGET_HOTEND;
-    show_keyboard(e);
+    lv_create_keyboard_text_entry(keyboard_callback);
 }
 
 static void show_keyboard_with_bed(lv_event_t * e){
     keyboard_target = TARGET_BED;
-    show_keyboard(e);
+    lv_create_keyboard_text_entry(keyboard_callback);
 }
 
 static void cooldown_temp(lv_event_t * e){
@@ -179,7 +149,7 @@ static void set_temp_via_preset(lv_event_t * e){
 
     if (edit_mode) {
         keyboard_target = (temp_target)target;
-        show_keyboard(e);
+        lv_create_keyboard_text_entry(keyboard_callback);
         return;
     }
 

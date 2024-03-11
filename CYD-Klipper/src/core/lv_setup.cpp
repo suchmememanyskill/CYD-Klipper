@@ -54,14 +54,14 @@ void lv_touch_intercept(lv_indev_drv_t *indev_driver, lv_indev_data_t *data)
 
         screen_timer_wake();
 #ifndef CYD_SCREEN_DISABLE_TOUCH_CALIBRATION
-        data->point.x = round((data->point.x * global_config.screenCalXMult) + global_config.screenCalXOffset);
-        data->point.y = round((data->point.y * global_config.screenCalYMult) + global_config.screenCalYOffset);
+        data->point.x = round((data->point.x * global_config.screen_cal_x_mult) + global_config.screen_cal_x_offset);
+        data->point.y = round((data->point.y * global_config.screen_cal_y_mult) + global_config.screen_cal_y_offset);
 #endif // CYD_SCREEN_DISABLE_TOUCH_CALIBRATION
     }
 }
 
 void lv_do_calibration(){
-    if (global_config.screenCalibrated){
+    if (global_config.screen_calibrated){
         return;
     }
 
@@ -149,22 +149,22 @@ void lv_do_calibration(){
     int16_t yDist = CYD_SCREEN_HEIGHT_PX - 20;
 #endif
 
-    global_config.screenCalXMult = (float)xDist / (float)(x2 - x1);
-    global_config.screenCalXOffset = 10.0 - ((float)x1 * global_config.screenCalXMult);
+    global_config.screen_cal_x_mult = (float)xDist / (float)(x2 - x1);
+    global_config.screen_cal_x_offset = 10.0 - ((float)x1 * global_config.screen_cal_x_mult);
 
-    global_config.screenCalYMult = (float)yDist / (float)(y2 - y1);
-    global_config.screenCalYOffset = 10.0 - ((float)y1 * global_config.screenCalYMult);
+    global_config.screen_cal_y_mult = (float)yDist / (float)(y2 - y1);
+    global_config.screen_cal_y_offset = 10.0 - ((float)y1 * global_config.screen_cal_y_mult);
 
-    if (global_config.screenCalXMult == std::numeric_limits<float>::infinity() || global_config.screenCalYMult == std::numeric_limits<float>::infinity()){
+    if (global_config.screen_cal_x_mult == std::numeric_limits<float>::infinity() || global_config.screen_cal_y_mult == std::numeric_limits<float>::infinity()){
         Serial.println("Calibration failed, please try again");
         ESP.restart();
     }
 
-    global_config.screenCalibrated = true;
-    WriteGlobalConfig();
+    global_config.screen_calibrated = true;
+    write_global_config();
 
     lv_obj_clean(lv_scr_act());
-    Serial.printf("Calibration done: X*%.2f + %.2f, Y*%.2f + %.2f\n", global_config.screenCalXMult, global_config.screenCalXOffset, global_config.screenCalYMult, global_config.screenCalYOffset);
+    Serial.printf("Calibration done: X*%.2f + %.2f, Y*%.2f + %.2f\n", global_config.screen_cal_x_mult, global_config.screen_cal_x_offset, global_config.screen_cal_y_mult, global_config.screen_cal_y_offset);
 }
 
 void set_screen_brightness()
@@ -207,7 +207,7 @@ void screen_timer_sleep(lv_timer_t *timer)
 
 void screen_timer_setup()
 {
-    screen_sleep_timer = lv_timer_create(screen_timer_sleep, global_config.screenTimeout * 1000 * 60, NULL);
+    screen_sleep_timer = lv_timer_create(screen_timer_sleep, global_config.screen_timeout * 1000 * 60, NULL);
     lv_timer_pause(screen_sleep_timer);
 }
 
@@ -228,26 +228,27 @@ void screen_timer_period(unsigned int period)
 
 void set_screen_timer_period()
 {
-    screen_timer_period(global_config.screenTimeout * 1000 * 60);
+    screen_timer_period(global_config.screen_timeout * 1000 * 60);
 }
 
 void set_color_scheme()
 {
+    PRINTER_CONFIG *config = get_current_printer_config();
     lv_disp_t *dispp = lv_disp_get_default();
     lv_color_t main_color = {0};
-    COLOR_DEF color_def = color_defs[global_config.color_scheme];
+    COLOR_DEF color_def = color_defs[config->color_scheme];
 
-    if (color_defs[global_config.color_scheme].primary_color_light > 0){
+    if (color_defs[config->color_scheme].primary_color_light > 0){
         main_color = lv_palette_lighten(color_def.primary_color, color_def.primary_color_light);
     }
-    else if (color_defs[global_config.color_scheme].primary_color_light < 0) {
+    else if (color_defs[config->color_scheme].primary_color_light < 0) {
         main_color = lv_palette_darken(color_def.primary_color, color_def.primary_color_light * -1);
     }
     else {
-        main_color = lv_palette_main(color_defs[global_config.color_scheme].primary_color);
+        main_color = lv_palette_main(color_defs[config->color_scheme].primary_color);
     }
 
-    lv_theme_t *theme = lv_theme_default_init(dispp, main_color, lv_palette_main(color_def.secondary_color), !global_config.lightMode, &CYD_SCREEN_FONT);
+    lv_theme_t *theme = lv_theme_default_init(dispp, main_color, lv_palette_main(color_def.secondary_color), !config->light_mode, &CYD_SCREEN_FONT);
     lv_disp_set_theme(dispp, theme);
 }
 

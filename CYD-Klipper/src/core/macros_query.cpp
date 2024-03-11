@@ -13,7 +13,7 @@ static char* power_devices[16] = {0};
 static bool power_device_states[16] = {0};
 static int power_devices_count = 0;
 
-static void _macros_query_internal(){
+void _macros_query_internal(){
     SETUP_HTTP_CLIENT("/printer/gcode/help")
 
     int httpCode = client.GET();
@@ -52,12 +52,15 @@ void _power_devices_query_internal(){
     SETUP_HTTP_CLIENT("/machine/device_power/devices")
 
     int httpCode = client.GET();
+
+    if (httpCode == 200 || httpCode == 404 || httpCode == 500){
+        power_devices_clear();
+    }
+
     if (httpCode == 200){
         JsonDocument doc;
         deserializeJson(doc, client.getStream());
         auto result = doc["result"]["devices"].as<JsonArray>();
-
-        power_devices_clear();
 
         for (auto i : result){
             const char * device_name = i["device"];

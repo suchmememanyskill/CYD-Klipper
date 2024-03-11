@@ -10,7 +10,7 @@ static void reset_btn_event_handler(lv_event_t * e) {
     lv_event_code_t code = lv_event_get_code(e);
 
     if(code == LV_EVENT_CLICKED) {
-        global_config.wifiConfigured = false;
+        global_config.wifi_configured = false;
         wifi_init_inner();
     }
 }
@@ -33,9 +33,9 @@ static void ta_event_cb(lv_event_t * e) {
         int len = strlen(txt);
         if (len > 0)
         {
-            global_config.wifiConfigured = true;
-            strcpy(global_config.wifiPassword, txt);
-            WriteGlobalConfig();
+            global_config.wifi_configured = true;
+            strcpy(global_config.wifi_password, txt);
+            write_global_config();
             wifi_init_inner();
         }
     }
@@ -79,7 +79,7 @@ static void wifi_btn_event_handler(lv_event_t * e){
     if(code == LV_EVENT_CLICKED) {
         delay(100);
         char* ssid = (char*)e->user_data;
-        strcpy(global_config.wifiSSID, ssid);
+        strcpy(global_config.wifi_SSID, ssid);
         Serial.println(ssid);
         wifi_pass_entry(ssid);
     }
@@ -89,8 +89,8 @@ void wifi_init_inner(){
     WiFi.disconnect();
     lv_obj_clean(lv_scr_act());
 
-    if (global_config.wifiConfigured){
-        WiFi.begin(global_config.wifiSSID, global_config.wifiPassword);
+    if (global_config.wifi_configured){
+        WiFi.begin(global_config.wifi_SSID, global_config.wifi_password);
         
         lv_obj_t * label = lv_label_create(lv_scr_act());
         lv_label_set_text(label, "Connecting to WiFi");
@@ -180,7 +180,7 @@ void wifi_init(){
     WiFi.mode(WIFI_STA);
     wifi_init_inner();
 
-    while (!global_config.wifiConfigured || WiFi.status() != WL_CONNECTED){
+    while (!global_config.wifi_configured || WiFi.status() != WL_CONNECTED){
         if (millis() - print_timer > print_freq){
             print_timer = millis();
             Serial.printf("WiFi Status: %s\n", errs[WiFi.status()]);

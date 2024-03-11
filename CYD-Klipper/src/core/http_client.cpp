@@ -1,14 +1,17 @@
 #include "http_client.h"
-#include "../conf/global_config.h"
+
+String get_full_url(String url_part, PRINTER_CONFIG * config)
+{
+    return "http://" + String(config->klipper_host) + ":" + String(config->klipper_port) + url_part;
+}
 
 String get_full_url(String url_part)
 {
-    return "http://" + String(global_config.klipperHost) + ":" + String(global_config.klipperPort) + url_part;
+    return "http://" + String(get_current_printer_config()->klipper_host) + ":" + String(get_current_printer_config()->klipper_port) + url_part;
 }
 
 void configure_http_client(HTTPClient &client, String url, bool stream, int timeout)
 {
-    Serial.println(url);
     if (stream){
         client.useHTTP10(true);
     }
@@ -20,7 +23,7 @@ void configure_http_client(HTTPClient &client, String url, bool stream, int time
 
     client.begin(url);
 
-    if (global_config.auth_configured) {
-        client.addHeader("X-Api-Key", global_config.klipper_auth);
+    if (get_current_printer_config()->auth_configured) {
+        client.addHeader("X-Api-Key", get_current_printer_config()->klipper_auth);
     }
 }

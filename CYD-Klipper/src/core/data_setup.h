@@ -37,12 +37,20 @@ typedef struct _Printer {
     int slicer_estimated_print_time_s;
 } Printer;
 
+typedef struct _PrinterMinimal {
+    bool online;
+    unsigned char state;
+    float print_progress; // 0 -> 1
+} PrinterMinimal;
+
 extern Printer printer;
+extern PrinterMinimal *printer_minimal;
 extern int klipper_request_consecutive_fail_count;
 
 #define DATA_PRINTER_STATE 1
 #define DATA_PRINTER_DATA 2
 #define DATA_PRINTER_TEMP_PRESET 3
+#define DATA_PRINTER_MINIMAL 4
 
 void data_loop();
 void data_setup();

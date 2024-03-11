@@ -67,14 +67,14 @@ void screen_lv_touchRead(lv_indev_drv_t *indev_driver, lv_indev_data_t *data)
 }
 
 void set_invert_display(){
-    tft.invertDisplay(global_config.invertColors);
+    tft.invertDisplay(get_current_printer_config()->invert_colors);
 }
 
 void screen_setup()
 {
     touchscreen_spi.begin(XPT2046_CLK, XPT2046_MISO, XPT2046_MOSI, XPT2046_CS);
     touchscreen.begin(touchscreen_spi);
-    touchscreen.setRotation(global_config.rotateScreen ? 3 : 1);
+    touchscreen.setRotation(global_config.rotate_screen ? 3 : 1);
 
     lv_init();
 
@@ -83,7 +83,7 @@ void screen_setup()
     ledcSetup(0, 5000, 12);
     ledcAttachPin(21, 0);
 
-    tft.setRotation(global_config.rotateScreen ? 3 : 1);
+    tft.setRotation(global_config.rotate_screen ? 3 : 1);
     tft.fillScreen(TFT_BLACK);
     set_invert_display();
     touchscreen_spi.begin(XPT2046_CLK, XPT2046_MISO, XPT2046_MOSI, XPT2046_CS);

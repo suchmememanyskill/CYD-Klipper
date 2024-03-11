@@ -85,7 +85,7 @@ void ota_init()
     Serial.printf("OTA Update Result: %d\n", result);
     update_available = result == ESP32OTAPull::UPDATE_AVAILABLE;
 
-    if (global_config.autoOtaUpdate && update_available)
+    if (global_config.auto_ota_update && update_available)
     {
         ota_do_update(true);
     }

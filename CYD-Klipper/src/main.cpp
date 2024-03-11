@@ -13,7 +13,7 @@
 void setup() {
     Serial.begin(115200);
     Serial.println("Hello World");
-    LoadGlobalConfig();
+    load_global_config();
     screen_setup();
     lv_setup();
     Serial.println("Screen init done");

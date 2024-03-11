@@ -8,6 +8,7 @@
 #include "panels/panel.h"
 #include "../core/macros_query.h"
 #include "../core/lv_setup.h"
+#include "switch_printer.h"
 
 char extruder_temp_buff[20];
 char bed_temp_buff[20];
@@ -90,10 +91,12 @@ void error_ui(){
         lv_label_set_text(label, "Devices");
         lv_obj_center(label);
     }
+
+    draw_switch_printer_button();
 }
 
 void check_if_screen_needs_to_be_disabled(){
-    if (global_config.onDuringPrint && printer.state == PRINTER_STATE_PRINTING){
+    if (global_config.on_during_print && printer.state == PRINTER_STATE_PRINTING){
         screen_timer_wake();
         screen_timer_stop();
     }

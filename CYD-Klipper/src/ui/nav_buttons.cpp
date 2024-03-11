@@ -4,6 +4,7 @@
 #include "nav_buttons.h"
 #include "ui_utils.h"
 #include <stdio.h>
+#include "../conf/global_config.h"
 
 static lv_style_t nav_button_style;
 
@@ -76,6 +77,10 @@ static void btn_click_macros(lv_event_t * e){
     nav_buttons_setup(4);
 }
 
+static void btn_click_printer(lv_event_t * e){
+    nav_buttons_setup(6);
+}
+
 void create_button(const char* icon, const char* name, lv_event_cb_t button_click, lv_event_cb_t label_update, lv_obj_t * root){
     lv_obj_t* btn = lv_btn_create(root);
     lv_obj_set_flex_grow(btn, 1);
@@ -131,6 +136,11 @@ void nav_buttons_setup(unsigned char active_panel){
     // Macros
     create_button(LV_SYMBOL_GPS, "Macro", btn_click_macros, NULL, root_panel);
 
+    if (global_config.multi_printer_mode)
+    {
+        create_button(LV_SYMBOL_HOME, "Printer", btn_click_printer, NULL, root_panel);
+    }
+
     lv_obj_t * panel = lv_create_empty_panel(lv_scr_act());
     lv_obj_set_size(panel, CYD_SCREEN_PANEL_WIDTH_PX, CYD_SCREEN_PANEL_HEIGHT_PX);
     lv_obj_align(panel, LV_ALIGN_TOP_RIGHT, 0, 0);
@@ -153,6 +163,9 @@ void nav_buttons_setup(unsigned char active_panel){
             break;
         case 5:
             stats_panel_init(panel);
+            break;
+        case 6:
+            printer_panel_init(panel);
             break;
     }
 

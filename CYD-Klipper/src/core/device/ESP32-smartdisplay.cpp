@@ -21,7 +21,7 @@ void set_invert_display()
 
 void lv_screen_intercept(_lv_disp_drv_t *disp_drv, const lv_area_t *area, lv_color_t *color_p)
 {
-    if (global_config.invertColors) {
+    if (get_current_printer_config()->invert_colors) {
         uint32_t w = (area->x2 - area->x1 + 1);
         uint32_t h = (area->y2 - area->y1 + 1);
 
@@ -61,7 +61,7 @@ void screen_setup()
     }
 #endif // CYD_SCREEN_DISABLE_INVERT_COLORS
 
-    lv_disp_set_rotation(lv_disp_get_default(), (global_config.rotateScreen) ? ROTATION_INVERTED : ROTATION_NORMAL);
+    lv_disp_set_rotation(lv_disp_get_default(), (global_config.rotate_screen) ? ROTATION_INVERTED : ROTATION_NORMAL);
 }
 
 #endif // CYD_SCREEN_DRIVER_ESP32_SMARTDISPLAY
