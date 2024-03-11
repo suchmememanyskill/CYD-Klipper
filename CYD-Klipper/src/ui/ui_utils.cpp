@@ -209,19 +209,16 @@ void on_timer_destroy(lv_event_t * e)
 {
     lv_timer_del(timer);
     timer = NULL;
-    Serial.println("Timer destroy");
 }
 
 void timer_callback(lv_timer_t *timer)
 {
     lv_obj_t * panel = (lv_obj_t *)timer->user_data;
     lv_obj_del(panel);
-    Serial.println("Timer callback");
 }
 
 void lv_create_popup_message(const char* message, uint16_t timeout_ms)
 {
-    Serial.println("Hello");
     if (message == nullptr || timer != NULL) 
     {
         return;

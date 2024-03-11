@@ -34,7 +34,14 @@ static void update_printer_status_text(lv_event_t * e)
     int index = config - global_config.printer_config;
     PrinterMinimal * printer = &printer_minimal[index];
 
-    if (!printer->online){
+    if (config == get_current_printer_config())
+    {
+        lv_label_set_text(label, "In Control");
+        return;
+    }
+
+    if (!printer->online)
+    {
         lv_label_set_text(label, "Offline");
         return;
     }
