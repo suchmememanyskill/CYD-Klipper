@@ -41,6 +41,7 @@ typedef struct _PrinterMinimal {
     bool online;
     unsigned char state;
     float print_progress; // 0 -> 1
+    unsigned int power_devices;
 } PrinterMinimal;
 
 extern Printer printer;

@@ -12,8 +12,6 @@ void switch_printer(int index)
     set_printer_config_index(index);
     set_color_scheme();
     set_invert_display();
-    _macros_query_internal();
-    _power_devices_query_internal();
 }
 
 static void btn_switch_printer(lv_event_t *e){

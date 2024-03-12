@@ -7,6 +7,7 @@
 #include "../nav_buttons.h"
 #include "../../core/macros_query.h"
 #include "../switch_printer.h"
+#include "../macros.h"
 
 const char * printer_status[] = {
     "Error",
@@ -83,34 +84,56 @@ static void update_printer_percentage_text(lv_event_t * e)
     }
 }
 
-static void btn_disable_if_controlled(lv_event_t * e)
+static void update_printer_control_button_text(lv_event_t * e)
+{
+    lv_obj_t * label = lv_event_get_target(e);
+    PRINTER_CONFIG * config = (PRINTER_CONFIG*)lv_event_get_user_data(e);
+    int index = config - global_config.printer_config;
+    PrinterMinimal * printer = &printer_minimal[index];
+
+    if (!printer->online && printer->power_devices > 0)
+    {
+        lv_label_set_text(label, "Power");
+    }
+    else
+    {
+        lv_label_set_text(label, "Control");
+    }
+}
+
+static void btn_enable_delete(lv_event_t * e)
 {
     lv_obj_t * btn = lv_event_get_target(e);
     PRINTER_CONFIG * config = (PRINTER_CONFIG*)lv_event_get_user_data(e);
 
     if (config == get_current_printer_config())
     {
+        // Disable
         lv_obj_add_state(btn, LV_STATE_DISABLED);
     }
     else 
     {
+        // Enable
         lv_obj_clear_state(btn, LV_STATE_DISABLED);
     }
 }
 
-static void btn_disable_if_controlled_or_offline(lv_event_t * e)
+static void btn_enable_control(lv_event_t * e)
 {
     lv_obj_t * btn = lv_event_get_target(e);
     PRINTER_CONFIG * config = (PRINTER_CONFIG*)lv_event_get_user_data(e);
     int index = config - global_config.printer_config;
     PrinterMinimal * printer = &printer_minimal[index];
 
-    if (config == get_current_printer_config() || !printer->online)
+    if (config == get_current_printer_config() || (!printer->online && printer->power_devices < 0))
     {
+        // Disable
         lv_obj_add_state(btn, LV_STATE_DISABLED);
+
     }
-    else 
+    else
     {
+        // Enable
         lv_obj_clear_state(btn, LV_STATE_DISABLED);
     }
 }
@@ -155,6 +178,13 @@ static void btn_printer_activate(lv_event_t * e)
     lv_obj_t * label = lv_event_get_target(e);
     PRINTER_CONFIG * config = (PRINTER_CONFIG*)lv_event_get_user_data(e);
     int index = config - global_config.printer_config;
+    PrinterMinimal * printer = &printer_minimal[index];
+
+    if (!printer->online)
+    {
+        macros_draw_power_fullscreen(config);
+        return;
+    }
 
     switch_printer(index);
     lv_msg_send(DATA_PRINTER_MINIMAL, NULL);
@@ -203,7 +233,7 @@ void create_printer_ui(PRINTER_CONFIG * config, lv_obj_t * root)
     lv_obj_t * btn = lv_btn_create(button_row);
     lv_obj_set_flex_grow(btn, 1);
     lv_obj_add_event_cb(btn, btn_printer_delete, LV_EVENT_CLICKED, config);
-    lv_obj_add_event_cb(btn, btn_disable_if_controlled, LV_EVENT_MSG_RECEIVED, config);
+    lv_obj_add_event_cb(btn, btn_enable_delete, LV_EVENT_MSG_RECEIVED, config);
     lv_msg_subsribe_obj(DATA_PRINTER_MINIMAL, btn, config);
 
     label = lv_label_create(btn);
@@ -221,12 +251,13 @@ void create_printer_ui(PRINTER_CONFIG * config, lv_obj_t * root)
     btn = lv_btn_create(button_row);
     lv_obj_set_flex_grow(btn, 2);
     lv_obj_add_event_cb(btn, btn_printer_activate, LV_EVENT_CLICKED, config);
-    lv_obj_add_event_cb(btn, btn_disable_if_controlled_or_offline, LV_EVENT_MSG_RECEIVED, config);
+    lv_obj_add_event_cb(btn, btn_enable_control, LV_EVENT_MSG_RECEIVED, config);
     lv_msg_subsribe_obj(DATA_PRINTER_MINIMAL, btn, config);
 
     label = lv_label_create(btn);
-    lv_label_set_text(label, "Control");
     lv_obj_center(label);
+    lv_obj_add_event_cb(label, update_printer_control_button_text, LV_EVENT_MSG_RECEIVED, config);
+    lv_msg_subsribe_obj(DATA_PRINTER_MINIMAL, label, config);
 
     lv_obj_t * line = lv_line_create(root);
     lv_line_set_points(line, line_points, 2);

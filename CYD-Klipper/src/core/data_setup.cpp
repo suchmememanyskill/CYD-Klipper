@@ -8,6 +8,7 @@
 #include <UrlEncode.h>
 #include "http_client.h"
 #include "../ui/ui_utils.h"
+#include "macros_query.h"
 
 const char *printer_state_messages[] = {
     "Error",
@@ -325,6 +326,7 @@ void fetch_printer_data_minimal()
         if (httpCode == 200)
         {
             data[i].online = true;
+            data[i].power_devices = 0;
             JsonDocument doc;
             deserializeJson(doc, client.getStream());
             auto status = doc["result"]["status"];
@@ -377,7 +379,8 @@ void fetch_printer_data_minimal()
         }
         else 
         {
-            printer_minimal->online = false;
+            data[i].online = false;
+            data[i].power_devices = power_devices_count(config);
             unfreeze_request_thread();
         }
     }
@@ -420,7 +423,6 @@ void data_setup()
     printer.print_filename = filename_buff;
     fetch_printer_data();
 
-    macros_query_setup();
     freeze_render_thread();
     xTaskCreatePinnedToCore(data_loop_background, "data_loop_background", 5000, NULL, 2, &background_loop, 0);
 }

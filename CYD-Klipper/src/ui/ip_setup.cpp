@@ -8,8 +8,10 @@
 #include "panels/panel.h"
 #include "../core/http_client.h"
 #include "switch_printer.h"
+#include "macros.h"
 
 bool connect_ok = false;
+int prev_power_device_count = 0;
 lv_obj_t * hostEntry;
 lv_obj_t * portEntry;
 lv_obj_t * label = NULL;
@@ -116,21 +118,7 @@ static void reset_btn_event_handler(lv_event_t * e){
 }
 
 static void power_devices_button(lv_event_t * e) {
-    lv_obj_t * panel = lv_create_empty_panel(lv_scr_act());
-    lv_obj_set_style_bg_opa(panel, LV_OPA_COVER, 0); 
-    lv_layout_flex_column(panel);
-    lv_obj_set_size(panel, CYD_SCREEN_WIDTH_PX, CYD_SCREEN_HEIGHT_PX - CYD_SCREEN_GAP_PX);
-    lv_obj_align(panel, LV_ALIGN_TOP_LEFT, 0, CYD_SCREEN_GAP_PX);
-
-    lv_obj_t * button = lv_btn_create(panel);
-    lv_obj_set_size(button, CYD_SCREEN_WIDTH_PX - CYD_SCREEN_GAP_PX * 2, CYD_SCREEN_MIN_BUTTON_HEIGHT_PX);
-    lv_obj_add_event_cb(button, destroy_event_user_data, LV_EVENT_CLICKED, panel);
-
-    lv_obj_t * label = lv_label_create(button);
-    lv_label_set_text(label, LV_SYMBOL_CLOSE " Close");
-    lv_obj_center(label);
-
-    macros_panel_add_power_devices_to_panel(panel, power_devices_query()); 
+    macros_draw_power_fullscreen();
 }
 
 void redraw_connect_screen(){
@@ -153,7 +141,7 @@ void redraw_connect_screen(){
     lv_label_set_text(btn_label, "Reset");
     lv_obj_center(btn_label);
 
-    if (power_devices_query().count >= 1){
+    if (prev_power_device_count >= 1){
         lv_obj_t * power_devices_btn = lv_btn_create(button_row);
         lv_obj_add_event_cb(power_devices_btn, power_devices_button, LV_EVENT_CLICKED, NULL);
         lv_obj_set_height(power_devices_btn, CYD_SCREEN_MIN_BUTTON_HEIGHT_PX);
@@ -292,7 +280,7 @@ int retry_count = 0;
 void ip_init(){
     connect_ok = false;
     retry_count = 0;
-    int prev_power_device_count = 0;
+    prev_power_device_count = 0;
 
     ip_init_inner();
 
@@ -312,13 +300,12 @@ void ip_init(){
                 lv_label_set_text(label, retry_count_text.c_str());
             }
 
-            if (status != CONNECT_AUTH_REQUIRED)
-                _power_devices_query_internal();
-            else
+            if (status == CONNECT_AUTH_REQUIRED)
                 handle_auth_entry();
 
-            if (power_devices_query().count != prev_power_device_count) {
-                prev_power_device_count = power_devices_query().count;
+            unsigned int power_device_count = power_devices_count();
+            if (power_device_count != prev_power_device_count) {
+                prev_power_device_count = power_device_count;
                 redraw_connect_screen();
             }
         }
@@ -328,7 +315,6 @@ void ip_init(){
 void ip_ok(){
     if (klipper_request_consecutive_fail_count > 5){
         freeze_request_thread();
-        power_devices_clear();
         ip_init();
         unfreeze_request_thread();
         klipper_request_consecutive_fail_count = 0;
