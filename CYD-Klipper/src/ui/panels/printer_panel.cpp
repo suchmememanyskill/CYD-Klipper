@@ -125,7 +125,7 @@ static void btn_enable_control(lv_event_t * e)
     int index = config - global_config.printer_config;
     PrinterMinimal * printer = &printer_minimal[index];
 
-    if (config == get_current_printer_config() || (!printer->online && printer->power_devices < 0))
+    if (config == get_current_printer_config() || (!printer->online && printer->power_devices <= 0))
     {
         // Disable
         lv_obj_add_state(btn, LV_STATE_DISABLED);
