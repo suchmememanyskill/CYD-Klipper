@@ -11,6 +11,8 @@ static void btn_goto_settings(lv_event_t * e){
 }
 
 void macros_panel_init(lv_obj_t* panel) {
+    macros_set_current_config(get_current_printer_config());
+
     lv_obj_t * btn = lv_btn_create(panel);
     lv_obj_add_event_cb(btn, btn_goto_settings, LV_EVENT_CLICKED, NULL);
     lv_obj_set_size(btn, CYD_SCREEN_PANEL_WIDTH_PX - CYD_SCREEN_GAP_PX * 2, CYD_SCREEN_MIN_BUTTON_HEIGHT_PX);

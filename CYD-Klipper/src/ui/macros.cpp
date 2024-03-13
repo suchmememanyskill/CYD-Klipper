@@ -40,9 +40,14 @@ void macros_add_power_devices_to_panel(lv_obj_t * root_panel, POWERQUERY query)
     }
 }
 
-void macros_draw_power_fullscreen(PRINTER_CONFIG * config)
+void macros_set_current_config(PRINTER_CONFIG * config)
 {
     curernt_config = config;
+}
+
+void macros_draw_power_fullscreen(PRINTER_CONFIG * config)
+{
+    macros_set_current_config(config);
 
     lv_obj_t * parent = lv_create_empty_panel(lv_scr_act());
     lv_obj_set_style_bg_opa(parent, LV_OPA_100, 0); 
