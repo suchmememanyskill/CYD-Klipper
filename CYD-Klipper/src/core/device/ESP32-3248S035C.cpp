@@ -68,8 +68,14 @@ void screen_lv_touchRead(lv_indev_drv_t *indev_driver, lv_indev_data_t *data)
             }
             else
             {
-                magicY = TOUCH_WIDTH - tp.points[i].x;
-                magicX = tp.points[i].y;
+                #ifdef CYD_SCREEN_VERTICAL
+                    // I don't even want to know why this works...
+                    magicY = TOUCH_HEIGHT - tp.points[i].x;
+                    magicX = tp.points[i].y - 160;
+                #else
+                    magicY = TOUCH_WIDTH - tp.points[i].x;
+                    magicX = tp.points[i].y;
+                #endif
             }
 
             data->point.x = magicX;
