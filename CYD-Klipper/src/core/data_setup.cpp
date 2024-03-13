@@ -139,7 +139,7 @@ void fetch_printer_data()
             {
                 printer_state = PRINTER_STATE_IDLE;
             }
-            else if (strcmp(state, "shutdown") == 0 && printer.state != PRINTER_STATE_ERROR)
+            else if ((strcmp(state, "shutdown") == 0 || strcmp(state, "error") == 0) && printer.state != PRINTER_STATE_ERROR)
             {
                 printer_state = PRINTER_STATE_ERROR;
             }
