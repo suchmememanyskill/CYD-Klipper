@@ -33,11 +33,11 @@ static void btn_print_file_verify(lv_event_t * e){
     lv_obj_set_size(panel, CYD_SCREEN_WIDTH_PX - CYD_SCREEN_GAP_PX * 4, CYD_SCREEN_HEIGHT_PX - CYD_SCREEN_GAP_PX * 3);
     lv_obj_align(panel, LV_ALIGN_CENTER, 0, 0);
 
-    lv_obj_t * label = lv_label_create(panel);
-    lv_label_set_text(label, "Print File");
-    lv_obj_align(label, LV_ALIGN_TOP_LEFT, 0, 0);
+    lv_obj_t * label_print_file = lv_label_create(panel);
+    lv_label_set_text(label_print_file, "Print File");
+    lv_obj_align(label_print_file, LV_ALIGN_TOP_LEFT, 0, 0);
 
-    label = lv_label_create(panel);
+    lv_obj_t * label = lv_label_create(panel);
     lv_label_set_text(label, selected_file->name);
     lv_obj_align(label, LV_ALIGN_CENTER, 0, -20);
     lv_obj_set_width(label, CYD_SCREEN_WIDTH_PX - CYD_SCREEN_GAP_PX * 10);
@@ -65,7 +65,14 @@ static void btn_print_file_verify(lv_event_t * e){
 
     if (img != NULL){
         lv_obj_set_parent(img, panel);
-        lv_obj_align(img, LV_ALIGN_BOTTOM_MID, 0, 0);
+        lv_obj_align(img, LV_ALIGN_TOP_LEFT, 0, 0);
+
+        lv_obj_t * text_center_panel = lv_create_empty_panel(panel);
+        lv_obj_set_size(text_center_panel, CYD_SCREEN_MIN_BUTTON_WIDTH_PX * 2, 32); 
+        lv_obj_align(text_center_panel, LV_ALIGN_TOP_LEFT, CYD_SCREEN_GAP_PX + 32, 0);
+
+        lv_obj_set_parent(label_print_file, text_center_panel);
+        lv_obj_align(label_print_file, LV_ALIGN_LEFT_MID, 0, 0);
     }
 }
 
