@@ -1,10 +1,6 @@
 #ifdef CYD_SCREEN_DRIVER_ESP32_3248S035C
 #include "../screen_driver.h"
 
-#ifdef CYD_SCREEN_VERTICAL
-    #error "Vertical screen not supported with the ESP32_3248S035C driver"
-#endif
-
 #include "lvgl.h"
 #include <TAMC_GT911.h>
 #include <TFT_eSPI.h>
@@ -107,14 +103,13 @@ void screen_setup()
 {
     // Initialize the touchscreen
     tp.begin();
-    tp.setRotation(ROTATION_NORMAL);
+    
     // Initialize LVGL
     lv_init();
     // Initialize the display
     tft.init();
     ledcSetup(0, 5000, 12);
     ledcAttachPin(TFT_BL, 0);
-    tft.setRotation(global_config.rotate_screen ? 3 : 1);
     tft.fillScreen(TFT_BLACK);
     set_invert_display();
     LED_init();
@@ -122,8 +117,22 @@ void screen_setup()
     lv_disp_draw_buf_init(&draw_buf, buf, NULL, TFT_WIDTH * TFT_HEIGHT / 10);
     static lv_disp_drv_t disp_drv;
     lv_disp_drv_init(&disp_drv);
-    disp_drv.hor_res = TFT_HEIGHT;
-    disp_drv.ver_res = TFT_WIDTH;
+
+
+    #ifdef CYD_SCREEN_VERTICAL
+        disp_drv.hor_res = TFT_WIDTH;
+        disp_drv.ver_res = TFT_HEIGHT;
+        tp.setRotation(2);
+        tft.setRotation(global_config.rotate_screen ? 2 : 0);
+    #else
+        disp_drv.hor_res = TFT_HEIGHT;
+        disp_drv.ver_res = TFT_WIDTH;
+        
+        tft.setRotation(global_config.rotate_screen ? 3 : 1);
+        tp.setRotation(ROTATION_NORMAL);
+    #endif
+
+
     disp_drv.flush_cb = screen_lv_flush;
     disp_drv.draw_buf = &draw_buf;
     lv_disp_drv_register(&disp_drv);

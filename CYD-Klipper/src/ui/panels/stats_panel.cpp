@@ -225,13 +225,14 @@ void create_stat_text_block(lv_obj_t * root, const char* label, lv_event_cb_t va
 }
 
 void stats_panel_init(lv_obj_t* panel) {
-    auto panel_width = CYD_SCREEN_PANEL_WIDTH_PX / 2 - CYD_SCREEN_GAP_PX * 3;
+    auto panel_width = CYD_SCREEN_PANEL_WIDTH_PX / 2 - CYD_SCREEN_GAP_PX * 2;
 
     lv_obj_t * left_panel = lv_create_empty_panel(panel);
     lv_obj_set_size(left_panel, panel_width, CYD_SCREEN_PANEL_HEIGHT_PX - CYD_SCREEN_GAP_PX * 2);
     lv_layout_flex_column(left_panel);
     lv_obj_set_flex_align(left_panel, LV_FLEX_ALIGN_SPACE_BETWEEN, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START);
     lv_obj_align(left_panel, LV_ALIGN_TOP_LEFT, CYD_SCREEN_GAP_PX, CYD_SCREEN_GAP_PX);
+    lv_obj_clear_flag(left_panel, LV_OBJ_FLAG_SCROLLABLE);
 
     create_stat_text_block(left_panel, "Position:", label_pos);
 

@@ -225,20 +225,10 @@ static void set_bed_target_temp_chart(lv_event_t * e){
     lv_chart_set_next_value(chart, series, printer.bed_target_temp);
 }
 
-void temp_panel_init(lv_obj_t * panel){
+void create_charts(lv_obj_t * root)
+{
     const auto element_width = CYD_SCREEN_PANEL_WIDTH_PX - CYD_SCREEN_GAP_PX * 2;
-    root_panel = panel;
-    edit_mode = false;
-
-    lv_obj_t * root_temp_panel = lv_create_empty_panel(panel);
-    lv_obj_set_size(root_temp_panel, CYD_SCREEN_PANEL_WIDTH_PX, CYD_SCREEN_PANEL_HEIGHT_PX);
-    lv_obj_align(root_temp_panel, LV_ALIGN_TOP_RIGHT, 0, 0);
-    lv_obj_set_style_pad_all(root_temp_panel, CYD_SCREEN_GAP_PX, 0);
-    lv_layout_flex_column(root_temp_panel);
-    lv_obj_set_flex_align(root_temp_panel, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_END, LV_FLEX_ALIGN_CENTER);
-    lv_obj_set_scrollbar_mode(root_temp_panel, LV_SCROLLBAR_MODE_OFF);
-
-    lv_obj_t * chart = lv_chart_create(root_temp_panel);
+    lv_obj_t * chart = lv_chart_create(root);
     lv_obj_set_size(chart, element_width - CYD_SCREEN_MIN_BUTTON_WIDTH_PX, CYD_SCREEN_MIN_BUTTON_HEIGHT_PX * 3);
     lv_chart_set_type(chart, LV_CHART_TYPE_LINE);
     lv_chart_set_point_count(chart, 120);
@@ -261,16 +251,16 @@ void temp_panel_init(lv_obj_t * panel){
     lv_obj_add_event_cb(chart, set_bed_temp_chart, LV_EVENT_MSG_RECEIVED, ser4);
     lv_obj_add_event_cb(chart, set_chart_range, LV_EVENT_MSG_RECEIVED, NULL);
     lv_msg_subscribe_obj(DATA_PRINTER_DATA, chart, NULL);
+}
 
-    lv_obj_t * single_screen_panel = lv_create_empty_panel(root_temp_panel);
-    lv_obj_set_size(single_screen_panel, element_width, CYD_SCREEN_PANEL_HEIGHT_PX - CYD_SCREEN_GAP_PX * 2 - CYD_SCREEN_GAP_PX / 2);
-    lv_layout_flex_column(single_screen_panel);
-
+void create_temp_buttons(lv_obj_t * root, lv_obj_t * panel)
+{
+    const auto element_width = CYD_SCREEN_PANEL_WIDTH_PX - CYD_SCREEN_GAP_PX * 2;
     lv_obj_t * temp_rows[2] = {0};
     lv_obj_t * button_temp_rows[2] = {0};
 
     for (int tempIter = 0; tempIter < 2; tempIter++){
-        temp_rows[tempIter] = lv_create_empty_panel(single_screen_panel);
+        temp_rows[tempIter] = lv_create_empty_panel(root);
         lv_layout_flex_column(temp_rows[tempIter]);
         lv_obj_set_size(temp_rows[tempIter], element_width, LV_SIZE_CONTENT);
 
@@ -306,9 +296,40 @@ void temp_panel_init(lv_obj_t * panel){
         lv_label_set_text(label, "Set");
         lv_obj_center(label);
     }
+}
 
-    lv_obj_t * gap = lv_create_empty_panel(single_screen_panel);
-    lv_obj_set_flex_grow(gap, 1);
+void temp_panel_init(lv_obj_t * panel){
+    const auto element_width = CYD_SCREEN_PANEL_WIDTH_PX - CYD_SCREEN_GAP_PX * 2;
+    root_panel = panel;
+    edit_mode = false;
+
+    lv_obj_t * root_temp_panel = lv_create_empty_panel(panel);
+    lv_obj_set_size(root_temp_panel, CYD_SCREEN_PANEL_WIDTH_PX, CYD_SCREEN_PANEL_HEIGHT_PX);
+    lv_obj_align(root_temp_panel, LV_ALIGN_TOP_RIGHT, 0, 0);
+    lv_obj_set_style_pad_all(root_temp_panel, CYD_SCREEN_GAP_PX, 0);
+    lv_layout_flex_column(root_temp_panel);
+    lv_obj_set_flex_align(root_temp_panel, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_END, LV_FLEX_ALIGN_CENTER);
+    lv_obj_set_scrollbar_mode(root_temp_panel, LV_SCROLLBAR_MODE_OFF);
+
+    #ifndef CYD_SCREEN_NO_TEMP_SCROLL
+        create_charts(root_temp_panel);
+
+        lv_obj_t * single_screen_panel = lv_create_empty_panel(root_temp_panel);
+        lv_obj_set_size(single_screen_panel, element_width, CYD_SCREEN_PANEL_HEIGHT_PX - CYD_SCREEN_GAP_PX * 2 - CYD_SCREEN_GAP_PX / 2);
+        lv_layout_flex_column(single_screen_panel);
+    #else
+        lv_obj_clear_flag(root_temp_panel, LV_OBJ_FLAG_SCROLLABLE);
+        lv_obj_t * single_screen_panel = root_temp_panel;
+    #endif
+    
+    create_temp_buttons(single_screen_panel, panel);
+
+    #ifdef CYD_SCREEN_NO_TEMP_SCROLL
+        create_charts(single_screen_panel);
+    #else
+        lv_obj_t * gap = lv_create_empty_panel(single_screen_panel);
+        lv_obj_set_flex_grow(gap, 1);
+    #endif
 
     lv_obj_t * one_above_bottom_panel = lv_create_empty_panel(single_screen_panel);
     lv_obj_set_size(one_above_bottom_panel, element_width, CYD_SCREEN_MIN_BUTTON_HEIGHT_PX);

@@ -270,7 +270,7 @@ void lv_setup()
 #endif // CYD_SCREEN_DISABLE_TOUCH_CALIBRATION
 
     display_driver->driver->read_cb = lv_touch_intercept;
-
+    
     screen_timer_setup();
     screen_timer_start();
     lv_png_init();
