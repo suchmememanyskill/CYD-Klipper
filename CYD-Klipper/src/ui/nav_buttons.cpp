@@ -58,27 +58,31 @@ static void update_printer_data_time(lv_event_t * e){
 }
 
 static void btn_click_files(lv_event_t * e){
-    nav_buttons_setup(0);
+    nav_buttons_setup(PANEL_PRINT);
 }
 
 static void btn_click_move(lv_event_t * e){
-    nav_buttons_setup(1);
+    nav_buttons_setup(PANEL_MOVE);
 }
 
 static void btn_click_extrude(lv_event_t * e){
-    nav_buttons_setup(2);
+    nav_buttons_setup(PANEL_TEMP);
 }
 
 static void btn_click_settings(lv_event_t * e){
-    nav_buttons_setup(3);
+    nav_buttons_setup(PANEL_SETTINGS);
 }
 
 static void btn_click_macros(lv_event_t * e){
-    nav_buttons_setup(4);
+    nav_buttons_setup(PANEL_MACROS);
 }
 
 static void btn_click_printer(lv_event_t * e){
-    nav_buttons_setup(6);
+    nav_buttons_setup(PANEL_PRINTER);
+}
+
+static void btn_click_err(lv_event_t * e){
+    nav_buttons_setup(PANEL_ERROR);
 }
 
 void create_button(const char* icon, const char* name, lv_event_cb_t button_click, lv_event_cb_t label_update, lv_obj_t * root){
@@ -124,20 +128,27 @@ void nav_buttons_setup(unsigned char active_panel){
 
 #endif
 
-    // Files/Print
-    create_button(LV_SYMBOL_COPY, "Idle", btn_click_files, update_printer_data_time, root_panel);
+    if (printer.state != PRINTER_STATE_ERROR){
+        // Files/Print
+        create_button(LV_SYMBOL_COPY, "Idle", btn_click_files, update_printer_data_time, root_panel);
 
-    // Move
-    create_button(printer.state == PRINTER_STATE_PRINTING ? LV_SYMBOL_EDIT : LV_SYMBOL_CHARGE, "Z?", btn_click_move, update_printer_data_z_pos, root_panel);
+        // Move
+        create_button(printer.state == PRINTER_STATE_PRINTING ? LV_SYMBOL_EDIT : LV_SYMBOL_CHARGE, "Z?", btn_click_move, update_printer_data_z_pos, root_panel);
 
-    // Extrude/Temp
-    create_button(LV_SYMBOL_WARNING, "?/?", btn_click_extrude, update_printer_data_temp, root_panel);
+        // Extrude/Temp
+        create_button(LV_SYMBOL_WARNING, "?/?", btn_click_extrude, update_printer_data_temp, root_panel);
+    }
+    else {
+        // Error UI
+        create_button(LV_SYMBOL_WARNING, "Error", btn_click_err, NULL, root_panel);
+    }
 
     // Macros
     create_button(LV_SYMBOL_GPS, "Macro", btn_click_macros, NULL, root_panel);
 
     if (global_config.multi_printer_mode)
     {
+        // Printers
         create_button(LV_SYMBOL_HOME, "Printer", btn_click_printer, NULL, root_panel);
     }
 
@@ -146,26 +157,29 @@ void nav_buttons_setup(unsigned char active_panel){
     lv_obj_align(panel, LV_ALIGN_TOP_RIGHT, 0, 0);
 
     switch (active_panel){
-        case 0:
+        case PANEL_PRINT:
             print_panel_init(panel);
             break;
-        case 1:
+        case PANEL_MOVE:
             move_panel_init(panel);
             break;
-        case 2:
+        case PANEL_TEMP:
             temp_panel_init(panel);
             break;
-        case 3:
+        case PANEL_SETTINGS:
             settings_panel_init(panel);
             break;
-        case 4:
+        case PANEL_MACROS:
             macros_panel_init(panel);
             break;
-        case 5:
+        case PANEL_STATS:
             stats_panel_init(panel);
             break;
-        case 6:
+        case PANEL_PRINTER:
             printer_panel_init(panel);
+            break;
+        case PANEL_ERROR:
+            error_panel_init(panel);
             break;
     }
 

@@ -163,7 +163,7 @@ static void btn_printer_delete(lv_event_t * e)
     config->ip_configured = false;
     write_global_config();
 
-    nav_buttons_setup(6);
+    nav_buttons_setup(PANEL_PRINTER);
 }
 
 // TODO: Extract this from temp/print panel and combine

@@ -85,7 +85,7 @@ static void disable_steppers_click(lv_event_t * e) {
 
 static void switch_to_stat_panel(lv_event_t * e) {
     lv_obj_t * panel = lv_event_get_target(e);
-    nav_buttons_setup(5);
+    nav_buttons_setup(PANEL_STATS);
 }
 
 inline void root_panel_steppers_locked(lv_obj_t * root_panel){

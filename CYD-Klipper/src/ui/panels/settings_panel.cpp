@@ -111,7 +111,7 @@ static void multi_printer_switch(lv_event_t* e){
     bool checked = (state & LV_STATE_CHECKED == LV_STATE_CHECKED);
     global_config.multi_printer_mode = checked;
     write_global_config();
-    nav_buttons_setup(3);
+    nav_buttons_setup(PANEL_SETTINGS);
 }
 
 const char* estimated_time_options = "Percentage\nInterpolated\nSlicer";
