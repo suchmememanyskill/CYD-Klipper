@@ -67,10 +67,7 @@ void macros_draw_power_fullscreen(PRINTER_CONFIG * config)
     lv_label_set_text(label, LV_SYMBOL_CLOSE " Close");
     lv_obj_center(label);
 
-    MACROSQUERY query = macros_query(config);
     POWERQUERY power = power_devices_query(config);
-
-    macros_add_macros_to_panel(parent, query);
     macros_add_power_devices_to_panel(parent, power);
 }
 
