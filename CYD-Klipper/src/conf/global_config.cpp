@@ -14,14 +14,16 @@ COLOR_DEF color_defs[] = {
     {LV_PALETTE_PURPLE, 0, LV_PALETTE_GREY},
 };
 
-void WriteGlobalConfig() {
+void write_global_config()
+{
     Preferences preferences;
     preferences.begin("global_config", false);
     preferences.putBytes("global_config", &global_config, sizeof(global_config));
     preferences.end();
 }
 
-void VerifyVersion(){
+void verify_version()
+{
     Preferences preferences;
     if (!preferences.begin("global_config", false))
         return;
@@ -37,17 +39,76 @@ void VerifyVersion(){
     preferences.end();
 }
 
-void LoadGlobalConfig() {
+PRINTER_CONFIG* get_current_printer_config()
+{
+    return &global_config.printer_config[global_config.printer_index];
+}
+
+int get_printer_config_count()
+{
+    int count = 0;
+    for (int i = 0; i < PRINTER_CONFIG_COUNT; i++) {
+        if (global_config.printer_config[i].ip_configured)
+            count++;
+    }
+    return count;
+}
+
+int get_printer_config_free_index()
+{
+    for (int i = 0; i < PRINTER_CONFIG_COUNT; i++) {
+        if (!global_config.printer_config[i].ip_configured)
+            return i;
+    }
+    return -1;
+}
+
+void set_printer_config_index(int index)
+{
+    if (index < 0 || index >= PRINTER_CONFIG_COUNT)
+        return;
+
+    PRINTER_CONFIG* old_config = &global_config.printer_config[global_config.printer_index];
+    PRINTER_CONFIG* new_config = &global_config.printer_config[index];
+
+    global_config.printer_index = index;
+
+    if (!new_config->ip_configured){
+        new_config->raw = old_config->raw;
+        new_config->ip_configured = false;
+        new_config->auth_configured = false;
+
+        new_config->printer_name[0] = 0;
+        new_config->klipper_host[0] = 0;
+        new_config->klipper_auth[0] = 0;
+        new_config->klipper_port = 0;
+
+        new_config->color_scheme = old_config->color_scheme;
+
+        for (int i = 0; i < 3; i++){
+            new_config->hotend_presets[i] = old_config->hotend_presets[i];
+            new_config->bed_presets[i] = old_config->bed_presets[i];
+        }
+
+        write_global_config();
+        ESP.restart();
+    }    
+
+    write_global_config();
+}
+
+void load_global_config() 
+{
     global_config.version = CONFIG_VERSION;
     global_config.brightness = 255;
-    global_config.screenTimeout = 5;
-    global_config.hotend_presets[0] = 0;
-    global_config.hotend_presets[1] = 200;
-    global_config.hotend_presets[2] = 240;
-    global_config.bed_presets[0] = 0;
-    global_config.bed_presets[1] = 60;
-    global_config.bed_presets[2] = 70;
-    VerifyVersion();
+    global_config.screen_timeout = 5;
+    global_config.printer_config[0].hotend_presets[0] = 0;
+    global_config.printer_config[0].hotend_presets[1] = 200;
+    global_config.printer_config[0].hotend_presets[2] = 240;
+    global_config.printer_config[0].bed_presets[0] = 0;
+    global_config.printer_config[0].bed_presets[1] = 60;
+    global_config.printer_config[0].bed_presets[2] = 70;
+    verify_version();
     Preferences preferences;
     preferences.begin("global_config", true);
     preferences.getBytes("global_config", &global_config, sizeof(global_config));

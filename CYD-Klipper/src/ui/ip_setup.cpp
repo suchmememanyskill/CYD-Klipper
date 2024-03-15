@@ -6,8 +6,12 @@
 #include "ui_utils.h"
 #include "../core/macros_query.h"
 #include "panels/panel.h"
+#include "../core/http_client.h"
+#include "switch_printer.h"
+#include "macros.h"
 
 bool connect_ok = false;
+int prev_power_device_count = 0;
 lv_obj_t * hostEntry;
 lv_obj_t * portEntry;
 lv_obj_t * label = NULL;
@@ -36,19 +40,11 @@ enum connection_status_t {
 };
 
 connection_status_t verify_ip(){
-    HTTPClient client;
-    String url = "http://" + String(global_config.klipperHost) + ":" + String(global_config.klipperPort) + "/printer/info";
+    SETUP_HTTP_CLIENT_FULL("/printer/info", true, 1000);
+
     int httpCode;
     try {
-        client.setTimeout(500);
-        client.setConnectTimeout(1000);
-        client.begin(url.c_str());
-
-        if (global_config.auth_configured)
-            client.addHeader("X-Api-Key", global_config.klipper_auth);
-
         httpCode = client.GET();
-        Serial.printf("%d %s\n", httpCode, url.c_str());
 
         if (httpCode == 401)
             return CONNECT_AUTH_REQUIRED;
@@ -76,21 +72,21 @@ static void ta_event_cb(lv_event_t * e) {
     }
     else if (code == LV_EVENT_READY) 
     {
-        strcpy(global_config.klipperHost, lv_textarea_get_text(hostEntry));
-        global_config.klipperPort = atoi(lv_textarea_get_text(portEntry));
+        strcpy(get_current_printer_config()->klipper_host, lv_textarea_get_text(hostEntry));
+        get_current_printer_config()->klipper_port = atoi(lv_textarea_get_text(portEntry));
 
         connection_status_t status = verify_ip();
         if (status == CONNECT_OK)
         {
-            global_config.ipConfigured = true;
-            WriteGlobalConfig();
+            get_current_printer_config()->ip_configured = true;
+            write_global_config();
             connect_ok = true;
         }
         else if (status == CONNECT_AUTH_REQUIRED)
         {
             label = NULL;
-            global_config.ipConfigured = true;
-            WriteGlobalConfig();
+            get_current_printer_config()->ip_configured = true;
+            write_global_config();
         }
         else
         {
@@ -116,27 +112,13 @@ static void reset_btn_event_handler(lv_event_t * e){
     lv_event_code_t code = lv_event_get_code(e);
 
     if(code == LV_EVENT_CLICKED) {
-        global_config.ipConfigured = false;
+        get_current_printer_config()->ip_configured = false;
         ip_init_inner();
     }
 }
 
 static void power_devices_button(lv_event_t * e) {
-    lv_obj_t * panel = lv_create_empty_panel(lv_scr_act());
-    lv_obj_set_style_bg_opa(panel, LV_OPA_COVER, 0); 
-    lv_layout_flex_column(panel);
-    lv_obj_set_size(panel, CYD_SCREEN_WIDTH_PX, CYD_SCREEN_HEIGHT_PX - CYD_SCREEN_GAP_PX);
-    lv_obj_align(panel, LV_ALIGN_TOP_LEFT, 0, CYD_SCREEN_GAP_PX);
-
-    lv_obj_t * button = lv_btn_create(panel);
-    lv_obj_set_size(button, CYD_SCREEN_WIDTH_PX - CYD_SCREEN_GAP_PX * 2, CYD_SCREEN_MIN_BUTTON_HEIGHT_PX);
-    lv_obj_add_event_cb(button, destroy_event_user_data, LV_EVENT_CLICKED, panel);
-
-    lv_obj_t * label = lv_label_create(button);
-    lv_label_set_text(label, LV_SYMBOL_CLOSE " Close");
-    lv_obj_center(label);
-
-    macros_panel_add_power_devices_to_panel(panel, power_devices_query()); 
+    macros_draw_power_fullscreen();
 }
 
 void redraw_connect_screen(){
@@ -159,7 +141,7 @@ void redraw_connect_screen(){
     lv_label_set_text(btn_label, "Reset");
     lv_obj_center(btn_label);
 
-    if (power_devices_query().count >= 1){
+    if (prev_power_device_count >= 1){
         lv_obj_t * power_devices_btn = lv_btn_create(button_row);
         lv_obj_add_event_cb(power_devices_btn, power_devices_button, LV_EVENT_CLICKED, NULL);
         lv_obj_set_height(power_devices_btn, CYD_SCREEN_MIN_BUTTON_HEIGHT_PX);
@@ -168,6 +150,8 @@ void redraw_connect_screen(){
         lv_label_set_text(btn_label, "Power Devices");
         lv_obj_center(btn_label);
     }
+
+    draw_switch_printer_button();    
 }
 
 static bool auth_entry_done = false;
@@ -183,9 +167,9 @@ static void keyboard_event_auth_entry(lv_event_t * e) {
         int len = strlen(txt);
         if (len > 0)
         {
-            global_config.auth_configured = true;
-            strcpy(global_config.klipper_auth, txt);
-            WriteGlobalConfig();
+            get_current_printer_config()->auth_configured = true;
+            strcpy(get_current_printer_config()->klipper_auth, txt);
+            write_global_config();
             auth_entry_done = true;
         }
     }
@@ -197,7 +181,7 @@ static void keyboard_event_auth_entry(lv_event_t * e) {
 
 void handle_auth_entry(){
     auth_entry_done = false;
-    global_config.klipper_auth[32] = 0;
+    get_current_printer_config()->klipper_auth[32] = 0;
     lv_obj_clean(lv_scr_act());
 
     lv_obj_t * root = lv_create_empty_panel(lv_scr_act());
@@ -219,8 +203,8 @@ void handle_auth_entry(){
     lv_textarea_set_max_length(passEntry, 32);
     lv_textarea_set_one_line(passEntry, true);
 
-    if (global_config.auth_configured)
-        lv_textarea_set_text(passEntry, global_config.klipper_auth);
+    if (get_current_printer_config()->auth_configured)
+        lv_textarea_set_text(passEntry, get_current_printer_config()->klipper_auth);
     else
         lv_textarea_set_text(passEntry, "");
 
@@ -242,7 +226,7 @@ void handle_auth_entry(){
 }
 
 void ip_init_inner(){
-    if (global_config.ipConfigured) {
+    if (get_current_printer_config()->ip_configured) {
         redraw_connect_screen();
         return;
     }
@@ -296,7 +280,7 @@ int retry_count = 0;
 void ip_init(){
     connect_ok = false;
     retry_count = 0;
-    int prev_power_device_count = 0;
+    prev_power_device_count = 0;
 
     ip_init_inner();
 
@@ -305,7 +289,7 @@ void ip_init(){
         lv_timer_handler();
         lv_task_handler();
 
-        if (!connect_ok && global_config.ipConfigured && (millis() - last_data_update_ip) > data_update_interval_ip){
+        if (!connect_ok && get_current_printer_config()->ip_configured && (millis() - last_data_update_ip) > data_update_interval_ip){
             connection_status_t status = verify_ip();
 
             connect_ok = status == CONNECT_OK;
@@ -316,13 +300,12 @@ void ip_init(){
                 lv_label_set_text(label, retry_count_text.c_str());
             }
 
-            if (status != CONNECT_AUTH_REQUIRED)
-                _power_devices_query_internal();
-            else
+            if (status == CONNECT_AUTH_REQUIRED)
                 handle_auth_entry();
 
-            if (power_devices_query().count != prev_power_device_count) {
-                prev_power_device_count = power_devices_query().count;
+            unsigned int power_device_count = power_devices_count();
+            if (power_device_count != prev_power_device_count) {
+                prev_power_device_count = power_device_count;
                 redraw_connect_screen();
             }
         }
@@ -332,7 +315,6 @@ void ip_init(){
 void ip_ok(){
     if (klipper_request_consecutive_fail_count > 5){
         freeze_request_thread();
-        power_devices_clear();
         ip_init();
         unfreeze_request_thread();
         klipper_request_consecutive_fail_count = 0;

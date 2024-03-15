@@ -1,6 +1,14 @@
 import subprocess, os, shutil, json
 
-CYD_PORTS = ["esp32-3248S035C", "esp32-2432S028R"]
+CYD_PORTS = [
+    "esp32-3248S035C", 
+    "esp32-2432S028R", 
+    "esp32-2432S032C-SD", 
+    "esp32-8048S043C-SD", 
+    "esp32-2432S024C-SD", 
+    "esp32-4827S043C-SD",
+    "esp32-3248S035C-V"
+]
 BASE_DIR = os.getcwd()
 
 def get_manifest(base_path : str, device_name : str):

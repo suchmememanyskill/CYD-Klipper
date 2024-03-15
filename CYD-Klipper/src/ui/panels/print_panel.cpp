@@ -4,9 +4,11 @@
 #include "../../core/files_query.h"
 #include "../../conf/global_config.h"
 #include <HardwareSerial.h>
-#include <HTTPClient.h>
 #include "../ui_utils.h"
 #include "../../core/lv_setup.h"
+#include "../gcode_img.h"
+#include "../../core/http_client.h"
+#include <UrlEncode.h>
 
 FILESYSTEM_FILE* selected_file = NULL;
 
@@ -14,32 +16,7 @@ static void btn_print_file(lv_event_t * e){
     lv_obj_t * panel = (lv_obj_t*)lv_event_get_user_data(e);
     lv_obj_del(panel);
 
-    char* buff = (char*)malloc(128 + (strlen(selected_file->name) * 3));
-    sprintf(buff, "http://%s:%d/printer/print/start?filename=", global_config.klipperHost, global_config.klipperPort);
-
-    char* ptr = buff + strlen(buff);
-    int filename_length = strlen(selected_file->name);
-    for (int i = 0; i < filename_length; i++){
-        char c = selected_file->name[i];
-        if (c == ' '){
-            *ptr = '%';
-            ptr++;
-            *ptr = '2';
-            ptr++;
-            *ptr = '0';
-        } else {
-            *ptr = c;
-        }
-        ptr++;
-    }
-
-    *ptr = 0;
-
-    HTTPClient client;
-    client.begin(buff);
-
-    if (global_config.auth_configured)
-        client.addHeader("X-Api-Key", global_config.klipper_auth);
+    SETUP_HTTP_CLIENT("/printer/print/start?filename=" + urlEncode(selected_file->name));
 
     int httpCode = client.POST("");
     Serial.printf("Print start: HTTP %d\n", httpCode);
@@ -56,11 +33,11 @@ static void btn_print_file_verify(lv_event_t * e){
     lv_obj_set_size(panel, CYD_SCREEN_WIDTH_PX - CYD_SCREEN_GAP_PX * 4, CYD_SCREEN_HEIGHT_PX - CYD_SCREEN_GAP_PX * 3);
     lv_obj_align(panel, LV_ALIGN_CENTER, 0, 0);
 
-    lv_obj_t * label = lv_label_create(panel);
-    lv_label_set_text(label, "Print File");
-    lv_obj_align(label, LV_ALIGN_TOP_LEFT, 0, 0);
+    lv_obj_t * label_print_file = lv_label_create(panel);
+    lv_label_set_text(label_print_file, "Print File");
+    lv_obj_align(label_print_file, LV_ALIGN_TOP_LEFT, 0, 0);
 
-    label = lv_label_create(panel);
+    lv_obj_t * label = lv_label_create(panel);
     lv_label_set_text(label, selected_file->name);
     lv_obj_align(label, LV_ALIGN_CENTER, 0, -20);
     lv_obj_set_width(label, CYD_SCREEN_WIDTH_PX - CYD_SCREEN_GAP_PX * 10);
@@ -83,6 +60,20 @@ static void btn_print_file_verify(lv_event_t * e){
     label = lv_label_create(btn);
     lv_label_set_text(label, LV_SYMBOL_OK);
     lv_obj_center(label);
+
+    lv_obj_t* img = show_gcode_img(selected_file->name);
+
+    if (img != NULL){
+        lv_obj_set_parent(img, panel);
+        lv_obj_align(img, LV_ALIGN_TOP_LEFT, 0, 0);
+
+        lv_obj_t * text_center_panel = lv_create_empty_panel(panel);
+        lv_obj_set_size(text_center_panel, CYD_SCREEN_MIN_BUTTON_WIDTH_PX * 2, 32); 
+        lv_obj_align(text_center_panel, LV_ALIGN_TOP_LEFT, CYD_SCREEN_GAP_PX + 32, 0);
+
+        lv_obj_set_parent(label_print_file, text_center_panel);
+        lv_obj_align(label_print_file, LV_ALIGN_LEFT_MID, 0, 0);
+    }
 }
 
 void print_panel_init(lv_obj_t* panel){
@@ -91,11 +82,13 @@ void print_panel_init(lv_obj_t* panel){
         return;
     }
 
+    clear_img_mem();
+
     lv_obj_t * list = lv_list_create(panel);
     lv_obj_set_style_radius(list, 0, 0);
     lv_obj_set_style_border_width(list, 0, 0); 
     lv_obj_set_style_bg_opa(list, LV_OPA_TRANSP, 0); 
-    lv_obj_set_size(list, CYD_SCREEN_PANEL_WIDTH_PX, CYD_SCREEN_HEIGHT_PX);
+    lv_obj_set_size(list, CYD_SCREEN_PANEL_WIDTH_PX, CYD_SCREEN_PANEL_HEIGHT_PX);
     lv_obj_align(list, LV_ALIGN_CENTER, 0, 0);
 
     FILESYSTEM_FILE* files = get_files(25);

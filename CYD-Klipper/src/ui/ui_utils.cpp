@@ -2,6 +2,7 @@
 #include "ui_utils.h"
 #include "../core/data_setup.h"
 #include "../core/lv_setup.h"
+#include <ErriezCRC32.h>
 
 lv_obj_t* lv_create_empty_panel(lv_obj_t* root) {
     lv_obj_t* panel = lv_obj_create(root); 
@@ -85,4 +86,165 @@ void lv_create_fullscreen_button_matrix_popup(lv_obj_t * root, lv_event_cb_t tit
             lv_obj_center(label);
         }
     }
+}
+
+void lv_keyboard_text_entry_close(lv_event_t * e){
+    lv_event_code_t code = lv_event_get_code(e);
+    lv_obj_t * ta = lv_event_get_target(e);
+    lv_obj_t * kb = (lv_obj_t *)lv_event_get_user_data(e);
+
+    if(code == LV_EVENT_DEFOCUSED || code == LV_EVENT_CANCEL || code == LV_EVENT_READY) 
+    {
+        lv_keyboard_set_textarea(kb, NULL);
+        lv_obj_del(lv_obj_get_parent(kb));
+    }
+}
+
+void lv_create_keyboard_text_entry(lv_event_cb_t keyboard_callback, lv_keyboard_mode_t keyboard_mode, lv_coord_t width, uint8_t max_length, const char* fill_text, bool contain_in_panel)
+{
+    lv_obj_t * parent = lv_create_empty_panel(lv_scr_act());
+    lv_obj_set_style_bg_opa(parent, LV_OPA_50, 0); 
+    lv_obj_align(parent, LV_ALIGN_TOP_RIGHT, 0, 0);
+    lv_layout_flex_column(parent, LV_FLEX_ALIGN_SPACE_BETWEEN);
+
+    if (contain_in_panel)
+    {
+        lv_obj_set_size(parent, CYD_SCREEN_PANEL_WIDTH_PX, CYD_SCREEN_PANEL_HEIGHT_PX);
+    }
+    else
+    {
+        lv_obj_set_size(parent, CYD_SCREEN_WIDTH_PX, CYD_SCREEN_HEIGHT_PX);
+    }
+
+    lv_obj_t * empty_panel = lv_create_empty_panel(parent);
+    lv_obj_set_flex_grow(empty_panel, 1);
+
+    lv_obj_t * ta = lv_textarea_create(parent);
+    lv_obj_t * keyboard = lv_keyboard_create(parent);
+
+    lv_obj_set_width(ta, width);
+    lv_textarea_set_max_length(ta, max_length);
+    lv_textarea_set_one_line(ta, true);
+    lv_textarea_set_text(ta, fill_text);
+    lv_obj_add_event_cb(ta, keyboard_callback, LV_EVENT_READY, keyboard);
+    lv_obj_add_event_cb(ta, lv_keyboard_text_entry_close, LV_EVENT_ALL, keyboard);
+
+    lv_keyboard_set_mode(keyboard, keyboard_mode);
+    lv_keyboard_set_textarea(keyboard, ta);
+}
+
+const static lv_point_t line_points[] = { {0, 0}, {(short int)((CYD_SCREEN_PANEL_WIDTH_PX - CYD_SCREEN_GAP_PX * 2) * 0.85f), 0} };
+
+void lv_create_custom_menu_entry(const char* label_text, lv_obj_t* object, lv_obj_t* root_panel, bool set_height)
+{
+    lv_obj_t * panel = lv_create_empty_panel(root_panel);
+    lv_layout_flex_row(panel, LV_FLEX_ALIGN_END);
+    lv_obj_set_size(panel, CYD_SCREEN_PANEL_WIDTH_PX - CYD_SCREEN_GAP_PX * 3, CYD_SCREEN_MIN_BUTTON_HEIGHT_PX);
+
+    lv_obj_t * label = lv_label_create(panel);
+    lv_label_set_text(label, label_text);
+    lv_label_set_long_mode(label, LV_LABEL_LONG_SCROLL_CIRCULAR);
+    lv_obj_set_flex_grow(label, 1);
+
+    lv_obj_set_parent(object, panel);
+
+    if (set_height)
+        lv_obj_set_height(object, CYD_SCREEN_MIN_BUTTON_HEIGHT_PX);
+
+    lv_obj_t * line = lv_line_create(root_panel);
+    lv_line_set_points(line, line_points, 2);
+    lv_obj_set_style_line_width(line, 1, 0);
+    lv_obj_set_style_line_color(line, lv_color_hex(0xAAAAAA), 0);
+}
+
+#define DROPDOWN_WIDTH CYD_SCREEN_MIN_BUTTON_WIDTH_PX * 3.75
+#define TOGGLE_WIDTH CYD_SCREEN_MIN_BUTTON_WIDTH_PX * 2
+
+void lv_create_custom_menu_button(const char *label_text, lv_obj_t* root_panel, lv_event_cb_t on_click, const char *btn_text, void * user_data)
+{
+    lv_obj_t * btn = lv_btn_create(lv_scr_act());
+    lv_obj_add_event_cb(btn, on_click, LV_EVENT_CLICKED, user_data);
+
+    lv_obj_t * label = lv_label_create(btn);
+    lv_label_set_text(label, btn_text);
+    lv_obj_center(label);
+
+    lv_create_custom_menu_entry(label_text, btn, root_panel, true);
+}
+
+void lv_create_custom_menu_switch(const char *label_text, lv_obj_t* root_panel, lv_event_cb_t on_toggle, bool state, void * user_data)
+{
+    lv_obj_t * toggle = lv_switch_create(lv_scr_act());
+    lv_obj_add_event_cb(toggle, on_toggle, LV_EVENT_VALUE_CHANGED, user_data);
+    lv_obj_set_width(toggle, TOGGLE_WIDTH);
+
+    if (state)
+        lv_obj_add_state(toggle, LV_STATE_CHECKED);
+
+    lv_create_custom_menu_entry(label_text, toggle, root_panel, true);
+}
+
+void lv_create_custom_menu_dropdown(const char *label_text, lv_obj_t *root_panel, lv_event_cb_t on_change, const char *options, int index, void * user_data)
+{
+    lv_obj_t * dropdown = lv_dropdown_create(lv_scr_act());
+    lv_dropdown_set_options(dropdown, options);
+    lv_dropdown_set_selected(dropdown, index);
+    lv_obj_set_width(dropdown, DROPDOWN_WIDTH);
+    lv_obj_add_event_cb(dropdown, on_change, LV_EVENT_VALUE_CHANGED, user_data);
+
+    lv_create_custom_menu_entry(label_text, dropdown, root_panel, true);
+}
+
+void lv_create_custom_menu_label(const char *label_text, lv_obj_t* root_panel, const char *text)
+{
+    lv_obj_t * label = lv_label_create(lv_scr_act());
+    lv_label_set_text(label, text);
+    lv_create_custom_menu_entry(label_text, label, root_panel, false);
+}
+
+uint32_t message_hash = 0;
+lv_timer_t* timer = NULL;
+
+void on_timer_destroy(lv_event_t * e)
+{
+    lv_timer_del(timer);
+    timer = NULL;
+}
+
+void timer_callback(lv_timer_t *timer)
+{
+    lv_obj_t * panel = (lv_obj_t *)timer->user_data;
+    lv_obj_del(panel);
+}
+
+void lv_create_popup_message(const char* message, uint16_t timeout_ms)
+{
+    if (message == nullptr || timer != NULL) 
+    {
+        return;
+    }
+
+    uint32_t new_hash = crc32String(message);
+
+    if (new_hash == message_hash) 
+    {
+        return;
+    }
+
+    message_hash = new_hash;
+
+    lv_obj_t* panel = lv_obj_create(lv_scr_act()); 
+    lv_obj_set_style_pad_all(panel, CYD_SCREEN_GAP_PX, CYD_SCREEN_GAP_PX);
+    lv_obj_set_size(panel, CYD_SCREEN_PANEL_WIDTH_PX - CYD_SCREEN_GAP_PX * 2, LV_SIZE_CONTENT);
+    lv_layout_flex_column(panel, LV_FLEX_ALIGN_CENTER);
+    lv_obj_align(panel, LV_ALIGN_TOP_RIGHT, -CYD_SCREEN_GAP_PX, CYD_SCREEN_GAP_PX);
+    lv_obj_add_event_cb(panel, on_timer_destroy, LV_EVENT_DELETE, NULL);
+    lv_obj_set_style_border_color(panel, lv_color_hex(0xFF0000), 0);
+
+    lv_obj_t* label = lv_label_create(panel);
+    lv_label_set_text_fmt(label, "%s", message);
+    lv_obj_set_size(label, CYD_SCREEN_PANEL_WIDTH_PX - CYD_SCREEN_GAP_PX * 6, LV_SIZE_CONTENT);
+    lv_label_set_long_mode(label, LV_LABEL_LONG_WRAP);
+
+    timer = lv_timer_create(timer_callback, timeout_ms,  panel);
 }
