@@ -48,6 +48,12 @@ static void light_mode_switch(lv_event_t * e){
     set_color_scheme();
 }
 
+static void show_stats_on_progress_panel_dropdown(lv_event_t * e){
+    auto selected = lv_dropdown_get_selected(lv_event_get_target(e));
+    get_current_printer_config()->show_stats_on_progress_panel = selected;
+    write_global_config();
+}
+
 static void theme_dropdown(lv_event_t * e){
     lv_obj_t * dropdown = lv_event_get_target(e);
     auto selected = lv_dropdown_get_selected(dropdown);
@@ -141,6 +147,7 @@ void settings_panel_init(lv_obj_t* panel){
 #endif // CYD_SCREEN_DISABLE_INVERT_COLORS
 
     lv_create_custom_menu_switch("Light Mode", panel, light_mode_switch, get_current_printer_config()->light_mode);
+    lv_create_custom_menu_dropdown("Stats in Progress Screen", panel, show_stats_on_progress_panel_dropdown, "None\nLayers\nPartial\nAll", get_current_printer_config()->show_stats_on_progress_panel);
     lv_create_custom_menu_button("Configure IP", panel, reset_ip_click, "Restart");
 
     if (global_config.multi_printer_mode)

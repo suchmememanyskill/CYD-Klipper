@@ -12,6 +12,13 @@ enum {
     REMAINING_TIME_CALC_SLICER = 2,
 };
 
+enum {
+    SHOW_STATS_ON_PROGRESS_PANEL_NONE = 0,
+    SHOW_STATS_ON_PROGRESS_PANEL_LAYER = 1,
+    SHOW_STATS_ON_PROGRESS_PANEL_PARTIAL = 2,
+    SHOW_STATS_ON_PROGRESS_PANEL_ALL = 3,
+};
+
 typedef struct _PRINTER_CONFIG {
     union {
         unsigned int raw;
@@ -24,6 +31,7 @@ typedef struct _PRINTER_CONFIG {
             bool light_mode : 1;
             bool invert_colors : 1;
             unsigned char remaining_time_calc_mode : 2;
+            unsigned char show_stats_on_progress_panel : 2;
         };
     };
 

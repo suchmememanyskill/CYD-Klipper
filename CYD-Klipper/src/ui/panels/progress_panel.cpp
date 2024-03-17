@@ -28,6 +28,28 @@ static void update_printer_data_remaining_time(lv_event_t * e){
     lv_label_set_text(label, time_display(printer.remaining_time_s));
 }
 
+static void update_printer_data_stats(lv_event_t * e){
+    lv_obj_t * label = lv_event_get_target(e);
+    char buff[256] = {0};
+
+    switch (get_current_printer_config()->show_stats_on_progress_panel)
+    {
+        case SHOW_STATS_ON_PROGRESS_PANEL_LAYER:
+            sprintf(buff, "Layer %d of %d", printer.current_layer, printer.total_layers);
+            break;
+        case SHOW_STATS_ON_PROGRESS_PANEL_PARTIAL:
+            sprintf(buff, "Position: X%.2f Y%.2f\nFeedrate: %d mm/s\nFilament Used: %.2f m\nLayer %d of %d", 
+            printer.position[0], printer.position[1], printer.feedrate_mm_per_s, printer.filament_used_mm / 1000, printer.current_layer, printer.total_layers);
+            break;
+        case SHOW_STATS_ON_PROGRESS_PANEL_ALL:
+            sprintf(buff, "Pressure Advance: %.3f (%.2fs)\nPosition: X%.2f Y%.2f Z%.2f\nFeedrate: %d mm/s\nFilament Used: %.2f m\nFan: %.0f%%\nSpeed: %.0f%%\nFlow: %.0f%%\nLayer %d of %d", 
+            printer.pressure_advance, printer.smooth_time, printer.position[0], printer.position[1], printer.position[2], printer.feedrate_mm_per_s, printer.filament_used_mm / 1000, printer.fan_speed * 100, printer.speed_mult * 100, printer.extrude_mult * 100, printer.current_layer, printer.total_layers);
+            break;
+    }
+
+    lv_label_set_text(label, buff);
+}
+
 static void update_printer_data_percentage(lv_event_t * e){
     lv_obj_t * label = lv_event_get_target(e);
     char percentage_buffer[12];
@@ -52,9 +74,27 @@ void progress_panel_init(lv_obj_t* panel){
     const auto button_size_mult = 1.3f;
 
     lv_obj_t * center_panel = lv_create_empty_panel(panel);
-    lv_obj_align(center_panel, LV_ALIGN_CENTER, 0, 0);
     lv_obj_set_size(center_panel, panel_width, LV_SIZE_CONTENT);
     lv_layout_flex_column(center_panel);
+
+    if (get_current_printer_config()->show_stats_on_progress_panel == SHOW_STATS_ON_PROGRESS_PANEL_ALL)
+    {
+        lv_obj_align(center_panel, LV_ALIGN_TOP_MID, 0, CYD_SCREEN_GAP_PX);
+    }
+    else 
+    {
+        lv_obj_align(center_panel, LV_ALIGN_CENTER, 0, 0);
+    }
+
+    
+    if (get_current_printer_config()->show_stats_on_progress_panel == SHOW_STATS_ON_PROGRESS_PANEL_LAYER)
+    {
+        lv_obj_t * label = lv_label_create(panel);
+        lv_obj_align(label, LV_ALIGN_TOP_MID, 0, CYD_SCREEN_GAP_PX);
+        lv_obj_set_style_text_font(label, &CYD_SCREEN_FONT_SMALL, 0);
+        lv_obj_add_event_cb(label, update_printer_data_stats, LV_EVENT_MSG_RECEIVED, NULL);
+        lv_msg_subsribe_obj(DATA_PRINTER_DATA, label, NULL);
+    }
 
     // Filename
     lv_obj_t * label = lv_label_create(center_panel);
@@ -124,4 +164,13 @@ void progress_panel_init(lv_obj_t* panel){
 
     lv_obj_align(btn, LV_ALIGN_BOTTOM_RIGHT, -2 * CYD_SCREEN_GAP_PX - CYD_SCREEN_MIN_BUTTON_WIDTH_PX * button_size_mult, -1 * CYD_SCREEN_GAP_PX);
     lv_obj_set_size(btn, CYD_SCREEN_MIN_BUTTON_WIDTH_PX * button_size_mult, CYD_SCREEN_MIN_BUTTON_HEIGHT_PX * button_size_mult);
+
+    if (get_current_printer_config()->show_stats_on_progress_panel >= SHOW_STATS_ON_PROGRESS_PANEL_PARTIAL)
+    {
+        label = lv_label_create(panel);
+        lv_obj_align(label, LV_ALIGN_BOTTOM_LEFT, CYD_SCREEN_GAP_PX, -1 * CYD_SCREEN_GAP_PX);
+        lv_obj_set_style_text_font(label, &CYD_SCREEN_FONT_SMALL, 0);
+        lv_obj_add_event_cb(label, update_printer_data_stats, LV_EVENT_MSG_RECEIVED, NULL);
+        lv_msg_subsribe_obj(DATA_PRINTER_DATA, label, NULL);
+    }
 }
