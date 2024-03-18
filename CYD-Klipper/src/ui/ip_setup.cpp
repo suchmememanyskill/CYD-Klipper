@@ -271,6 +271,13 @@ void ip_init_inner(){
     lv_obj_add_event_cb(portEntry, ta_event_cb, LV_EVENT_ALL, keyboard);
     lv_keyboard_set_mode(keyboard, LV_KEYBOARD_MODE_USER_1);
     lv_keyboard_set_textarea(keyboard, hostEntry);
+
+    if (global_config.multi_printer_mode)
+    {
+        lv_obj_t * btn = draw_switch_printer_button();
+        lv_obj_set_parent(btn, textbow_row);
+        lv_obj_align(btn, LV_ALIGN_DEFAULT, 0, 0);
+    }
 }
 
 long last_data_update_ip = -10000;

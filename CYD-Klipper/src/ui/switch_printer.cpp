@@ -1,5 +1,4 @@
 #include "switch_printer.h"
-#include "lvgl.h"
 #include "../conf/global_config.h"
 #include "ui_utils.h"
 #include "../core/http_client.h"
@@ -47,7 +46,7 @@ void switch_printer_init() {
         PRINTER_CONFIG * config = &global_config.printer_config[i];
         const char* printer_name = (config->printer_name[0] == 0) ? config->klipper_host : config->printer_name;
 
-        if (config == get_current_printer_config())
+        if (config == get_current_printer_config() && config->ip_configured)
         {
             lv_create_custom_menu_label(printer_name, parent, "Active");
             continue;
@@ -75,11 +74,11 @@ static void show_switch_printer_screen(lv_event_t * e){
     switch_printer_init();
 }
 
-void draw_switch_printer_button() 
+lv_obj_t * draw_switch_printer_button() 
 {
     if (!global_config.multi_printer_mode)
     {
-        return;
+        return NULL;
     }
 
     lv_obj_t * btn = lv_btn_create(lv_scr_act());
@@ -90,4 +89,6 @@ void draw_switch_printer_button()
     lv_obj_t * label = lv_label_create(btn);
     lv_label_set_text(label, LV_SYMBOL_HOME);
     lv_obj_center(label);
+
+    return btn;
 }
