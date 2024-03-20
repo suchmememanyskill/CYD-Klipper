@@ -12,3 +12,4 @@ void macros_panel_init(lv_obj_t* panel);
 void stats_panel_init(lv_obj_t* panel);
 void printer_panel_init(lv_obj_t* panel);
 void error_panel_init(lv_obj_t* panel);
+void connecting_panel_init(lv_obj_t* panel);

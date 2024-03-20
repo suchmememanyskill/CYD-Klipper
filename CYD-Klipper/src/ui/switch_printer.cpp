@@ -58,14 +58,7 @@ void switch_printer_init() {
             
 
             int httpCode = client.GET();
-            if (httpCode == 200)
-            {
-                lv_create_custom_menu_button(printer_name, parent, btn_switch_printer, "Switch", config);
-            }
-            else 
-            {
-                lv_create_custom_menu_label(printer_name, parent, "Offline");
-            }
+            lv_create_custom_menu_button(printer_name, parent, btn_switch_printer, (httpCode == 200) ? "Switch" : "Offline", config);
         }
     }
 }

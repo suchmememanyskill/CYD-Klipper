@@ -29,7 +29,6 @@ void setup() {
 
 void loop(){
     wifi_ok();
-    ip_ok();
     data_loop();
     lv_timer_handler();
     lv_task_handler();

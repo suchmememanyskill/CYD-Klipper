@@ -1,13 +1,12 @@
 #pragma once
 
 enum {
-    PRINTER_STATE_ERROR = 0,
-    PRINTER_STATE_IDLE = 1,
-    PRINTER_STATE_PRINTING = 2,
-    PRINTER_STATE_PAUSED = 3,
+    PRINTER_STATE_OFFLINE = 0,
+    PRINTER_STATE_ERROR = 1,
+    PRINTER_STATE_IDLE = 2,
+    PRINTER_STATE_PRINTING = 3,
+    PRINTER_STATE_PAUSED = 4,
 };
-
-extern const char* printer_state_messages[];
 
 typedef struct _Printer {
     unsigned char state;
@@ -38,7 +37,6 @@ typedef struct _Printer {
 } Printer;
 
 typedef struct _PrinterMinimal {
-    bool online;
     unsigned char state;
     float print_progress; // 0 -> 1
     unsigned int power_devices;

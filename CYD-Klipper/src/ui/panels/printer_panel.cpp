@@ -10,6 +10,7 @@
 #include "../macros.h"
 
 const char * printer_status[] = {
+    "Offline",
     "Error",
     "Idle",
     "Printing",
@@ -41,7 +42,7 @@ static void update_printer_status_text(lv_event_t * e)
         return;
     }
 
-    if (!printer->online)
+    if (printer->state == PRINTER_STATE_OFFLINE)
     {
         lv_label_set_text(label, "Offline");
         return;
@@ -57,7 +58,7 @@ static void update_printer_percentage_bar(lv_event_t * e)
     int index = config - global_config.printer_config;
     PrinterMinimal * printer = &printer_minimal[index];
 
-    if (printer->online && (printer->state == PRINTER_STATE_PRINTING || printer->state == PRINTER_STATE_PAUSED)){
+    if (printer->state != PRINTER_STATE_OFFLINE && (printer->state == PRINTER_STATE_PRINTING || printer->state == PRINTER_STATE_PAUSED)){
         lv_bar_set_value(percentage, printer->print_progress * 100, LV_ANIM_OFF);
     }
     else {
@@ -72,7 +73,7 @@ static void update_printer_percentage_text(lv_event_t * e)
     int index = config - global_config.printer_config;
     PrinterMinimal * printer = &printer_minimal[index];
 
-    if (printer->online && (printer->state == PRINTER_STATE_PRINTING || printer->state == PRINTER_STATE_PAUSED))
+    if (printer->state != PRINTER_STATE_OFFLINE && (printer->state == PRINTER_STATE_PRINTING || printer->state == PRINTER_STATE_PAUSED))
     {
         char percentage_buffer[12];
         sprintf(percentage_buffer, "%.2f%%", printer->print_progress * 100);
@@ -91,7 +92,7 @@ static void update_printer_control_button_text(lv_event_t * e)
     int index = config - global_config.printer_config;
     PrinterMinimal * printer = &printer_minimal[index];
 
-    if (!printer->online && printer->power_devices > 0)
+    if (printer->state == PRINTER_STATE_OFFLINE && printer->power_devices > 0)
     {
         lv_label_set_text(label, "Power");
     }
@@ -125,7 +126,7 @@ static void btn_enable_control(lv_event_t * e)
     int index = config - global_config.printer_config;
     PrinterMinimal * printer = &printer_minimal[index];
 
-    if (config == get_current_printer_config() || (!printer->online && printer->power_devices <= 0))
+    if (config == get_current_printer_config() || (printer->state == PRINTER_STATE_OFFLINE && printer->power_devices <= 0))
     {
         // Disable
         lv_obj_add_state(btn, LV_STATE_DISABLED);
@@ -180,7 +181,7 @@ static void btn_printer_activate(lv_event_t * e)
     int index = config - global_config.printer_config;
     PrinterMinimal * printer = &printer_minimal[index];
 
-    if (!printer->online)
+    if (printer->state == PRINTER_STATE_OFFLINE)
     {
         macros_draw_power_fullscreen(config);
         return;

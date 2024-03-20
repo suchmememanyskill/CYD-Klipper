@@ -24,7 +24,10 @@ void check_if_screen_needs_to_be_disabled(){
 static void on_state_change(void * s, lv_msg_t * m){
     check_if_screen_needs_to_be_disabled();
     
-    if (printer.state == PRINTER_STATE_ERROR){
+    if (printer.state == PRINTER_STATE_OFFLINE){
+        nav_buttons_setup(PANEL_CONNECTING);
+    }
+    else if (printer.state == PRINTER_STATE_ERROR){
         nav_buttons_setup(PANEL_ERROR);
     }
     else {
