@@ -3,6 +3,7 @@
 #include "../conf/global_config.h"
 #include "ui_utils.h"
 #include "WiFi.h"
+#include "../core/data_setup.h"
 
 void wifi_init_inner();
 void wifi_pass_entry(const char* ssid);
@@ -33,16 +34,11 @@ static void ta_event_cb(lv_event_t * e) {
     if (code == LV_EVENT_READY) 
     {
         const char * txt = lv_textarea_get_text(ta);
-        int len = strlen(txt);
-        if (len > 0)
-        {
-
-            global_config.wifi_configured = true;
-            strcpy(global_config.wifi_SSID, current_ssid_ptr);
-            strcpy(global_config.wifi_password, txt);
-            write_global_config();
-            wifi_init_inner();
-        }
+        global_config.wifi_configured = true;
+        strcpy(global_config.wifi_SSID, current_ssid_ptr);
+        strcpy(global_config.wifi_password, txt);
+        write_global_config();
+        wifi_init_inner();
     }
     else if (code == LV_EVENT_CANCEL)
     {
@@ -150,7 +146,14 @@ void wifi_init_inner(){
     lv_obj_clean(lv_scr_act());
 
     if (global_config.wifi_configured){
-        WiFi.begin(global_config.wifi_SSID, global_config.wifi_password);
+        if (global_config.wifi_password[0] == '\0')
+        {
+            WiFi.begin(global_config.wifi_SSID);
+        }
+        else 
+        {
+            WiFi.begin(global_config.wifi_SSID, global_config.wifi_password);
+        }
         
         Serial.printf("Connecting to %s with a password length of %d\n", global_config.wifi_SSID, strlen(global_config.wifi_password));
 
@@ -253,8 +256,35 @@ void wifi_init(){
     }
 }
 
+ulong start_time_recovery = 0;
+
 void wifi_ok(){
     if (WiFi.status() != WL_CONNECTED){
-        ESP.restart();
+        Serial.println("WiFi Connection Lost. Reconnecting...");
+        freeze_request_thread();
+        WiFi.disconnect();
+        delay(5000); // Wait for the WiFi to disconnect
+
+        start_time_recovery = millis();
+
+        if (global_config.wifi_password[0] == '\0')
+        {
+            WiFi.begin(global_config.wifi_SSID);
+        }
+        else 
+        {
+            WiFi.begin(global_config.wifi_SSID, global_config.wifi_password);
+        }
+
+        while (WiFi.status() != WL_CONNECTED){
+            delay(1000);
+            Serial.printf("WiFi Status: %s\n", errs[WiFi.status()]);
+            if (millis() - start_time_recovery > 10000){
+                Serial.println("WiFi Connection failed to reconnect. Restarting...");
+                ESP.restart();
+            }
+        }
+
+        unfreeze_request_thread();
     }
 }
