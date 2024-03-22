@@ -223,7 +223,7 @@ void fetch_printer_data()
 
                 if (state == nullptr)
                 {
-                    printer_state = PRINTER_STATE_ERROR;
+                    // Continue
                 }
                 else if (strcmp(state, "printing") == 0)
                 {
