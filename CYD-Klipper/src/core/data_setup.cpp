@@ -340,7 +340,7 @@ void fetch_printer_data_minimal()
                 data[i].state = PRINTER_STATE_ERROR;
             }
 
-            data[i].power_devices = 0;
+            data[i].power_devices = power_devices_count(config);
             JsonDocument doc;
             deserializeJson(doc, client.getStream());
             auto status = doc["result"]["status"];
