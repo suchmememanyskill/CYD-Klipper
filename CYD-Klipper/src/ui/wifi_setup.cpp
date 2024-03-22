@@ -279,7 +279,7 @@ void wifi_ok(){
         while (WiFi.status() != WL_CONNECTED){
             delay(1000);
             Serial.printf("WiFi Status: %s\n", errs[WiFi.status()]);
-            if (millis() - start_time_recovery > 10000){
+            if (millis() - start_time_recovery > 15000){
                 Serial.println("WiFi Connection failed to reconnect. Restarting...");
                 ESP.restart();
             }

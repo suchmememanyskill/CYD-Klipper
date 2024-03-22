@@ -241,6 +241,7 @@ void fetch_printer_data()
 
             if (status.containsKey("display_status"))
             {
+                printer.print_progress = status["display_status"]["progress"];
                 const char* message = status["display_status"]["message"];
                 lv_create_popup_message(message, 10000);
             }
