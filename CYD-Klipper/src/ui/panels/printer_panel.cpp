@@ -51,18 +51,18 @@ static void update_printer_status_text(lv_event_t * e)
     lv_label_set_text(label, printer_status[printer->state]);
 }
 
-static void update_printer_button_active_printer(lv_event_t * e)
+static void update_printer_label_visible_active_printer(lv_event_t * e)
 {
-    lv_obj_t * btn = lv_event_get_target(e);
+    lv_obj_t * label = lv_event_get_target(e);
     PRINTER_CONFIG * config = (PRINTER_CONFIG*)lv_event_get_user_data(e);
 
     if (config == get_current_printer_config())
     {
-        lv_obj_add_state(btn, LV_STATE_CHECKED);
+        lv_label_set_text(label, LV_SYMBOL_WIFI);
     }
     else 
     {
-        lv_obj_clear_state(btn, LV_STATE_CHECKED);
+        lv_label_set_text(label, "");
     }
 }
 
@@ -221,6 +221,10 @@ void create_printer_ui(PRINTER_CONFIG * config, lv_obj_t * root)
     lv_obj_t * label = lv_label_create(data_row_name);
     lv_obj_add_event_cb(label, update_printer_name_text, LV_EVENT_MSG_RECEIVED, config);
     lv_msg_subsribe_obj(DATA_PRINTER_MINIMAL, label, config);
+
+    label = lv_label_create(data_row_name);
+    lv_obj_add_event_cb(label, update_printer_label_visible_active_printer, LV_EVENT_MSG_RECEIVED, config);
+    lv_msg_subsribe_obj(DATA_PRINTER_MINIMAL, label, config);
     
     label = lv_label_create(data_row_name);
     lv_obj_add_event_cb(label, update_printer_status_text, LV_EVENT_MSG_RECEIVED, config);
@@ -247,8 +251,6 @@ void create_printer_ui(PRINTER_CONFIG * config, lv_obj_t * root)
     lv_obj_t * btn = lv_btn_create(button_row);
     lv_obj_set_flex_grow(btn, 1);
     lv_obj_add_event_cb(btn, btn_printer_secondary, LV_EVENT_CLICKED, config);
-    lv_obj_add_event_cb(btn, update_printer_button_active_printer, LV_EVENT_MSG_RECEIVED, config);
-    lv_msg_subsribe_obj(DATA_PRINTER_MINIMAL, btn, config);
 
     label = lv_label_create(btn);
     lv_obj_center(label);
@@ -258,8 +260,6 @@ void create_printer_ui(PRINTER_CONFIG * config, lv_obj_t * root)
     btn = lv_btn_create(button_row);
     lv_obj_set_flex_grow(btn, 2);
     lv_obj_add_event_cb(btn, btn_printer_rename, LV_EVENT_CLICKED, config);
-    lv_obj_add_event_cb(btn, update_printer_button_active_printer, LV_EVENT_MSG_RECEIVED, config);
-    lv_msg_subsribe_obj(DATA_PRINTER_MINIMAL, btn, config);
 
     label = lv_label_create(btn);
     lv_label_set_text(label, "Rename");
@@ -269,7 +269,6 @@ void create_printer_ui(PRINTER_CONFIG * config, lv_obj_t * root)
     lv_obj_set_flex_grow(btn, 2);
     lv_obj_add_event_cb(btn, btn_printer_activate, LV_EVENT_CLICKED, config);
     lv_obj_add_event_cb(btn, btn_enable_control, LV_EVENT_MSG_RECEIVED, config);
-    lv_obj_add_event_cb(btn, update_printer_button_active_printer, LV_EVENT_MSG_RECEIVED, config);
     lv_msg_subsribe_obj(DATA_PRINTER_MINIMAL, btn, config);
 
     label = lv_label_create(btn);
