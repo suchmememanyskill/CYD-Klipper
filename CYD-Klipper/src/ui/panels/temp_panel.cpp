@@ -117,12 +117,12 @@ static void keyboard_callback(lv_event_t * e){
 
 static void show_keyboard_with_hotend(lv_event_t * e){
     keyboard_target = TARGET_HOTEND;
-    lv_create_keyboard_text_entry(keyboard_callback);
+    lv_create_keyboard_text_entry(keyboard_callback, "Set Hotend Temp");
 }
 
 static void show_keyboard_with_bed(lv_event_t * e){
     keyboard_target = TARGET_BED;
-    lv_create_keyboard_text_entry(keyboard_callback);
+    lv_create_keyboard_text_entry(keyboard_callback, "Set Bed Temp");
 }
 
 static void cooldown_temp(lv_event_t * e){
@@ -149,7 +149,7 @@ static void set_temp_via_preset(lv_event_t * e){
 
     if (edit_mode) {
         keyboard_target = (temp_target)target;
-        lv_create_keyboard_text_entry(keyboard_callback);
+        lv_create_keyboard_text_entry(keyboard_callback, "Set Preset Temp");
         return;
     }
 

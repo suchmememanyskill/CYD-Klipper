@@ -88,6 +88,45 @@ static void switch_to_stat_panel(lv_event_t * e) {
     nav_buttons_setup(PANEL_STATS);
 }
 
+static void line_custom_set(const char * axis, const char *text)
+{
+    float pos = atof(text);
+
+    if (pos < 0 || pos > 500)
+        return;
+    // TODO: Move menu goes funky when in light mode
+    move_printer(axis, pos, false);
+}
+
+static void x_line_custom_callback(lv_event_t * e) {
+    const char * text = lv_textarea_get_text(lv_event_get_target(e));
+    line_custom_set("X", text);
+}
+
+static void y_line_custom_callback(lv_event_t * e) {
+    const char * text = lv_textarea_get_text(lv_event_get_target(e));
+    line_custom_set("Y", text);
+}
+
+static void z_line_custom_callback(lv_event_t * e) {
+    const char * text = lv_textarea_get_text(lv_event_get_target(e));
+    line_custom_set("Z", text);
+}
+
+static void x_line_custom(lv_event_t * e) {
+    lv_create_keyboard_text_entry(x_line_custom_callback, "Set X position", LV_KEYBOARD_MODE_NUMBER, CYD_SCREEN_PANEL_WIDTH_PX / 2, 6);
+}
+
+static void y_line_custom(lv_event_t * e) {
+    lv_create_keyboard_text_entry(y_line_custom_callback, "Set Y position", LV_KEYBOARD_MODE_NUMBER, CYD_SCREEN_PANEL_WIDTH_PX / 2, 6);
+}
+
+static void z_line_custom(lv_event_t * e) {
+    lv_create_keyboard_text_entry(z_line_custom_callback, "Set Z position", LV_KEYBOARD_MODE_NUMBER, CYD_SCREEN_PANEL_WIDTH_PX / 2, 6);
+}
+
+lv_event_cb_t custom_callbacks[] = {x_line_custom, y_line_custom, z_line_custom};
+
 inline void root_panel_steppers_locked(lv_obj_t * root_panel){
     const auto width = CYD_SCREEN_PANEL_WIDTH_PX - CYD_SCREEN_GAP_PX * 2;
 
@@ -128,7 +167,8 @@ inline void root_panel_steppers_locked(lv_obj_t * root_panel){
     lv_obj_center(label);
 
     for (int row = 0; row < 3; row++) {
-        label = lv_label_create(panel);
+        label = lv_label_btn_create(panel, custom_callbacks[row]);
+        lv_obj_align(label, LV_ALIGN_CENTER, 0, 0);
         lv_label_set_text(label, "???");
         lv_obj_set_width(label, width);
         lv_obj_add_event_cb(label, position_callbacks[row], LV_EVENT_MSG_RECEIVED, NULL);

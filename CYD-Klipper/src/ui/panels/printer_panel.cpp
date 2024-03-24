@@ -184,7 +184,7 @@ static void btn_printer_secondary(lv_event_t * e)
 static void btn_printer_rename(lv_event_t * e)
 {
     keyboard_config = (PRINTER_CONFIG*)lv_event_get_user_data(e);
-    lv_create_keyboard_text_entry(keyboard_callback, LV_KEYBOARD_MODE_TEXT_LOWER, CYD_SCREEN_WIDTH_PX * 0.75, 24, keyboard_config->printer_name, false);
+    lv_create_keyboard_text_entry(keyboard_callback, "Rename Printer", LV_KEYBOARD_MODE_TEXT_LOWER, CYD_SCREEN_WIDTH_PX * 0.75, 24, keyboard_config->printer_name, false);
 }
 
 static void btn_printer_activate(lv_event_t * e)

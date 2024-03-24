@@ -9,6 +9,7 @@ lv_obj_t* lv_create_empty_panel(lv_obj_t* root) {
     lv_obj_set_style_border_width(panel, 0, 0); 
     lv_obj_set_style_bg_opa(panel, LV_OPA_TRANSP, 0); 
     lv_obj_set_style_pad_all(panel, 0, 0);
+    lv_obj_set_style_radius(panel, 0, 0);
     return panel;
 }
 
@@ -100,7 +101,7 @@ void lv_keyboard_text_entry_close(lv_event_t * e){
     }
 }
 
-void lv_create_keyboard_text_entry(lv_event_cb_t keyboard_callback, lv_keyboard_mode_t keyboard_mode, lv_coord_t width, uint8_t max_length, const char* fill_text, bool contain_in_panel)
+void lv_create_keyboard_text_entry(lv_event_cb_t keyboard_callback, const char* title, lv_keyboard_mode_t keyboard_mode, lv_coord_t width, uint8_t max_length, const char* fill_text, bool contain_in_panel)
 {
     lv_obj_t * parent = lv_create_empty_panel(lv_scr_act());
     lv_obj_set_style_bg_opa(parent, LV_OPA_50, 0); 
@@ -114,6 +115,19 @@ void lv_create_keyboard_text_entry(lv_event_cb_t keyboard_callback, lv_keyboard_
     else
     {
         lv_obj_set_size(parent, CYD_SCREEN_WIDTH_PX, CYD_SCREEN_HEIGHT_PX);
+    }
+
+    if (title != nullptr)
+    {
+        lv_obj_t * empty_panel = lv_create_empty_panel(parent);
+        lv_obj_set_size(empty_panel, 0, 0);
+
+        lv_obj_t * title_container = lv_obj_create(parent);
+        lv_obj_set_style_pad_all(title_container, CYD_SCREEN_GAP_PX / 2, 0);
+        lv_obj_set_size(title_container, LV_SIZE_CONTENT, LV_SIZE_CONTENT);
+
+        lv_obj_t * title_label = lv_label_create(title_container);
+        lv_label_set_text(title_label, title);
     }
 
     lv_obj_t * empty_panel = lv_create_empty_panel(parent);
@@ -247,4 +261,14 @@ void lv_create_popup_message(const char* message, uint16_t timeout_ms)
     lv_label_set_long_mode(label, LV_LABEL_LONG_WRAP);
 
     timer = lv_timer_create(timer_callback, timeout_ms,  panel);
+}
+
+lv_obj_t * lv_label_btn_create(lv_obj_t * parent, lv_event_cb_t btn_callback, void* user_data)
+{
+    lv_obj_t * panel = lv_create_empty_panel(parent);
+    lv_obj_set_size(panel, LV_SIZE_CONTENT, LV_SIZE_CONTENT);
+    lv_obj_add_event_cb(panel, btn_callback, LV_EVENT_CLICKED, user_data);
+
+    lv_obj_t * label = lv_label_create(panel);
+    return label;
 }
