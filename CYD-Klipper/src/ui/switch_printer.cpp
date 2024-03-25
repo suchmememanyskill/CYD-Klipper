@@ -5,12 +5,14 @@
 #include "../core/lv_setup.h"
 #include "../core/macros_query.h"
 #include "../core/screen_driver.h"
+#include "../core/data_setup.h"
 
 void switch_printer(int index)
 {
     set_printer_config_index(index);
     set_color_scheme();
     set_invert_display();
+    printer.slicer_estimated_print_time_s = 0;
 }
 
 static void btn_switch_printer(lv_event_t *e){
