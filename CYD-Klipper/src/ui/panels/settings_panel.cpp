@@ -27,6 +27,10 @@ static void reset_calibration_click(lv_event_t * e){
     ESP.restart();
 }
 
+static void reset_click(lv_event_t * e){
+    ESP.restart();
+}
+
 static void reset_wifi_click(lv_event_t * e){
     global_config.wifi_configured = false;
     write_global_config();
@@ -206,4 +210,5 @@ void settings_panel_init(lv_obj_t* panel){
     #endif // CYD_SCREEN_DISABLE_TOUCH_CALIBRATION
 
     lv_create_custom_menu_button("Configure WiFi", panel, reset_wifi_click, "Restart");
+    lv_create_custom_menu_button("Restart ESP", panel, reset_click, "Restart");
 }
