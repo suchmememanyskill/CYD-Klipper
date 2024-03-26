@@ -85,9 +85,16 @@ void set_printer_config_index(int index)
 
         new_config->color_scheme = old_config->color_scheme;
 
+        // TODO: Replace with memcpy
         for (int i = 0; i < 3; i++){
             new_config->hotend_presets[i] = old_config->hotend_presets[i];
             new_config->bed_presets[i] = old_config->bed_presets[i];
+        }
+
+        for (int i = 0; i < 3; i++){
+            new_config->printer_move_x_steps[i] = old_config->printer_move_x_steps[i];
+            new_config->printer_move_y_steps[i] = old_config->printer_move_y_steps[i];
+            new_config->printer_move_z_steps[i] = old_config->printer_move_z_steps[i];
         }
 
         write_global_config();
