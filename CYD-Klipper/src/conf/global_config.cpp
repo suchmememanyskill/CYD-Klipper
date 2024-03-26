@@ -108,6 +108,16 @@ void load_global_config()
     global_config.printer_config[0].bed_presets[0] = 0;
     global_config.printer_config[0].bed_presets[1] = 60;
     global_config.printer_config[0].bed_presets[2] = 70;
+    global_config.printer_config[0].printer_move_x_steps[0] = 10;
+    global_config.printer_config[0].printer_move_x_steps[1] = 100;
+    global_config.printer_config[0].printer_move_x_steps[2] = 1000;
+    global_config.printer_config[0].printer_move_y_steps[0] = 10;
+    global_config.printer_config[0].printer_move_y_steps[1] = 100;
+    global_config.printer_config[0].printer_move_y_steps[2] = 1000;
+    global_config.printer_config[0].printer_move_z_steps[0] = 1;
+    global_config.printer_config[0].printer_move_z_steps[1] = 10;
+    global_config.printer_config[0].printer_move_z_steps[2] = 100;
+
     verify_version();
     Preferences preferences;
     preferences.begin("global_config", true);

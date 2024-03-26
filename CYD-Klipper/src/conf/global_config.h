@@ -3,7 +3,7 @@
 
 #include "lvgl.h"
 
-#define CONFIG_VERSION 5
+#define CONFIG_VERSION 6
 #define PRINTER_CONFIG_COUNT 8
 
 enum {
@@ -44,6 +44,10 @@ typedef struct _PRINTER_CONFIG {
 
     unsigned short hotend_presets[3];
     unsigned short bed_presets[3];
+
+    unsigned short printer_move_x_steps[3];
+    unsigned short printer_move_y_steps[3];
+    unsigned short printer_move_z_steps[3];
 } PRINTER_CONFIG;
 
 typedef struct _GLOBAL_CONFIG {
@@ -70,8 +74,8 @@ typedef struct _GLOBAL_CONFIG {
     float screen_cal_y_offset;
     float screen_cal_y_mult;
 
-    char wifi_SSID[32];
-    char wifi_password[64];
+    char wifi_SSID[33];
+    char wifi_password[65];
     
     unsigned char brightness;
     unsigned char screen_timeout;
