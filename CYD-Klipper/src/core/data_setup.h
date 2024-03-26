@@ -20,6 +20,7 @@ typedef struct _Printer {
     unsigned char homed_axis;
     unsigned char absolute_coords;
     float elapsed_time_s;
+    float printed_time_s;
     float remaining_time_s;
     float filament_used_mm;
     char* print_filename; 

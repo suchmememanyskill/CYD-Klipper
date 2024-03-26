@@ -214,7 +214,8 @@ void fetch_printer_data()
                 const char *filename = status["print_stats"]["filename"];
                 strcpy(filename_buff, filename);
                 printer.print_filename = filename_buff;
-                printer.elapsed_time_s = status["print_stats"]["print_duration"];
+                printer.elapsed_time_s = status["print_stats"]["total_duration"];
+                printer.printed_time_s = status["print_stats"]["print_duration"];
                 printer.filament_used_mm = status["print_stats"]["filament_used"];
                 printer.total_layers = status["print_stats"]["info"]["total_layer"];
                 printer.current_layer = status["print_stats"]["info"]["current_layer"];
@@ -248,12 +249,12 @@ void fetch_printer_data()
 
             if (printer.state == PRINTER_STATE_PRINTING && printer.print_progress > 0)
             {
-                float remaining_time_s_percentage = (printer.elapsed_time_s / printer.print_progress) - printer.elapsed_time_s;
+                float remaining_time_s_percentage = (printer.printed_time_s / printer.print_progress) - printer.printed_time_s;
                 float remaining_time_s_slicer = 0;
 
                 if (printer.slicer_estimated_print_time_s > 0)
                 {
-                    remaining_time_s_slicer = printer.slicer_estimated_print_time_s - printer.elapsed_time_s;
+                    remaining_time_s_slicer = printer.slicer_estimated_print_time_s - printer.printed_time_s;
                 }
 
                 if (remaining_time_s_slicer <= 0 || config->remaining_time_calc_mode == REMAINING_TIME_CALC_PERCENTAGE)
