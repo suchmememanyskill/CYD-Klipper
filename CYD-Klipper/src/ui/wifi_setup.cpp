@@ -94,8 +94,10 @@ static void wifi_keyboard_cb_manual_ssid(lv_event_t * e){
     lv_obj_t * ta = lv_event_get_target(e);
     lv_obj_t * kb = (lv_obj_t *)lv_event_get_user_data(e);
     const char * text = lv_textarea_get_text(ta);
-    Serial.println(text);
-    wifi_pass_entry(text);
+    char * text_copy = (char*)malloc(strlen(text) + 1);
+    strcpy(text_copy, text);
+    Serial.println(text_copy);
+    wifi_pass_entry(text_copy);
 }
 
 static void wifi_btn_manual_ssid(lv_event_t * e){
