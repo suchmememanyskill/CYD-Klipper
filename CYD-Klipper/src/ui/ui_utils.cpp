@@ -149,7 +149,7 @@ void lv_create_keyboard_text_entry(lv_event_cb_t keyboard_callback, const char* 
 
 const static lv_point_t line_points[] = { {0, 0}, {(short int)((CYD_SCREEN_PANEL_WIDTH_PX - CYD_SCREEN_GAP_PX * 2) * 0.85f), 0} };
 
-void lv_create_custom_menu_entry(const char* label_text, lv_obj_t* object, lv_obj_t* root_panel, bool set_height)
+void lv_create_custom_menu_entry(const char* label_text, lv_obj_t* object, lv_obj_t* root_panel, bool set_height, const char * comment)
 {
     lv_obj_t * panel = lv_create_empty_panel(root_panel);
     lv_layout_flex_row(panel, LV_FLEX_ALIGN_END);
@@ -165,6 +165,13 @@ void lv_create_custom_menu_entry(const char* label_text, lv_obj_t* object, lv_ob
     if (set_height)
         lv_obj_set_height(object, CYD_SCREEN_MIN_BUTTON_HEIGHT_PX);
 
+    if (comment != NULL)
+    {
+        lv_obj_t * comment_label = lv_label_create(root_panel);
+        lv_label_set_text(comment_label, comment);
+        lv_obj_set_style_text_font(comment_label, &CYD_SCREEN_FONT_SMALL, 0);
+    }
+
     lv_obj_t * line = lv_line_create(root_panel);
     lv_line_set_points(line, line_points, 2);
     lv_obj_set_style_line_width(line, 1, 0);
@@ -174,7 +181,7 @@ void lv_create_custom_menu_entry(const char* label_text, lv_obj_t* object, lv_ob
 #define DROPDOWN_WIDTH CYD_SCREEN_MIN_BUTTON_WIDTH_PX * 3.75
 #define TOGGLE_WIDTH CYD_SCREEN_MIN_BUTTON_WIDTH_PX * 2
 
-void lv_create_custom_menu_button(const char *label_text, lv_obj_t* root_panel, lv_event_cb_t on_click, const char *btn_text, void * user_data)
+void lv_create_custom_menu_button(const char *label_text, lv_obj_t* root_panel, lv_event_cb_t on_click, const char *btn_text, void * user_data, const char * comment)
 {
     lv_obj_t * btn = lv_btn_create(lv_scr_act());
     lv_obj_add_event_cb(btn, on_click, LV_EVENT_CLICKED, user_data);
@@ -183,10 +190,10 @@ void lv_create_custom_menu_button(const char *label_text, lv_obj_t* root_panel, 
     lv_label_set_text(label, btn_text);
     lv_obj_center(label);
 
-    lv_create_custom_menu_entry(label_text, btn, root_panel, true);
+    lv_create_custom_menu_entry(label_text, btn, root_panel, true, comment);
 }
 
-void lv_create_custom_menu_switch(const char *label_text, lv_obj_t* root_panel, lv_event_cb_t on_toggle, bool state, void * user_data)
+void lv_create_custom_menu_switch(const char *label_text, lv_obj_t* root_panel, lv_event_cb_t on_toggle, bool state, void * user_data, const char * comment)
 {
     lv_obj_t * toggle = lv_switch_create(lv_scr_act());
     lv_obj_add_event_cb(toggle, on_toggle, LV_EVENT_VALUE_CHANGED, user_data);
@@ -195,10 +202,10 @@ void lv_create_custom_menu_switch(const char *label_text, lv_obj_t* root_panel, 
     if (state)
         lv_obj_add_state(toggle, LV_STATE_CHECKED);
 
-    lv_create_custom_menu_entry(label_text, toggle, root_panel, true);
+    lv_create_custom_menu_entry(label_text, toggle, root_panel, true, comment);
 }
 
-void lv_create_custom_menu_dropdown(const char *label_text, lv_obj_t *root_panel, lv_event_cb_t on_change, const char *options, int index, void * user_data)
+void lv_create_custom_menu_dropdown(const char *label_text, lv_obj_t *root_panel, lv_event_cb_t on_change, const char *options, int index, void * user_data, const char * comment)
 {
     lv_obj_t * dropdown = lv_dropdown_create(lv_scr_act());
     lv_dropdown_set_options(dropdown, options);
@@ -206,7 +213,7 @@ void lv_create_custom_menu_dropdown(const char *label_text, lv_obj_t *root_panel
     lv_obj_set_width(dropdown, DROPDOWN_WIDTH);
     lv_obj_add_event_cb(dropdown, on_change, LV_EVENT_VALUE_CHANGED, user_data);
 
-    lv_create_custom_menu_entry(label_text, dropdown, root_panel, true);
+    lv_create_custom_menu_entry(label_text, dropdown, root_panel, true, comment);
 }
 
 void lv_create_custom_menu_label(const char *label_text, lv_obj_t* root_panel, const char *text)
