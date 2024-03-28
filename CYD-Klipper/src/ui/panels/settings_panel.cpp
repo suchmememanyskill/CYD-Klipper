@@ -88,6 +88,14 @@ static void wake_timeout_dropdown(lv_event_t * e){
     write_global_config();
 }
 
+static void dualusb_screen_fix_switch(lv_event_t* e){
+    auto state = lv_obj_get_state(lv_event_get_target(e));
+    bool checked = (state & LV_STATE_CHECKED == LV_STATE_CHECKED);
+    global_config.display_mode = checked;
+    write_global_config();
+    ESP.restart();
+}
+
 static void rotate_screen_switch(lv_event_t* e){
     auto state = lv_obj_get_state(lv_event_get_target(e));
     bool checked = (state & LV_STATE_CHECKED == LV_STATE_CHECKED);
@@ -186,6 +194,9 @@ void settings_panel_init(lv_obj_t* panel){
     lv_create_custom_menu_dropdown("Wake Timeout", panel, wake_timeout_dropdown, wake_timeout_options, wake_timeout_settings_index);
 #endif
 
+#ifdef CYD_SCREEN_DRIVER_ESP32_2432S028R
+    lv_create_custom_menu_switch("Dual USB Screen Color Fix", panel, dualusb_screen_fix_switch, global_config.display_mode);
+#endif
     lv_create_custom_menu_switch("Rotate Screen", panel, rotate_screen_switch, global_config.rotate_screen);
     lv_create_custom_menu_switch("Multi Printer Mode", panel, multi_printer_switch, global_config.multi_printer_mode);
     lv_create_custom_menu_switch("Auto Update", panel, auto_ota_update_switch, global_config.auto_ota_update);
