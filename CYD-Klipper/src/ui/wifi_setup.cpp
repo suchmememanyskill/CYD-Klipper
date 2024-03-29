@@ -4,6 +4,7 @@
 #include "ui_utils.h"
 #include "WiFi.h"
 #include "../core/data_setup.h"
+#include "../core/lv_setup.h"
 
 void wifi_init_inner();
 void wifi_pass_entry(const char* ssid);
@@ -223,8 +224,7 @@ void wifi_init(){
             Serial.printf("WiFi Status: %s\n", errs[WiFi.status()]);
         }
         
-        lv_timer_handler();
-        lv_task_handler();
+        lv_handler();
     }
 }
 

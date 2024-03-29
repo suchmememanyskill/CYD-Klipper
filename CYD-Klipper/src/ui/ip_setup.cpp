@@ -9,6 +9,7 @@
 #include "../core/http_client.h"
 #include "switch_printer.h"
 #include "macros.h"
+#include "../core/lv_setup.h"
 
 lv_obj_t * hostEntry;
 lv_obj_t * portEntry;
@@ -232,7 +233,6 @@ void ip_init(){
     
     while (!get_current_printer_config()->ip_configured)
     {
-        lv_timer_handler();
-        lv_task_handler();
+        lv_handler();
     }
 }

@@ -8,3 +8,4 @@ void screen_timer_stop();
 void set_color_scheme();
 void lv_setup();
 bool is_screen_asleep();
+void lv_handler();

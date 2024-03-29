@@ -181,8 +181,7 @@ void settings_section_behaviour(lv_obj_t* panel)
 #endif
 
     lv_create_custom_menu_switch("Multi Printer Mode", panel, multi_printer_switch, global_config.multi_printer_mode);
-
-lv_create_custom_menu_button("Configure IP", panel, reset_ip_click, "Restart");
+    lv_create_custom_menu_button("Configure Printer IP", panel, reset_ip_click, "Restart");
 }
 
 void settings_section_device(lv_obj_t* panel)

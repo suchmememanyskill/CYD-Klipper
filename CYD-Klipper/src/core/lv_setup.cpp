@@ -12,6 +12,27 @@
 #define CPU_FREQ_LOW 80
 #endif
 
+unsigned long last_milis = 0;
+
+inline void lv_handler()
+{
+#ifndef CYD_SCREEN_DISABLE_TOUCH_CALIBRATION
+    if (digitalRead(0) == HIGH)
+    {
+        last_milis = millis();
+    }
+    else if (millis() - last_milis > 8000)
+    {
+        global_config.screen_calibrated = false;
+        write_global_config();
+        ESP.restart();
+    }
+#endif
+
+    lv_timer_handler();
+    lv_task_handler();
+}
+
 typedef void (*lv_indev_drv_read_cb_t)(struct _lv_indev_drv_t * indev_drv, lv_indev_data_t * data);
 
 bool is_screen_in_sleep = false;
@@ -95,8 +116,7 @@ void lv_do_calibration(){
 #endif
     
     while (true){
-        lv_timer_handler();
-        lv_task_handler();
+        lv_handler();
 
         if (point[0] != 0 && point[1] != 0){
             break;
@@ -130,8 +150,7 @@ void lv_do_calibration(){
 #endif
 
     while (true){
-        lv_timer_handler();
-        lv_task_handler();
+        lv_handler();
 
         if (point[0] != 0 && point[1] != 0){
             break;
