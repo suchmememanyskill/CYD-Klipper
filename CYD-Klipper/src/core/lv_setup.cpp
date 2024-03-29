@@ -14,7 +14,7 @@
 
 unsigned long last_milis = 0;
 
-inline void lv_handler()
+void lv_handler()
 {
 #ifndef CYD_SCREEN_DISABLE_TOUCH_CALIBRATION
     if (digitalRead(0) == HIGH)
