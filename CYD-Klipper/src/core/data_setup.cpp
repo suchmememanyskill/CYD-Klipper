@@ -10,14 +10,9 @@
 #include "../ui/ui_utils.h"
 #include "macros_query.h"
 
-const char *printer_state_messages[] = {
-    "Error",
-    "Idle",
-    "Printing"};
-
 Printer printer = {0};
 PrinterMinimal *printer_minimal;
-int klipper_request_consecutive_fail_count = 0;
+int klipper_request_consecutive_fail_count = 999;
 char filename_buff[512] = {0};
 SemaphoreHandle_t freezeRenderThreadSemaphore, freezeRequestThreadSemaphore;
 const long data_update_interval = 780;
@@ -120,12 +115,19 @@ void fetch_printer_data()
     delay(10);
     if (httpCode == 200)
     {
+        int printer_state = printer.state;
+
+        if (printer.state == PRINTER_STATE_OFFLINE)
+        {
+            printer.state = PRINTER_STATE_ERROR;
+        }
+
         klipper_request_consecutive_fail_count = 0;
         JsonDocument doc;
         deserializeJson(doc, client.getStream());
         auto status = doc["result"]["status"];
         bool emit_state_update = false;
-        int printer_state = printer.state;
+        
         delay(10);
         unfreeze_request_thread();
         freeze_render_thread();
@@ -212,7 +214,8 @@ void fetch_printer_data()
                 const char *filename = status["print_stats"]["filename"];
                 strcpy(filename_buff, filename);
                 printer.print_filename = filename_buff;
-                printer.elapsed_time_s = status["print_stats"]["print_duration"];
+                printer.elapsed_time_s = status["print_stats"]["total_duration"];
+                printer.printed_time_s = status["print_stats"]["print_duration"];
                 printer.filament_used_mm = status["print_stats"]["filament_used"];
                 printer.total_layers = status["print_stats"]["info"]["total_layer"];
                 printer.current_layer = status["print_stats"]["info"]["current_layer"];
@@ -221,7 +224,7 @@ void fetch_printer_data()
 
                 if (state == nullptr)
                 {
-                    printer_state = PRINTER_STATE_ERROR;
+                    // Continue
                 }
                 else if (strcmp(state, "printing") == 0)
                 {
@@ -239,18 +242,19 @@ void fetch_printer_data()
 
             if (status.containsKey("display_status"))
             {
+                printer.print_progress = status["display_status"]["progress"];
                 const char* message = status["display_status"]["message"];
                 lv_create_popup_message(message, 10000);
             }
 
             if (printer.state == PRINTER_STATE_PRINTING && printer.print_progress > 0)
             {
-                float remaining_time_s_percentage = (printer.elapsed_time_s / printer.print_progress) - printer.elapsed_time_s;
+                float remaining_time_s_percentage = (printer.printed_time_s / printer.print_progress) - printer.printed_time_s;
                 float remaining_time_s_slicer = 0;
 
                 if (printer.slicer_estimated_print_time_s > 0)
                 {
-                    remaining_time_s_slicer = printer.slicer_estimated_print_time_s - printer.elapsed_time_s;
+                    remaining_time_s_slicer = printer.slicer_estimated_print_time_s - printer.printed_time_s;
                 }
 
                 if (remaining_time_s_slicer <= 0 || config->remaining_time_calc_mode == REMAINING_TIME_CALC_PERCENTAGE)
@@ -298,6 +302,13 @@ void fetch_printer_data()
     else
     {
         klipper_request_consecutive_fail_count++;
+
+        if (klipper_request_consecutive_fail_count == 5) 
+        {
+            printer.state = PRINTER_STATE_OFFLINE;
+            lv_msg_send(DATA_PRINTER_STATE, &printer);
+        }
+
         Serial.printf("Failed to fetch printer data: %d\n", httpCode);
         unfreeze_request_thread();
     }
@@ -312,7 +323,7 @@ void fetch_printer_data_minimal()
 
         if (!config->ip_configured)
         {
-            data[i].online = false;
+            data[i].state = PRINTER_STATE_OFFLINE;
             continue;
         }
 
@@ -325,8 +336,12 @@ void fetch_printer_data_minimal()
         delay(10);
         if (httpCode == 200)
         {
-            data[i].online = true;
-            data[i].power_devices = 0;
+            if (data[i].state == PRINTER_STATE_OFFLINE)
+            {
+                data[i].state = PRINTER_STATE_ERROR;
+            }
+
+            data[i].power_devices = power_devices_count(config);
             JsonDocument doc;
             deserializeJson(doc, client.getStream());
             auto status = doc["result"]["status"];
@@ -379,7 +394,7 @@ void fetch_printer_data_minimal()
         }
         else 
         {
-            data[i].online = false;
+            data[i].state = PRINTER_STATE_OFFLINE;
             data[i].power_devices = power_devices_count(config);
             unfreeze_request_thread();
         }

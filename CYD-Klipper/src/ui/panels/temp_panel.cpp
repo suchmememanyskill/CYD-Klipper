@@ -18,7 +18,7 @@ enum temp_target{
 static temp_target keyboard_target;
 static char hotend_buff[40];
 static char bed_buff[40];
-static bool edit_mode = false;
+static bool temp_edit_mode = false;
 lv_obj_t* root_panel;
 
 static void update_printer_data_hotend_temp(lv_event_t * e){
@@ -117,12 +117,12 @@ static void keyboard_callback(lv_event_t * e){
 
 static void show_keyboard_with_hotend(lv_event_t * e){
     keyboard_target = TARGET_HOTEND;
-    lv_create_keyboard_text_entry(keyboard_callback);
+    lv_create_keyboard_text_entry(keyboard_callback, "Set Hotend Temp");
 }
 
 static void show_keyboard_with_bed(lv_event_t * e){
     keyboard_target = TARGET_BED;
-    lv_create_keyboard_text_entry(keyboard_callback);
+    lv_create_keyboard_text_entry(keyboard_callback, "Set Bed Temp");
 }
 
 static void cooldown_temp(lv_event_t * e){
@@ -147,9 +147,9 @@ static void set_temp_via_preset(lv_event_t * e){
     int target = static_cast<int>(reinterpret_cast<intptr_t>(lv_event_get_user_data(e)));
     int value = get_temp_preset(target);
 
-    if (edit_mode) {
+    if (temp_edit_mode) {
         keyboard_target = (temp_target)target;
-        lv_create_keyboard_text_entry(keyboard_callback);
+        lv_create_keyboard_text_entry(keyboard_callback, "Set Preset Temp");
         return;
     }
 
@@ -165,7 +165,7 @@ static void set_temp_via_preset(lv_event_t * e){
 static void btn_toggleable_edit(lv_event_t * e){
     lv_obj_t * btn = lv_event_get_target(e);
     auto state = lv_obj_get_state(btn);
-    edit_mode = (state & LV_STATE_CHECKED == LV_STATE_CHECKED);
+    temp_edit_mode = (state & LV_STATE_CHECKED == LV_STATE_CHECKED);
 }
 
 static void btn_retract(lv_event_t * e){
@@ -301,7 +301,7 @@ void create_temp_buttons(lv_obj_t * root, lv_obj_t * panel)
 void temp_panel_init(lv_obj_t * panel){
     const auto element_width = CYD_SCREEN_PANEL_WIDTH_PX - CYD_SCREEN_GAP_PX * 2;
     root_panel = panel;
-    edit_mode = false;
+    temp_edit_mode = false;
 
     lv_obj_t * root_temp_panel = lv_create_empty_panel(panel);
     lv_obj_set_size(root_temp_panel, CYD_SCREEN_PANEL_WIDTH_PX, CYD_SCREEN_PANEL_HEIGHT_PX);

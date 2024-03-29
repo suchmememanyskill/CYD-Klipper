@@ -1,17 +1,18 @@
 #include "switch_printer.h"
-#include "lvgl.h"
 #include "../conf/global_config.h"
 #include "ui_utils.h"
 #include "../core/http_client.h"
 #include "../core/lv_setup.h"
 #include "../core/macros_query.h"
 #include "../core/screen_driver.h"
+#include "../core/data_setup.h"
 
 void switch_printer(int index)
 {
     set_printer_config_index(index);
     set_color_scheme();
     set_invert_display();
+    printer.slicer_estimated_print_time_s = 0;
 }
 
 static void btn_switch_printer(lv_event_t *e){
@@ -47,7 +48,7 @@ void switch_printer_init() {
         PRINTER_CONFIG * config = &global_config.printer_config[i];
         const char* printer_name = (config->printer_name[0] == 0) ? config->klipper_host : config->printer_name;
 
-        if (config == get_current_printer_config())
+        if (config == get_current_printer_config() && config->ip_configured)
         {
             lv_create_custom_menu_label(printer_name, parent, "Active");
             continue;
@@ -59,14 +60,7 @@ void switch_printer_init() {
             
 
             int httpCode = client.GET();
-            if (httpCode == 200)
-            {
-                lv_create_custom_menu_button(printer_name, parent, btn_switch_printer, "Switch", config);
-            }
-            else 
-            {
-                lv_create_custom_menu_label(printer_name, parent, "Offline");
-            }
+            lv_create_custom_menu_button(printer_name, parent, btn_switch_printer, (httpCode == 200) ? "Switch" : "Offline", config);
         }
     }
 }
@@ -75,11 +69,11 @@ static void show_switch_printer_screen(lv_event_t * e){
     switch_printer_init();
 }
 
-void draw_switch_printer_button() 
+lv_obj_t * draw_switch_printer_button() 
 {
     if (!global_config.multi_printer_mode)
     {
-        return;
+        return NULL;
     }
 
     lv_obj_t * btn = lv_btn_create(lv_scr_act());
@@ -90,4 +84,6 @@ void draw_switch_printer_button()
     lv_obj_t * label = lv_label_create(btn);
     lv_label_set_text(label, LV_SYMBOL_HOME);
     lv_obj_center(label);
+
+    return btn;
 }

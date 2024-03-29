@@ -3,13 +3,20 @@
 
 #include "lvgl.h"
 
-#define CONFIG_VERSION 5
+#define CONFIG_VERSION 6
 #define PRINTER_CONFIG_COUNT 8
 
 enum {
     REMAINING_TIME_CALC_PERCENTAGE = 0,
     REMAINING_TIME_CALC_INTERPOLATED = 1,
     REMAINING_TIME_CALC_SLICER = 2,
+};
+
+enum {
+    SHOW_STATS_ON_PROGRESS_PANEL_NONE = 0,
+    SHOW_STATS_ON_PROGRESS_PANEL_LAYER = 1,
+    SHOW_STATS_ON_PROGRESS_PANEL_PARTIAL = 2,
+    SHOW_STATS_ON_PROGRESS_PANEL_ALL = 3,
 };
 
 typedef struct _PRINTER_CONFIG {
@@ -24,6 +31,7 @@ typedef struct _PRINTER_CONFIG {
             bool light_mode : 1;
             bool invert_colors : 1;
             unsigned char remaining_time_calc_mode : 2;
+            unsigned char show_stats_on_progress_panel : 2;
         };
     };
 
@@ -36,6 +44,10 @@ typedef struct _PRINTER_CONFIG {
 
     unsigned short hotend_presets[3];
     unsigned short bed_presets[3];
+
+    unsigned short printer_move_x_steps[3];
+    unsigned short printer_move_y_steps[3];
+    unsigned short printer_move_z_steps[3];
 } PRINTER_CONFIG;
 
 typedef struct _GLOBAL_CONFIG {
@@ -52,6 +64,7 @@ typedef struct _GLOBAL_CONFIG {
             bool auto_ota_update : 1;
             bool multi_printer_mode : 1;
             bool on_during_print : 1;
+            bool display_mode : 1; // Driver specifc usage. Currently only used on ESP32-2432S028R to fix the screen on the usb-c model
         };
     };
 
@@ -62,8 +75,8 @@ typedef struct _GLOBAL_CONFIG {
     float screen_cal_y_offset;
     float screen_cal_y_mult;
 
-    char wifi_SSID[32];
-    char wifi_password[64];
+    char wifi_SSID[33];
+    char wifi_password[65];
     
     unsigned char brightness;
     unsigned char screen_timeout;

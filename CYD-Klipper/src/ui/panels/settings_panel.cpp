@@ -27,6 +27,10 @@ static void reset_calibration_click(lv_event_t * e){
     ESP.restart();
 }
 
+static void reset_click(lv_event_t * e){
+    ESP.restart();
+}
+
 static void reset_wifi_click(lv_event_t * e){
     global_config.wifi_configured = false;
     write_global_config();
@@ -46,6 +50,12 @@ static void light_mode_switch(lv_event_t * e){
     get_current_printer_config()->light_mode = checked;
     write_global_config();
     set_color_scheme();
+}
+
+static void show_stats_on_progress_panel_dropdown(lv_event_t * e){
+    auto selected = lv_dropdown_get_selected(lv_event_get_target(e));
+    get_current_printer_config()->show_stats_on_progress_panel = selected;
+    write_global_config();
 }
 
 static void theme_dropdown(lv_event_t * e){
@@ -76,6 +86,14 @@ static void wake_timeout_dropdown(lv_event_t * e){
     global_config.screen_timeout = wake_timeout_options_values[selected];
     set_screen_timer_period();
     write_global_config();
+}
+
+static void dualusb_screen_fix_switch(lv_event_t* e){
+    auto state = lv_obj_get_state(lv_event_get_target(e));
+    bool checked = (state & LV_STATE_CHECKED == LV_STATE_CHECKED);
+    global_config.display_mode = checked;
+    write_global_config();
+    ESP.restart();
 }
 
 static void rotate_screen_switch(lv_event_t* e){
@@ -122,46 +140,35 @@ static void estimated_time_dropdown(lv_event_t * e){
     write_global_config();
 }
 
-void settings_panel_init(lv_obj_t* panel){
-    lv_obj_set_style_pad_all(panel, CYD_SCREEN_GAP_PX, 0);
-    lv_layout_flex_column(panel);
-    lv_obj_set_scrollbar_mode(panel, LV_SCROLLBAR_MODE_OFF);
+#define PRINTER_SPECIFIC_SETTING global_config.multi_printer_mode ? LV_SYMBOL_PLUS " Stored per printer" : NULL
 
-    if (global_config.multi_printer_mode)
-    {
-        lv_obj_t * label = lv_label_create(panel);
-        lv_label_set_text(label, "Printer Specific Settings");
-    }
+void settings_section_theming(lv_obj_t* panel)
+{
+    lv_obj_t * label = lv_label_create(panel);
+    lv_label_set_text(label, "Theming");
 
-    lv_create_custom_menu_dropdown("Estimated Time", panel, estimated_time_dropdown, estimated_time_options, get_current_printer_config()->remaining_time_calc_mode);
-    lv_create_custom_menu_dropdown("Theme", panel, theme_dropdown, "Blue\nGreen\nGrey\nYellow\nOrange\nRed\nPurple", get_current_printer_config()->color_scheme);
+    lv_create_custom_menu_dropdown("Theme", panel, theme_dropdown, "Blue\nGreen\nLime\nGrey\nYellow\nOrange\nRed\nPurple", get_current_printer_config()->color_scheme, NULL, PRINTER_SPECIFIC_SETTING);
 
 #ifndef CYD_SCREEN_DISABLE_INVERT_COLORS
-    lv_create_custom_menu_switch("Invert Colors", panel, invert_color_switch, get_current_printer_config()->invert_colors);
+    lv_create_custom_menu_switch("Invert Colors", panel, invert_color_switch, get_current_printer_config()->invert_colors, NULL, (global_config.multi_printer_mode) ? LV_SYMBOL_PLUS " Stored per printer" 
+    #ifdef CYD_SCREEN_DRIVER_ESP32_2432S028R
+        "\nIntended for the 2.8\" dual USB model screen" :  "Intended for the 2.8\" dual USB model screen"
+    #else
+       : NULL
+    #endif
+    );
 #endif // CYD_SCREEN_DISABLE_INVERT_COLORS
 
-    lv_create_custom_menu_switch("Light Mode", panel, light_mode_switch, get_current_printer_config()->light_mode);
-    lv_create_custom_menu_button("Configure IP", panel, reset_ip_click, "Restart");
+    lv_create_custom_menu_switch("Light Mode", panel, light_mode_switch, get_current_printer_config()->light_mode, NULL, PRINTER_SPECIFIC_SETTING);
+}
 
-    if (global_config.multi_printer_mode)
-    {
-        lv_obj_t * label = lv_label_create(panel);
-        lv_label_set_text(label, "\nGlobal Settings");
-    }
-
-#ifndef CYD_SCREEN_DISABLE_TIMEOUT
-    lv_create_custom_menu_switch("Screen On During Print", panel, on_during_print_switch, global_config.on_during_print);
-#endif
-
-    int brightness_settings_index = 0;
-    for (int i = 0; i < SIZEOF(brightness_options_values); i++){
-        if (brightness_options_values[i] == global_config.brightness){
-            brightness_settings_index = i;
-            break;
-        }
-    }
-
-    lv_create_custom_menu_dropdown("Brightness", panel, brightness_dropdown, brightness_options, brightness_settings_index);
+void settings_section_behaviour(lv_obj_t* panel)
+{
+    lv_obj_t * label = lv_label_create(panel);
+    lv_label_set_text(label, "\nBehaviour");
+    
+    lv_create_custom_menu_dropdown("Estimated Time", panel, estimated_time_dropdown, estimated_time_options, get_current_printer_config()->remaining_time_calc_mode, NULL, PRINTER_SPECIFIC_SETTING);
+    lv_create_custom_menu_dropdown("Stats in Progress Screen", panel, show_stats_on_progress_panel_dropdown, "None\nLayers\nPartial\nAll", get_current_printer_config()->show_stats_on_progress_panel, NULL, PRINTER_SPECIFIC_SETTING);
 
 #ifndef CYD_SCREEN_DISABLE_TIMEOUT
     int wake_timeout_settings_index = 0;
@@ -175,8 +182,34 @@ void settings_panel_init(lv_obj_t* panel){
     lv_create_custom_menu_dropdown("Wake Timeout", panel, wake_timeout_dropdown, wake_timeout_options, wake_timeout_settings_index);
 #endif
 
-    lv_create_custom_menu_switch("Rotate Screen", panel, rotate_screen_switch, global_config.rotate_screen);
+#ifndef CYD_SCREEN_DISABLE_TIMEOUT
+    lv_create_custom_menu_switch("Screen On During Print", panel, on_during_print_switch, global_config.on_during_print);
+#endif
+
     lv_create_custom_menu_switch("Multi Printer Mode", panel, multi_printer_switch, global_config.multi_printer_mode);
+    lv_create_custom_menu_button("Configure Printer IP", panel, reset_ip_click, "Restart");
+}
+
+void settings_section_device(lv_obj_t* panel)
+{
+    lv_obj_t * label = lv_label_create(panel);
+    lv_label_set_text(label, "\nDevice");
+
+    int brightness_settings_index = 0;
+    for (int i = 0; i < SIZEOF(brightness_options_values); i++){
+        if (brightness_options_values[i] == global_config.brightness){
+            brightness_settings_index = i;
+            break;
+        }
+    }
+
+    lv_create_custom_menu_dropdown("Brightness", panel, brightness_dropdown, brightness_options, brightness_settings_index);
+
+#ifdef CYD_SCREEN_DRIVER_ESP32_2432S028R
+    lv_create_custom_menu_switch("Screen Color Fix", panel, dualusb_screen_fix_switch, global_config.display_mode, NULL, "ONLY for the 2.8\" dual USB model screen");
+#endif
+
+    lv_create_custom_menu_switch("Rotate Screen", panel, rotate_screen_switch, global_config.rotate_screen);
     lv_create_custom_menu_switch("Auto Update", panel, auto_ota_update_switch, global_config.auto_ota_update);
     lv_create_custom_menu_label("Version", panel, REPO_VERSION "  ");
 
@@ -194,9 +227,20 @@ void settings_panel_init(lv_obj_t* panel){
         lv_create_custom_menu_label("Device", panel, ARDUINO_BOARD "  ");
     }
 
-    #ifndef CYD_SCREEN_DISABLE_TOUCH_CALIBRATION
-        lv_create_custom_menu_button("Calibrate Touch", panel, reset_calibration_click, "Restart");
-    #endif // CYD_SCREEN_DISABLE_TOUCH_CALIBRATION
+#ifndef CYD_SCREEN_DISABLE_TOUCH_CALIBRATION
+    lv_create_custom_menu_button("Calibrate Touch", panel, reset_calibration_click, "Restart");
+#endif // CYD_SCREEN_DISABLE_TOUCH_CALIBRATION
 
     lv_create_custom_menu_button("Configure WiFi", panel, reset_wifi_click, "Restart");
+    lv_create_custom_menu_button("Restart ESP", panel, reset_click, "Restart");
+}
+
+void settings_panel_init(lv_obj_t* panel){
+    lv_obj_set_style_pad_all(panel, CYD_SCREEN_GAP_PX, 0);
+    lv_layout_flex_column(panel);
+    lv_obj_set_scrollbar_mode(panel, LV_SCROLLBAR_MODE_OFF);
+
+    settings_section_theming(panel);
+    settings_section_behaviour(panel);
+    settings_section_device(panel);
 }

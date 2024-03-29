@@ -85,6 +85,10 @@ static void btn_click_err(lv_event_t * e){
     nav_buttons_setup(PANEL_ERROR);
 }
 
+static void btn_click_conn(lv_event_t * e){
+    nav_buttons_setup(PANEL_CONNECTING);
+}
+
 void create_button(const char* icon, const char* name, lv_event_cb_t button_click, lv_event_cb_t label_update, lv_obj_t * root){
     lv_obj_t* btn = lv_btn_create(root);
     lv_obj_set_flex_grow(btn, 1);
@@ -128,7 +132,7 @@ void nav_buttons_setup(unsigned char active_panel){
 
 #endif
 
-    if (printer.state != PRINTER_STATE_ERROR){
+    if (printer.state > PRINTER_STATE_ERROR){
         // Files/Print
         create_button(LV_SYMBOL_COPY, "Idle", btn_click_files, update_printer_data_time, root_panel);
 
@@ -138,9 +142,13 @@ void nav_buttons_setup(unsigned char active_panel){
         // Extrude/Temp
         create_button(LV_SYMBOL_WARNING, "?/?", btn_click_extrude, update_printer_data_temp, root_panel);
     }
-    else {
+    else if (printer.state == PRINTER_STATE_ERROR) {
         // Error UI
         create_button(LV_SYMBOL_WARNING, "Error", btn_click_err, NULL, root_panel);
+    }
+    else {
+        // Connecting
+        create_button(LV_SYMBOL_REFRESH, "Link", btn_click_conn, NULL, root_panel);
     }
 
     // Macros
@@ -180,6 +188,9 @@ void nav_buttons_setup(unsigned char active_panel){
             break;
         case PANEL_ERROR:
             error_panel_init(panel);
+            break;
+        case PANEL_CONNECTING:
+            connecting_panel_init(panel);
             break;
     }
 

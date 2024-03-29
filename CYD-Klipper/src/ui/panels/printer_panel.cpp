@@ -10,6 +10,7 @@
 #include "../macros.h"
 
 const char * printer_status[] = {
+    "Offline",
     "Error",
     "Idle",
     "Printing",
@@ -41,13 +42,28 @@ static void update_printer_status_text(lv_event_t * e)
         return;
     }
 
-    if (!printer->online)
+    if (printer->state == PRINTER_STATE_OFFLINE)
     {
         lv_label_set_text(label, "Offline");
         return;
     }
 
     lv_label_set_text(label, printer_status[printer->state]);
+}
+
+static void update_printer_label_visible_active_printer(lv_event_t * e)
+{
+    lv_obj_t * label = lv_event_get_target(e);
+    PRINTER_CONFIG * config = (PRINTER_CONFIG*)lv_event_get_user_data(e);
+
+    if (config == get_current_printer_config())
+    {
+        lv_label_set_text(label, LV_SYMBOL_WIFI);
+    }
+    else 
+    {
+        lv_label_set_text(label, "");
+    }
 }
 
 static void update_printer_percentage_bar(lv_event_t * e)
@@ -57,7 +73,7 @@ static void update_printer_percentage_bar(lv_event_t * e)
     int index = config - global_config.printer_config;
     PrinterMinimal * printer = &printer_minimal[index];
 
-    if (printer->online && (printer->state == PRINTER_STATE_PRINTING || printer->state == PRINTER_STATE_PAUSED)){
+    if (printer->state != PRINTER_STATE_OFFLINE && (printer->state == PRINTER_STATE_PRINTING || printer->state == PRINTER_STATE_PAUSED)){
         lv_bar_set_value(percentage, printer->print_progress * 100, LV_ANIM_OFF);
     }
     else {
@@ -72,7 +88,7 @@ static void update_printer_percentage_text(lv_event_t * e)
     int index = config - global_config.printer_config;
     PrinterMinimal * printer = &printer_minimal[index];
 
-    if (printer->online && (printer->state == PRINTER_STATE_PRINTING || printer->state == PRINTER_STATE_PAUSED))
+    if (printer->state != PRINTER_STATE_OFFLINE && (printer->state == PRINTER_STATE_PRINTING || printer->state == PRINTER_STATE_PAUSED))
     {
         char percentage_buffer[12];
         sprintf(percentage_buffer, "%.2f%%", printer->print_progress * 100);
@@ -91,7 +107,7 @@ static void update_printer_control_button_text(lv_event_t * e)
     int index = config - global_config.printer_config;
     PrinterMinimal * printer = &printer_minimal[index];
 
-    if (!printer->online && printer->power_devices > 0)
+    if (printer->power_devices > 0 && (config == get_current_printer_config() || printer->state == PRINTER_STATE_OFFLINE))
     {
         lv_label_set_text(label, "Power");
     }
@@ -101,20 +117,18 @@ static void update_printer_control_button_text(lv_event_t * e)
     }
 }
 
-static void btn_enable_delete(lv_event_t * e)
+static void btn_set_secondary_button_text(lv_event_t * e)
 {
-    lv_obj_t * btn = lv_event_get_target(e);
+    lv_obj_t * label = lv_event_get_target(e);
     PRINTER_CONFIG * config = (PRINTER_CONFIG*)lv_event_get_user_data(e);
 
     if (config == get_current_printer_config())
     {
-        // Disable
-        lv_obj_add_state(btn, LV_STATE_DISABLED);
+        lv_label_set_text(label, LV_SYMBOL_SETTINGS);
     }
     else 
     {
-        // Enable
-        lv_obj_clear_state(btn, LV_STATE_DISABLED);
+        lv_label_set_text(label, LV_SYMBOL_TRASH);
     }
 }
 
@@ -125,7 +139,7 @@ static void btn_enable_control(lv_event_t * e)
     int index = config - global_config.printer_config;
     PrinterMinimal * printer = &printer_minimal[index];
 
-    if (config == get_current_printer_config() || (!printer->online && printer->power_devices <= 0))
+    if ((config == get_current_printer_config() || printer->state == PRINTER_STATE_OFFLINE) && printer->power_devices <= 0)
     {
         // Disable
         lv_obj_add_state(btn, LV_STATE_DISABLED);
@@ -150,13 +164,14 @@ static void keyboard_callback(lv_event_t * e){
     lv_msg_send(DATA_PRINTER_MINIMAL, NULL);
 }
 
-static void btn_printer_delete(lv_event_t * e)
+static void btn_printer_secondary(lv_event_t * e)
 {
     lv_obj_t * btn = lv_event_get_target(e);
     PRINTER_CONFIG * config = (PRINTER_CONFIG*)lv_event_get_user_data(e);
 
     if (config == get_current_printer_config())
     {
+        nav_buttons_setup(PANEL_SETTINGS);
         return;
     }
 
@@ -166,11 +181,10 @@ static void btn_printer_delete(lv_event_t * e)
     nav_buttons_setup(PANEL_PRINTER);
 }
 
-// TODO: Extract this from temp/print panel and combine
 static void btn_printer_rename(lv_event_t * e)
 {
     keyboard_config = (PRINTER_CONFIG*)lv_event_get_user_data(e);
-    lv_create_keyboard_text_entry(keyboard_callback, LV_KEYBOARD_MODE_TEXT_LOWER, CYD_SCREEN_WIDTH_PX * 0.75, 24, keyboard_config->printer_name, false);
+    lv_create_keyboard_text_entry(keyboard_callback, "Rename Printer", LV_KEYBOARD_MODE_TEXT_LOWER, CYD_SCREEN_WIDTH_PX * 0.75, 24, keyboard_config->printer_name, false);
 }
 
 static void btn_printer_activate(lv_event_t * e)
@@ -180,7 +194,7 @@ static void btn_printer_activate(lv_event_t * e)
     int index = config - global_config.printer_config;
     PrinterMinimal * printer = &printer_minimal[index];
 
-    if (!printer->online)
+    if (printer->power_devices > 0 && (config == get_current_printer_config() || printer->state == PRINTER_STATE_OFFLINE))
     {
         macros_draw_power_fullscreen(config);
         return;
@@ -207,6 +221,10 @@ void create_printer_ui(PRINTER_CONFIG * config, lv_obj_t * root)
     lv_obj_t * label = lv_label_create(data_row_name);
     lv_obj_add_event_cb(label, update_printer_name_text, LV_EVENT_MSG_RECEIVED, config);
     lv_msg_subsribe_obj(DATA_PRINTER_MINIMAL, label, config);
+
+    label = lv_label_create(data_row_name);
+    lv_obj_add_event_cb(label, update_printer_label_visible_active_printer, LV_EVENT_MSG_RECEIVED, config);
+    lv_msg_subsribe_obj(DATA_PRINTER_MINIMAL, label, config);
     
     label = lv_label_create(data_row_name);
     lv_obj_add_event_cb(label, update_printer_status_text, LV_EVENT_MSG_RECEIVED, config);
@@ -232,13 +250,12 @@ void create_printer_ui(PRINTER_CONFIG * config, lv_obj_t * root)
 
     lv_obj_t * btn = lv_btn_create(button_row);
     lv_obj_set_flex_grow(btn, 1);
-    lv_obj_add_event_cb(btn, btn_printer_delete, LV_EVENT_CLICKED, config);
-    lv_obj_add_event_cb(btn, btn_enable_delete, LV_EVENT_MSG_RECEIVED, config);
-    lv_msg_subsribe_obj(DATA_PRINTER_MINIMAL, btn, config);
+    lv_obj_add_event_cb(btn, btn_printer_secondary, LV_EVENT_CLICKED, config);
 
     label = lv_label_create(btn);
-    lv_label_set_text(label, LV_SYMBOL_TRASH);
     lv_obj_center(label);
+    lv_obj_add_event_cb(label, btn_set_secondary_button_text, LV_EVENT_MSG_RECEIVED, config);
+    lv_msg_subsribe_obj(DATA_PRINTER_MINIMAL, label, config);
 
     btn = lv_btn_create(button_row);
     lv_obj_set_flex_grow(btn, 2);

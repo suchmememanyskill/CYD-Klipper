@@ -22,14 +22,8 @@ void macros_panel_init(lv_obj_t* panel) {
     lv_label_set_text(label, LV_SYMBOL_SETTINGS " Screen Settings");
     lv_obj_center(label);
 
-    MACROSQUERY query = macros_query();
+    MACROSQUERY macros = macros_query();
     POWERQUERY power = power_devices_query();
-    if (query.count == 0 && power.count == 0){
-        label = lv_label_create(panel);
-        lv_label_set_text(label, "No macros found.\nMacros with the description\n\"CYD_SCREEN_MACRO\"\nwill show up here.");
-        lv_obj_align(label, LV_ALIGN_CENTER, 0, 0);
-        return;
-    }
 
     lv_obj_t * root_panel = lv_create_empty_panel(panel);
     lv_obj_set_scrollbar_mode(root_panel, LV_SCROLLBAR_MODE_OFF);
@@ -38,5 +32,17 @@ void macros_panel_init(lv_obj_t* panel) {
     lv_layout_flex_column(root_panel);
 
     macros_add_power_devices_to_panel(root_panel, power);
-    macros_add_macros_to_panel(root_panel, query);
+
+    if (macros.count == 0){
+        label = lv_label_create(root_panel);
+        lv_label_set_text(label, "No macros found.\nMacros with the description\n\"CYD_SCREEN_MACRO\"\nwill show up here.");
+
+        if (power.count == 0){
+            lv_layout_flex_column(root_panel, LV_FLEX_ALIGN_CENTER);
+        }
+
+        return;
+    }
+
+    macros_add_macros_to_panel(root_panel, macros);
 }
