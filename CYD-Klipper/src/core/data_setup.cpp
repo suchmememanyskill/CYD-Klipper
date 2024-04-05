@@ -244,7 +244,11 @@ void fetch_printer_data()
             {
                 printer.print_progress = status["display_status"]["progress"];
                 const char* message = status["display_status"]["message"];
-                lv_create_popup_message(message, 10000);
+
+                if (!global_config.disable_m117_messaging)
+                {
+                    lv_create_popup_message(message, 10000);
+                }
             }
 
             if (printer.state == PRINTER_STATE_PRINTING && printer.print_progress > 0)

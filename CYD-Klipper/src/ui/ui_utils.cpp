@@ -260,6 +260,7 @@ void lv_create_popup_message(const char* message, uint16_t timeout_ms)
     lv_layout_flex_column(panel, LV_FLEX_ALIGN_CENTER);
     lv_obj_align(panel, LV_ALIGN_TOP_RIGHT, -CYD_SCREEN_GAP_PX, CYD_SCREEN_GAP_PX);
     lv_obj_add_event_cb(panel, on_timer_destroy, LV_EVENT_DELETE, NULL);
+    lv_obj_add_event_cb(panel, destroy_event_user_data, LV_EVENT_CLICKED, panel);
     lv_obj_set_style_border_color(panel, lv_color_hex(0xFF0000), 0);
 
     lv_obj_t* label = lv_label_create(panel);
