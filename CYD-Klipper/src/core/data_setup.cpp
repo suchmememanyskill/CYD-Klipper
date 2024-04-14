@@ -305,16 +305,18 @@ void fetch_printer_data()
     }
     else
     {
+        unfreeze_request_thread();
         klipper_request_consecutive_fail_count++;
 
         if (klipper_request_consecutive_fail_count == 5) 
         {
+            freeze_render_thread();
             printer.state = PRINTER_STATE_OFFLINE;
             lv_msg_send(DATA_PRINTER_STATE, &printer);
+            unfreeze_render_thread();
         }
 
         Serial.printf("Failed to fetch printer data: %d\n", httpCode);
-        unfreeze_request_thread();
     }
 }
 
