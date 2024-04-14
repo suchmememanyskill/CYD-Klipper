@@ -96,6 +96,13 @@ static void dualusb_screen_fix_switch(lv_event_t* e){
     ESP.restart();
 }
 
+static void disable_m117_messaging_switch(lv_event_t* e){
+    auto state = lv_obj_get_state(lv_event_get_target(e));
+    bool checked = (state & LV_STATE_CHECKED == LV_STATE_CHECKED);
+    global_config.disable_m117_messaging = checked;
+    write_global_config();
+}
+
 static void rotate_screen_switch(lv_event_t* e){
     auto state = lv_obj_get_state(lv_event_get_target(e));
     bool checked = (state & LV_STATE_CHECKED == LV_STATE_CHECKED);
@@ -187,6 +194,7 @@ void settings_section_behaviour(lv_obj_t* panel)
 #endif
 
     lv_create_custom_menu_switch("Multi Printer Mode", panel, multi_printer_switch, global_config.multi_printer_mode);
+    lv_create_custom_menu_switch("Disable M117 Messaging", panel, disable_m117_messaging_switch, global_config.disable_m117_messaging);
     lv_create_custom_menu_button("Configure Printer IP", panel, reset_ip_click, "Restart");
 }
 

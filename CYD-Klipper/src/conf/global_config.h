@@ -65,6 +65,7 @@ typedef struct _GLOBAL_CONFIG {
             bool multi_printer_mode : 1;
             bool on_during_print : 1;
             bool display_mode : 1; // Driver specifc usage. Currently only used on ESP32-2432S028R to fix the screen on the usb-c model
+            bool disable_m117_messaging : 1;
         };
     };
 
