@@ -212,7 +212,7 @@ void fetch_printer_data()
             if (status.containsKey("print_stats"))
             {
                 const char *filename = status["print_stats"]["filename"];
-                strcpy(filename_buff, filename);
+                strcpy(filename_buff, filename == NULL ? "" : filename);
                 printer.print_filename = filename_buff;
                 printer.elapsed_time_s = status["print_stats"]["total_duration"];
                 printer.printed_time_s = status["print_stats"]["print_duration"];
