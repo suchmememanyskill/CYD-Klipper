@@ -217,7 +217,12 @@ void settings_section_device(lv_obj_t* panel)
     lv_create_custom_menu_switch("Screen Color Fix", panel, dualusb_screen_fix_switch, global_config.display_mode, NULL, "ONLY for the 2.8\" dual USB model screen");
 #endif
 
+#if defined(CYD_SCREEN_DRIVER_ESP32_SMARTDISPLAY) && !defined(CYD_SCREEN_DISABLE_TOUCH_CALIBRATION)
+    // TODO: Rotating screen requires different calibration points. 
+#else
     lv_create_custom_menu_switch("Rotate Screen", panel, rotate_screen_switch, global_config.rotate_screen);
+#endif
+
     lv_create_custom_menu_switch("Auto Update", panel, auto_ota_update_switch, global_config.auto_ota_update);
     lv_create_custom_menu_label("Version", panel, REPO_VERSION "  ");
 
