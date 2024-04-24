@@ -8,7 +8,7 @@ CYD_PORTS = [
     "esp32-2432S024C-SD", 
     "esp32-4827S043C-SD",
     "esp32-3248S035C-V",
-    "esp32-4827S043R-SD",
+    #"esp32-4827S043R-SD",
 ]
 BASE_DIR = os.getcwd()
 
