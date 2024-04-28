@@ -33,6 +33,20 @@ static const lv_btnmatrix_ctrl_t kb_ctrl[] = {
     LV_KEYBOARD_CTRL_BTN_FLAGS | 6, 4, 4, 4, 4, 4, 4, 4, 4, 4, LV_KEYBOARD_CTRL_BTN_FLAGS | 6
 };
 
+static const char * hex_numpad_map[] = {
+    "1", "2", "3", "f", LV_SYMBOL_BACKSPACE, "\n",
+    "4", "5", "6", "e", LV_SYMBOL_OK, "\n",
+    "7", "8", "9", "d", LV_SYMBOL_LEFT, "\n",
+    "0", "a", "b", "c", LV_SYMBOL_RIGHT, NULL
+};
+
+static const lv_btnmatrix_ctrl_t hex_numpad_ctrl[] = {
+    1, 1, 1, 1, LV_KEYBOARD_CTRL_BTN_FLAGS | 1,
+    1, 1, 1, 1, LV_KEYBOARD_CTRL_BTN_FLAGS | 1,
+    1, 1, 1, 1, LV_KEYBOARD_CTRL_BTN_FLAGS | 1,
+    1, 1, 1, 1, LV_KEYBOARD_CTRL_BTN_FLAGS | 1,
+};
+
 enum connection_status_t {
     CONNECT_FAIL = 0,
     CONNECT_OK = 1,
@@ -175,8 +189,8 @@ void show_auth_entry()
     lv_obj_set_flex_grow(passEntry, 1);
     
     lv_keyboard_set_textarea(keyboard, passEntry);
-    lv_keyboard_set_map(keyboard, LV_KEYBOARD_MODE_USER_1, kb_map, kb_ctrl);
-    lv_keyboard_set_mode(keyboard, LV_KEYBOARD_MODE_USER_1);
+    lv_keyboard_set_map(keyboard, LV_KEYBOARD_MODE_USER_2, hex_numpad_map, hex_numpad_ctrl);
+    lv_keyboard_set_mode(keyboard, LV_KEYBOARD_MODE_USER_2);
 }
 
 void show_ip_entry()
