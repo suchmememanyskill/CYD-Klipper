@@ -26,7 +26,7 @@ A ESP32-2432S028R is required to run this project. You can find out where to buy
 
 ### Install
 
-[There is a web-based installer available. This is only supported on Chrome, Edge or Opera, and only on Desktop.](https://suchmememanyskill.github.io/CYD-Klipper/)
+[There is a web-based installer available. This is only supported on Chrome, Edge, Arc or Opera, and only on Desktop.](https://suchmememanyskill.github.io/CYD-Klipper/)
 
 On initial install, all data should be wiped. On updates, data should be able to be kept without issues.
 
