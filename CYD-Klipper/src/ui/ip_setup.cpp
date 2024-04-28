@@ -62,6 +62,20 @@ static void keyboard_event_ip_entry(lv_event_t * e) {
     lv_obj_t * ta = lv_event_get_target(e);
     lv_obj_t * kb = (lv_obj_t *)lv_event_get_user_data(e);
 
+    if ((code == LV_EVENT_FOCUSED || code == LV_EVENT_DEFOCUSED) && ta != NULL)
+    {
+        // make sure we alter the keymap before taking actions that might
+        // destroy the keyboard
+        if (lv_obj_has_flag(ta, LV_OBJ_FLAG_USER_1))
+        {
+            lv_keyboard_set_mode(kb, LV_KEYBOARD_MODE_USER_1);
+        }
+        else
+        {
+            lv_keyboard_set_mode(kb, LV_KEYBOARD_MODE_NUMBER);
+        }
+    }
+
     if(code == LV_EVENT_FOCUSED) {
         lv_keyboard_set_textarea(kb, ta);
         lv_obj_clear_flag(kb, LV_OBJ_FLAG_HIDDEN);
@@ -93,15 +107,6 @@ static void keyboard_event_ip_entry(lv_event_t * e) {
     else
     {
         return;
-    }
-
-    if (lv_obj_has_flag(ta, LV_OBJ_FLAG_USER_1))
-    {
-        lv_keyboard_set_mode(kb, LV_KEYBOARD_MODE_USER_1);
-    }
-    else
-    {
-        lv_keyboard_set_mode(kb, LV_KEYBOARD_MODE_NUMBER);
     }
 }
 
