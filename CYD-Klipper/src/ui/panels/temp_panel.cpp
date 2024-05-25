@@ -139,8 +139,15 @@ static void btn_extrude(lv_event_t * e){
         return;
     }
 
-    send_gcode(true, "M83");
-    send_gcode(true, "G1 E25 F300");
+    if (get_current_printer_config()->custom_filament_move_macros)
+    {
+        send_gcode(true, "FILAMENT_EXTRUDE");
+    }
+    else 
+    {
+        send_gcode(true, "M83");
+        send_gcode(true, "G1 E25 F300");
+    }
 }
 
 static void set_temp_via_preset(lv_event_t * e){
@@ -173,8 +180,15 @@ static void btn_retract(lv_event_t * e){
         return;
     }
 
-    send_gcode(true, "M83");
-    send_gcode(true, "G1 E-25 F300");
+    if (get_current_printer_config()->custom_filament_move_macros)
+    {
+        send_gcode(true, "FILAMENT_RETRACT");
+    }
+    else 
+    {
+        send_gcode(true, "M83");
+        send_gcode(true, "G1 E-25 F300");
+    }
 }
 
 static void set_chart_range(lv_event_t * e) {

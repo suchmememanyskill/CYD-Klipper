@@ -32,6 +32,8 @@ typedef struct _PRINTER_CONFIG {
             bool invert_colors : 1;
             unsigned char remaining_time_calc_mode : 2;
             unsigned char show_stats_on_progress_panel : 2;
+
+            bool custom_filament_move_macros : 1;
         };
     };
 
