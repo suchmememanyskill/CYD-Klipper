@@ -16,6 +16,7 @@ int klipper_request_consecutive_fail_count = 999;
 char filename_buff[512] = {0};
 SemaphoreHandle_t freezeRenderThreadSemaphore, freezeRequestThreadSemaphore;
 const long data_update_interval = 780;
+unsigned char lock_absolute_relative_mode_swap = 0;
 
 void semaphore_init(){
     freezeRenderThreadSemaphore = xSemaphoreCreateMutex();
@@ -82,25 +83,29 @@ void move_printer(const char* axis, float amount, bool relative) {
 
     char gcode[64];
     const char* extra = (amount > 0) ? "+" : "";
+    const char* start = "";
+    const char* end = "";
 
     bool absolute_coords = printer.absolute_coords;
 
     if (absolute_coords && relative) {
-        send_gcode(true, "G91");
+        start = "G91\n";
     }
     else if (!absolute_coords && !relative) {
-        send_gcode(true, "G90");
+        start = "G90\n";
     }
-
-    sprintf(gcode, "G1 %s%s%.3f F6000", axis, extra, amount);
-    send_gcode(true, gcode);
 
     if (absolute_coords && relative) {
-        send_gcode(true, "G90");
+        end = "\nG90";
     }
     else if (!absolute_coords && !relative) {
-        send_gcode(true, "G91");
+        end = "\nG91";
     }
+
+    sprintf(gcode, "%sG1 %s%s%.3f F6000%s", start, axis, extra, amount, end);
+    send_gcode(true, gcode);
+
+    lock_absolute_relative_mode_swap = 2;
 }
 
 int last_slicer_time_query = -15000;
@@ -192,7 +197,16 @@ void fetch_printer_data()
                 printer.gcode_offset[1] = status["gcode_move"]["homing_origin"][1];
                 printer.gcode_offset[2] = status["gcode_move"]["homing_origin"][2];
                 bool absolute_coords = status["gcode_move"]["absolute_coordinates"];
-                printer.absolute_coords = absolute_coords == true;
+
+                if (lock_absolute_relative_mode_swap > 0)
+                {
+                    lock_absolute_relative_mode_swap--;
+                }
+                else 
+                {
+                    printer.absolute_coords = absolute_coords == true;
+                }
+
                 printer.speed_mult = status["gcode_move"]["speed_factor"];
                 printer.extrude_mult = status["gcode_move"]["extrude_factor"];
                 printer.feedrate_mm_per_s = status["gcode_move"]["speed"];
@@ -212,7 +226,7 @@ void fetch_printer_data()
             if (status.containsKey("print_stats"))
             {
                 const char *filename = status["print_stats"]["filename"];
-                strcpy(filename_buff, filename);
+                strcpy(filename_buff, filename == NULL ? "" : filename);
                 printer.print_filename = filename_buff;
                 printer.elapsed_time_s = status["print_stats"]["total_duration"];
                 printer.printed_time_s = status["print_stats"]["print_duration"];

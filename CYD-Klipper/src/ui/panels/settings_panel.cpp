@@ -52,6 +52,13 @@ static void light_mode_switch(lv_event_t * e){
     set_color_scheme();
 }
 
+static void filament_move_mode_switch(lv_event_t * e){
+    auto state = lv_obj_get_state(lv_event_get_target(e));
+    bool checked = (state & LV_STATE_CHECKED == LV_STATE_CHECKED);
+    get_current_printer_config()->custom_filament_move_macros = checked;
+    write_global_config();
+}
+
 static void show_stats_on_progress_panel_dropdown(lv_event_t * e){
     auto selected = lv_dropdown_get_selected(lv_event_get_target(e));
     get_current_printer_config()->show_stats_on_progress_panel = selected;
@@ -147,7 +154,7 @@ static void estimated_time_dropdown(lv_event_t * e){
     write_global_config();
 }
 
-#define PRINTER_SPECIFIC_SETTING global_config.multi_printer_mode ? LV_SYMBOL_PLUS " Stored per printer" : NULL
+#define PRINTER_SPECIFIC_SETTING global_config.multi_printer_mode ? "Stored per printer" : NULL
 
 void settings_section_theming(lv_obj_t* panel)
 {
@@ -157,7 +164,7 @@ void settings_section_theming(lv_obj_t* panel)
     lv_create_custom_menu_dropdown("Theme", panel, theme_dropdown, "Blue\nGreen\nLime\nGrey\nYellow\nOrange\nRed\nPurple", get_current_printer_config()->color_scheme, NULL, PRINTER_SPECIFIC_SETTING);
 
 #ifndef CYD_SCREEN_DISABLE_INVERT_COLORS
-    lv_create_custom_menu_switch("Invert Colors", panel, invert_color_switch, get_current_printer_config()->invert_colors, NULL, (global_config.multi_printer_mode) ? LV_SYMBOL_PLUS " Stored per printer" 
+    lv_create_custom_menu_switch("Invert Colors", panel, invert_color_switch, get_current_printer_config()->invert_colors, NULL, (global_config.multi_printer_mode) ? "Stored per printer" 
     #ifdef CYD_SCREEN_DRIVER_ESP32_2432S028R
         "\nIntended for the 2.8\" dual USB model screen" :  "Intended for the 2.8\" dual USB model screen"
     #else
@@ -196,6 +203,11 @@ void settings_section_behaviour(lv_obj_t* panel)
     lv_create_custom_menu_switch("Multi Printer Mode", panel, multi_printer_switch, global_config.multi_printer_mode);
     lv_create_custom_menu_switch("Disable M117 Messaging", panel, disable_m117_messaging_switch, global_config.disable_m117_messaging);
     lv_create_custom_menu_button("Configure Printer IP", panel, reset_ip_click, "Restart");
+
+    lv_create_custom_menu_switch("Custom Filament Move Macros", panel, filament_move_mode_switch, get_current_printer_config()->custom_filament_move_macros, NULL, 
+        global_config.multi_printer_mode
+            ? "Calls FILAMENT_RETRACT and\nFILAMENT_EXTRUDE in temperature menu\nwhen enabled. Stored per printer."
+            : "Calls FILAMENT_RETRACT and\nFILAMENT_EXTRUDE in temperature menu\nwhen enabled");
 }
 
 void settings_section_device(lv_obj_t* panel)
@@ -217,7 +229,12 @@ void settings_section_device(lv_obj_t* panel)
     lv_create_custom_menu_switch("Screen Color Fix", panel, dualusb_screen_fix_switch, global_config.display_mode, NULL, "ONLY for the 2.8\" dual USB model screen");
 #endif
 
+#if defined(CYD_SCREEN_DRIVER_ESP32_SMARTDISPLAY) && !defined(CYD_SCREEN_DISABLE_TOUCH_CALIBRATION)
+    // TODO: Rotating screen requires different calibration points. 
+#else
     lv_create_custom_menu_switch("Rotate Screen", panel, rotate_screen_switch, global_config.rotate_screen);
+#endif
+
     lv_create_custom_menu_switch("Auto Update", panel, auto_ota_update_switch, global_config.auto_ota_update);
     lv_create_custom_menu_label("Version", panel, REPO_VERSION "  ");
 

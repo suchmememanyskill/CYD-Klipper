@@ -312,18 +312,29 @@ inline void root_panel_steppers_locked(lv_obj_t * root_panel){
 inline void root_panel_steppers_unlocked(lv_obj_t * root_panel){
     lv_obj_t * panel = lv_create_empty_panel(root_panel);
     lv_obj_set_size(panel, CYD_SCREEN_PANEL_WIDTH_PX, CYD_SCREEN_PANEL_HEIGHT_PX);
-    lv_obj_set_style_pad_all(panel, CYD_SCREEN_GAP_PX, 0);
     lv_layout_flex_column(panel, LV_FLEX_ALIGN_CENTER);
 
     lv_obj_t * label = lv_label_create(panel);
     lv_label_set_text(label, LV_SYMBOL_EYE_CLOSE " Steppers unlocked");
 
-    lv_obj_t * btn = lv_btn_create(panel);
+    lv_obj_t * btn_row = lv_create_empty_panel(panel);
+    lv_obj_set_size(btn_row, CYD_SCREEN_PANEL_WIDTH_PX, CYD_SCREEN_MIN_BUTTON_HEIGHT_PX);
+    lv_layout_flex_row(btn_row, LV_FLEX_ALIGN_CENTER);
+
+    lv_obj_t * btn = lv_btn_create(btn_row);
     lv_obj_set_height(btn, CYD_SCREEN_MIN_BUTTON_HEIGHT_PX);
     lv_obj_add_event_cb(btn, home_button_click, LV_EVENT_CLICKED, NULL);
 
     label = lv_label_create(btn);
     lv_label_set_text(label, LV_SYMBOL_HOME "Home Axis");
+    lv_obj_center(label);
+
+    btn = lv_btn_create(btn_row);
+    lv_obj_set_height(btn, CYD_SCREEN_MIN_BUTTON_HEIGHT_PX);
+    lv_obj_add_event_cb(btn, switch_to_stat_panel, LV_EVENT_CLICKED, NULL);
+
+    label = lv_label_create(btn);
+    lv_label_set_text(label, LV_SYMBOL_SETTINGS "Parameters");
     lv_obj_center(label);
 }
 

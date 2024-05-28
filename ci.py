@@ -7,13 +7,15 @@ CYD_PORTS = [
     "esp32-8048S043C-SD", 
     "esp32-2432S024C-SD", 
     "esp32-4827S043C-SD",
-    "esp32-3248S035C-V"
+    "esp32-3248S035C-V",
+    #"esp32-4827S043R-SD",
 ]
 BASE_DIR = os.getcwd()
 
 def get_manifest(base_path : str, device_name : str):
     return {
         "name": f"to {device_name}",
+        "funding_url": "https://ko-fi.com/suchmememanyskill",
         "new_install_prompt_erase": True,
         "builds": [
             {
