@@ -23,3 +23,5 @@ unsigned int power_devices_count(PRINTER_CONFIG * config);
 unsigned int power_devices_count();
 bool set_power_state(const char* device_name, bool state, PRINTER_CONFIG * config);
 bool set_power_state(const char* device_name, bool state);
+void macros_clear();
+void power_devices_clear();
