@@ -12,6 +12,15 @@ static char* power_devices[16] = {0};
 static bool power_device_states[16] = {0};
 static unsigned int stored_power_devices_count = 0;
 
+void macros_clear()
+{
+    for (int i = 0; i < macros_count; i++){
+        free(macros[i]);
+    }
+
+    macros_count = 0;
+}
+
 MACROSQUERY macros_query(PRINTER_CONFIG * config) 
 {
     HTTPClient client;
@@ -24,11 +33,7 @@ MACROSQUERY macros_query(PRINTER_CONFIG * config)
         deserializeJson(doc, client.getStream());
         auto result = doc["result"].as<JsonObject>();
 
-        for (int i = 0; i < macros_count; i++){
-            free(macros[i]);
-        }
-
-        macros_count = 0;
+        macros_clear();
 
         for (JsonPair i : result){
             const char *key = i.key().c_str();
@@ -85,6 +90,15 @@ unsigned int macro_count()
     return macro_count(get_current_printer_config());
 }
 
+void power_devices_clear()
+{
+    for (int i = 0; i < stored_power_devices_count; i++){
+        free(power_devices[i]);
+    }
+
+    stored_power_devices_count = 0;
+}
+
 POWERQUERY power_devices_query(PRINTER_CONFIG * config)
 {
     HTTPClient client;
@@ -97,11 +111,7 @@ POWERQUERY power_devices_query(PRINTER_CONFIG * config)
         deserializeJson(doc, client.getStream());
         auto result = doc["result"]["devices"].as<JsonArray>();
 
-        for (int i = 0; i < stored_power_devices_count; i++){
-            free(power_devices[i]);
-        }
-
-        stored_power_devices_count = 0;
+        power_devices_clear();
 
         for (auto i : result){
             const char * device_name = i["device"];
@@ -153,8 +163,6 @@ unsigned int power_devices_count()
 {
     return power_devices_count(get_current_printer_config());
 }
-
-
 
 bool set_power_state(const char* device_name, bool state, PRINTER_CONFIG * config) 
 {

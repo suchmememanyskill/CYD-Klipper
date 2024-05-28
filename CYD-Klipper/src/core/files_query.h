@@ -20,3 +20,4 @@ typedef struct _FILESYSTEM_FILE {
 } FILESYSTEM_FILE;
 
 FILESYSTEM_FILE* get_files(int limit);
+void clear_files();

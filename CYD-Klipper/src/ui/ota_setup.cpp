@@ -5,6 +5,9 @@
 #include "../core/data_setup.h"
 #include "../conf/global_config.h"
 #include "ota_setup.h"
+#include "../core/macros_query.h"
+#include "../core/files_query.h"
+#include "gcode_img.h"
 
 //const char *ota_url = "https://gist.githubusercontent.com/suchmememanyskill/ece418fe199e155340de6c224a0badf2/raw/0d6762d68bc807cbecc71e40d55b76692397a7b3/update.json"; // Test url
 const char *ota_url = "https://suchmememanyskill.github.io/CYD-Klipper/OTA.json"; // Prod url
@@ -73,6 +76,11 @@ void ota_do_update(bool variant_automatic)
     lv_refr_now(NULL);
     lv_timer_handler();
     lv_task_handler();
+
+    macros_clear();
+    power_devices_clear();
+    clear_files();
+    clear_img_mem();
 
     ota_pull.SetCallback(do_update_callback);
     ota_pull.CheckForOTAUpdate(ota_url, REPO_VERSION, ESP32OTAPull::ActionType::UPDATE_AND_BOOT);

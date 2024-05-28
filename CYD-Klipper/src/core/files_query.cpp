@@ -9,9 +9,8 @@
 // Always has +1 entry with a null'd name
 FILESYSTEM_FILE* last_query = NULL;
 
-FILESYSTEM_FILE* get_files(int limit){
-    freeze_request_thread();
-
+void clear_files()
+{
     if (last_query != NULL){
         FILESYSTEM_FILE* current = last_query;
 
@@ -21,7 +20,14 @@ FILESYSTEM_FILE* get_files(int limit){
         }
 
         free(last_query);
+        last_query = NULL;
     }
+}
+
+FILESYSTEM_FILE* get_files(int limit)
+{
+    freeze_request_thread();
+    clear_files();
 
     Serial.printf("Heap space pre-file-parse: %d bytes\n", esp_get_free_heap_size());
     std::list<FILESYSTEM_FILE> files;
