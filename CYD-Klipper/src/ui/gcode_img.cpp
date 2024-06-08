@@ -2,6 +2,7 @@
 #include "lvgl.h"
 #include "ui_utils.h"
 #include <Esp.h>
+#include <UrlEncode.h>
 #include <ArduinoJson.h>
 #include "../conf/global_config.h"
 #include "../core/http_client.h"
@@ -10,29 +11,27 @@ static unsigned char * data_png = NULL;
 static char img_filename_path[256] = {0};
 static lv_img_dsc_t img_header = {0};
 
-bool has_128_128_gcode(const char* filename)
+bool has_32_32_gcode_img(const char* filename)
 {
     if (filename == NULL){
         Serial.println("No gcode filename");
         return false;
     }
 
-    SETUP_HTTP_CLIENT("/server/files/thumbnails?filename=" + String(filename));
-
+    SETUP_HTTP_CLIENT("/server/files/thumbnails?filename=" + urlEncode(filename));
     int httpCode = 0;
     try {
         httpCode = client.GET();
     }
     catch (...){
         Serial.println("Exception while fetching gcode img location");
-        return {0};
+        return false;
     }
 
     if (httpCode == 200)
     {
-        String payload = client.getString();
         JsonDocument doc;
-        deserializeJson(doc, payload);
+        deserializeJson(doc, client.getStream());
         auto result = doc["result"].as<JsonArray>();
         const char* chosen_thumb = NULL;
 
@@ -58,6 +57,10 @@ bool has_128_128_gcode(const char* filename)
             return true;
         }
     }
+    else 
+    {
+        Serial.printf("Failed to fetch gcode image data: %d\n", httpCode);
+    }
 
     return false;
 }
@@ -71,7 +74,7 @@ lv_obj_t* draw_gcode_img()
         return NULL;
     }
 
-    SETUP_HTTP_CLIENT_FULL("/server/files/gcodes/" + String(img_filename_path), false, 2000);
+    SETUP_HTTP_CLIENT_FULL("/server/files/gcodes/" + urlEncode(img_filename_path), false, 2000);
 
     int httpCode = 0;
     try {
@@ -121,7 +124,7 @@ lv_obj_t* show_gcode_img(const char* filename)
         return NULL;
     }
 
-    if (!has_128_128_gcode(filename)){
+    if (!has_32_32_gcode_img(filename)){
         Serial.println("No 32x32 gcode img found");
         return NULL;
     }
