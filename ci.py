@@ -81,7 +81,10 @@ for port in CYD_PORTS:
     add_configuration(port)
 
 os.chdir(BASE_DIR)
-shutil.copytree("./out", "./_site/out")
+out_dir = "./_site/out"
+if os.path.exists(out_dir):
+    shutil.rmtree(out_dir)
+shutil.copytree("./out", out_dir)
 
 with open("./_site/OTA.json", "w") as f:
     json.dump({"Configurations": configurations}, f)
