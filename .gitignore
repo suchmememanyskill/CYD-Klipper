@@ -1,0 +1,10 @@
+_site/out/
+_site/OTA.json
+_site/esp32-*.json
+
+pyvenv.cfg
+bin/
+out/
+lib
+lib64
+
