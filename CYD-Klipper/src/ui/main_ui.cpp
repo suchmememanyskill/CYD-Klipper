@@ -30,8 +30,11 @@ static void on_state_change(void * s, lv_msg_t * m){
     else if (printer.state == PRINTER_STATE_ERROR){
         nav_buttons_setup(PANEL_ERROR);
     }
+    else if (printer.state == PRINTER_STATE_IDLE) {
+        nav_buttons_setup(PANEL_FILES);
+    }
     else {
-        nav_buttons_setup(PANEL_PRINT);
+        nav_buttons_setup(PANEL_PROGRESS);
     }
 }
 

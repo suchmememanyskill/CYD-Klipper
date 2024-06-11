@@ -23,6 +23,10 @@ static void btn_print_file(lv_event_t * e){
 }
 
 static void btn_print_file_verify(lv_event_t * e){
+    if (printer.state != PRINTER_STATE_IDLE){
+        return;
+    }
+
     const auto button_size_mult = 1.3f;
 
     lv_obj_t * btn = lv_event_get_target(e);
@@ -76,12 +80,7 @@ static void btn_print_file_verify(lv_event_t * e){
     }
 }
 
-void print_panel_init(lv_obj_t* panel){
-    if (printer.state == PRINTER_STATE_PRINTING || printer.state == PRINTER_STATE_PAUSED){
-        progress_panel_init(panel);
-        return;
-    }
-
+void files_panel_init(lv_obj_t* panel){
     clear_img_mem();
 
     lv_obj_t * list = lv_list_create(panel);
