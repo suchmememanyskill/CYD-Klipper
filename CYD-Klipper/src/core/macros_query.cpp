@@ -45,6 +45,13 @@ MACROSQUERY macros_query(PRINTER_CONFIG * config)
             }
         }
 
+        if (global_config.sort_macros)
+        {
+            std::sort(macros, macros + macros_count, [](const char* a, const char* b) {
+                return strcmp(a, b) < 0;
+            });
+        }
+
         return {(const char**)macros, (unsigned int)macros_count};
     }
     else {
