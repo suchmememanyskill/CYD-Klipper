@@ -11,7 +11,7 @@ CYD_PORTS = [
     #"esp32-4827S043R-SD",
 ]
 
-ESP_C3_CHIPS = [
+ESP_S3_CHIPS = [
     "esp32-8048S043C-SD",
     "esp32-4827S043C-SD",
 ]
@@ -25,7 +25,7 @@ def get_manifest(base_path : str, device_name : str):
         "new_install_prompt_erase": True,
         "builds": [
             {
-                "chipFamily": "ESP32-S3" if device_name in ESP_C3_CHIPS else "ESP32",
+                "chipFamily": "ESP32-S3" if device_name in ESP_S3_CHIPS else "ESP32",
                 "parts": [
                     {
                         "path": f"{base_path}/bootloader.bin",
