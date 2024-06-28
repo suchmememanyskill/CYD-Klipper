@@ -10,6 +10,12 @@ CYD_PORTS = [
     "esp32-3248S035C-V",
     #"esp32-4827S043R-SD",
 ]
+
+ESP_S3_CHIPS = [
+    "esp32-8048S043C-SD",
+    "esp32-4827S043C-SD",
+]
+
 BASE_DIR = os.getcwd()
 
 def get_manifest(base_path : str, device_name : str):
@@ -19,7 +25,7 @@ def get_manifest(base_path : str, device_name : str):
         "new_install_prompt_erase": True,
         "builds": [
             {
-                "chipFamily": "ESP32",
+                "chipFamily": "ESP32-S3" if device_name in ESP_S3_CHIPS else "ESP32",
                 "parts": [
                     {
                         "path": f"{base_path}/bootloader.bin",
@@ -81,7 +87,10 @@ for port in CYD_PORTS:
     add_configuration(port)
 
 os.chdir(BASE_DIR)
-shutil.copytree("./out", "./_site/out")
+out_dir = "./_site/out"
+if os.path.exists(out_dir):
+    shutil.rmtree(out_dir)
+shutil.copytree("./out", out_dir)
 
 with open("./_site/OTA.json", "w") as f:
     json.dump({"Configurations": configurations}, f)

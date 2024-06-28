@@ -110,6 +110,13 @@ static void disable_m117_messaging_switch(lv_event_t* e){
     write_global_config();
 }
 
+static void sort_macros_switch(lv_event_t* e){
+    auto state = lv_obj_get_state(lv_event_get_target(e));
+    bool checked = (state & LV_STATE_CHECKED == LV_STATE_CHECKED);
+    global_config.sort_macros = checked;
+    write_global_config();
+}
+
 static void rotate_screen_switch(lv_event_t* e){
     auto state = lv_obj_get_state(lv_event_get_target(e));
     bool checked = (state & LV_STATE_CHECKED == LV_STATE_CHECKED);
@@ -208,6 +215,8 @@ void settings_section_behaviour(lv_obj_t* panel)
         global_config.multi_printer_mode
             ? "Calls FILAMENT_RETRACT and\nFILAMENT_EXTRUDE in temperature menu\nwhen enabled. Stored per printer."
             : "Calls FILAMENT_RETRACT and\nFILAMENT_EXTRUDE in temperature menu\nwhen enabled");
+
+    lv_create_custom_menu_switch("Sort Macros A->Z", panel, sort_macros_switch, global_config.sort_macros);
 }
 
 void settings_section_device(lv_obj_t* panel)

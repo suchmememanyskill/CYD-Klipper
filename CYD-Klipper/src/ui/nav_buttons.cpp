@@ -58,7 +58,11 @@ static void update_printer_data_time(lv_event_t * e){
 }
 
 static void btn_click_files(lv_event_t * e){
-    nav_buttons_setup(PANEL_PRINT);
+    nav_buttons_setup(PANEL_FILES);
+}
+
+static void btn_click_progress(lv_event_t * e){
+    nav_buttons_setup(PANEL_PROGRESS);
 }
 
 static void btn_click_move(lv_event_t * e){
@@ -115,7 +119,7 @@ void create_button(const char* icon, const char* name, lv_event_cb_t button_clic
     lv_obj_add_style(label, &nav_button_text_style, 0);
 }
 
-void nav_buttons_setup(unsigned char active_panel){
+void nav_buttons_setup(PANEL_TYPE active_panel){
     lv_obj_clean(lv_scr_act());
     lv_obj_clear_flag(lv_scr_act(), LV_OBJ_FLAG_SCROLLABLE);
 
@@ -134,7 +138,14 @@ void nav_buttons_setup(unsigned char active_panel){
 
     if (printer.state > PRINTER_STATE_ERROR){
         // Files/Print
-        create_button(LV_SYMBOL_COPY, "Idle", btn_click_files, update_printer_data_time, root_panel);
+        if (printer.state == PRINTER_STATE_IDLE)
+        {
+            create_button(LV_SYMBOL_COPY, "Idle", btn_click_files, update_printer_data_time, root_panel);
+        }
+        else 
+        {
+            create_button(LV_SYMBOL_FILE, "Paused", btn_click_progress, update_printer_data_time, root_panel);
+        }
 
         // Move
         create_button(printer.state == PRINTER_STATE_PRINTING ? LV_SYMBOL_EDIT : LV_SYMBOL_CHARGE, "Z?", btn_click_move, update_printer_data_z_pos, root_panel);
@@ -165,8 +176,8 @@ void nav_buttons_setup(unsigned char active_panel){
     lv_obj_align(panel, LV_ALIGN_TOP_RIGHT, 0, 0);
 
     switch (active_panel){
-        case PANEL_PRINT:
-            print_panel_init(panel);
+        case PANEL_FILES:
+            files_panel_init(panel);
             break;
         case PANEL_MOVE:
             move_panel_init(panel);
@@ -191,6 +202,9 @@ void nav_buttons_setup(unsigned char active_panel){
             break;
         case PANEL_CONNECTING:
             connecting_panel_init(panel);
+            break;
+        case PANEL_PROGRESS:
+            progress_panel_init(panel);
             break;
     }
 

@@ -1,8 +1,13 @@
 #include "panel.h"
 #include "../ui_utils.h"
 #include "../../core/data_setup.h"
+#include "../nav_buttons.h"
 #include <stdio.h>
 #include <Esp.h>
+
+static void swap_to_files_menu(lv_event_t * e) {
+    nav_buttons_setup(PANEL_FILES);
+}
 
 static void set_fan_speed_text(lv_event_t * e) {
     lv_obj_t * label = lv_event_get_target(e);
@@ -248,6 +253,16 @@ void stats_panel_init(lv_obj_t* panel) {
     lv_obj_set_size(right_panel, panel_width, CYD_SCREEN_PANEL_HEIGHT_PX - CYD_SCREEN_GAP_PX * 2);
     lv_layout_flex_column(right_panel, LV_FLEX_ALIGN_CENTER);
     lv_obj_align(right_panel, LV_ALIGN_TOP_RIGHT, -1 * CYD_SCREEN_GAP_PX, CYD_SCREEN_GAP_PX);
+
+    if (printer.state >= PRINTER_STATE_PRINTING){
+        lv_obj_t * btn = lv_btn_create(right_panel);
+        lv_obj_set_size(btn, CYD_SCREEN_PANEL_WIDTH_PX / 2 - CYD_SCREEN_GAP_PX * 3, CYD_SCREEN_MIN_BUTTON_HEIGHT_PX);
+        lv_obj_add_event_cb(btn, swap_to_files_menu, LV_EVENT_CLICKED, NULL);
+
+        lv_obj_t * label = lv_label_create(btn);
+        lv_label_set_text(label, "Files");
+        lv_obj_align(label, LV_ALIGN_CENTER, 0, 0);
+    }
     
     create_state_button(right_panel, set_fan_speed_text, open_fan_speed_panel);
     create_state_button(right_panel, set_zoffset_text, open_zoffset_panel);
