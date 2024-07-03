@@ -4,6 +4,7 @@
 #include "lvgl.h"
 #include "../ui/ui_utils.h"
 #include <Esp.h>
+#include "../ui/serial/serial_console.h"
 
 #ifndef CPU_FREQ_HIGH
 #define CPU_FREQ_HIGH 240
@@ -117,6 +118,7 @@ void lv_do_calibration(){
     
     while (true){
         lv_handler();
+        serial_console::run();
 
         if (point[0] != 0 && point[1] != 0){
             break;

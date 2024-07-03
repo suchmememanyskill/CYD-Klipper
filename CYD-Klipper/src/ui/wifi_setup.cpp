@@ -5,6 +5,7 @@
 #include "WiFi.h"
 #include "../core/data_setup.h"
 #include "../core/lv_setup.h"
+#include "serial/serial_console.h"
 
 void wifi_init_inner();
 void wifi_pass_entry(const char* ssid);
@@ -225,6 +226,8 @@ void wifi_init(){
         }
         
         lv_handler();
+        serial_console::run();
+
     }
 }
 
