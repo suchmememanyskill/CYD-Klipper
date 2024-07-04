@@ -15,7 +15,7 @@ except:
     version = "Unknown"
 
 flag = "-D REPO_VERSION=\\\"" + version + "\\\""
-dev_flag = "-DREPO_DEVELOPMENT=1"
+dev_flag = "-DREPO_DEVELOPMENT=0"
 print(f"Version: {version}")
 print(f"Flag: {flag}")
 

@@ -53,7 +53,7 @@ void help(String argv[])
     Serial.println("ssid [name pass]     - set the network SSID and password to connect to");
     Serial.println("ip [address port]    - set Moonraker address");
     Serial.println("key [key]            - set the Moonraker API key");
-    Serial.println("rotation [1|0]       - set rotate screen 180 degrees");
+    Serial.println("rotation [on|off]       - set rotate screen 180 degrees");
     Serial.println("brightness [num]     - set screen brightness");
     Serial.println("printer [num|-1]     - set active printer#; -1 for multi-printer mode off");
     Serial.println("help                 - this help");
@@ -104,7 +104,7 @@ void sets(String argv[])
         Serial.printf("erase touch\n");
     }
 
-    Serial.printf("rotate %d\n",global_config.rotate_screen?1:0);
+    Serial.printf("rotation %s\n",global_config.rotate_screen?"on":"off");
     Serial.printf("brightness %d\n",global_config.brightness);
 }
 
@@ -253,19 +253,19 @@ void ip(String argv[])
 
 void rotation(String argv[])
 {
-    if(argv[1] == "1")
+    if(argv[1] == "on")
     {
         global_config.rotate_screen = true;
         write_global_config();
     }
-    else if (argv[1] == "0")
+    else if (argv[1] == "off")
     {
         global_config.rotate_screen = false;
         write_global_config();
     }
     else
     {
-        Serial.println("Rotation can be 0 or 1");
+        Serial.println("Rotation can be on or off");
     }
 }
 

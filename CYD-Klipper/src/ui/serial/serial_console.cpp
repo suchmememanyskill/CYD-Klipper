@@ -23,8 +23,20 @@ namespace serial_console
 
     while ((c = Serial.read()) != -1 && cnt > 0)
     {
-      Serial.print((char)c); // echo
       --cnt;
+
+      //backspace
+      if(c == 8)
+      {
+        if(index > 0)
+        {
+          Serial.print("\x08 \x08"); // overwrite last character with space and move cursor 1 back.
+          index--;
+        }
+        continue;
+      }
+      
+      Serial.print((char)c); // echo
 
       // Buffer overflow handling:
       // start treating current buffer as invalid:
