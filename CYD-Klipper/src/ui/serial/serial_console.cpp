@@ -109,7 +109,7 @@ namespace serial_console
 
     void greet()
     {
-        Serial.println("CYB-Klipper " REPO_VERSION);
+        Serial.println("CYD-Klipper " REPO_VERSION);
         Serial.println("Type 'help' for serial console command list");
         Serial.print("> ");
     }
