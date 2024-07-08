@@ -14,7 +14,7 @@ static lv_img_dsc_t img_header = {0};
 bool has_32_32_gcode_img(const char* filename)
 {
     if (filename == NULL){
-        Serial.println("No gcode filename");
+        LOG_LN("No gcode filename");
         return false;
     }
 
@@ -24,7 +24,7 @@ bool has_32_32_gcode_img(const char* filename)
         httpCode = client.GET();
     }
     catch (...){
-        Serial.println("Exception while fetching gcode img location");
+        LOG_LN("Exception while fetching gcode img location");
         return false;
     }
 
@@ -52,14 +52,14 @@ bool has_32_32_gcode_img(const char* filename)
         }
 
         if (chosen_thumb != NULL){
-            Serial.printf("Found 32x32 PNG gcode img at %s\n", filename);
+            LOG_LN(("Found 32x32 PNG gcode img at %s\n", filename))
             strcpy(img_filename_path, chosen_thumb);
             return true;
         }
     }
     else 
     {
-        Serial.printf("Failed to fetch gcode image data: %d\n", httpCode);
+        LOG_LN(("Failed to fetch gcode image data: %d\n", httpCode))
     }
 
     return false;
@@ -70,7 +70,7 @@ lv_obj_t* draw_gcode_img()
     clear_img_mem();
 
     if (img_filename_path[0] == 0){
-        Serial.println("No gcode img path");
+        LOG_LN("No gcode img path");
         return NULL;
     }
 
@@ -81,7 +81,7 @@ lv_obj_t* draw_gcode_img()
         httpCode = client.GET();
     }
     catch (...){
-        Serial.println("Exception while fetching gcode img");
+        LOG_LN("Exception while fetching gcode img");
         return NULL;
     }
 
@@ -90,13 +90,13 @@ lv_obj_t* draw_gcode_img()
         size_t len = client.getSize();
         if (len <= 0)
         {
-            Serial.println("No gcode img data");
+            LOG_LN("No gcode img data");
             return NULL;
         }
 
         data_png = (unsigned char*)malloc(len + 1);
         if (len != client.getStream().readBytes(data_png, len)){
-            Serial.println("Failed to read gcode img data");
+            LOG_LN("Failed to read gcode img data");
             clear_img_mem();
             return NULL;
         }
@@ -120,12 +120,12 @@ lv_obj_t* draw_gcode_img()
 lv_obj_t* show_gcode_img(const char* filename)
 {
     if (filename == NULL){
-        Serial.println("No gcode filename");
+        LOG_LN("No gcode filename");
         return NULL;
     }
 
     if (!has_32_32_gcode_img(filename)){
-        Serial.println("No 32x32 gcode img found");
+        LOG_LN("No 32x32 gcode img found");
         return NULL;
     }
 

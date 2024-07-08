@@ -17,7 +17,7 @@ void setup() {
     load_global_config();
     screen_setup();
     lv_setup();
-    Serial.println("Screen init done");
+    LOG_LN("Screen init done");
     
     wifi_init();
     ota_init();

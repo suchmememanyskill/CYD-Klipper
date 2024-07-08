@@ -88,7 +88,7 @@ void wifi_pass_entry(const char* ssid)
 static void wifi_btn_event_handler(lv_event_t * e){
     delay(100);
     char* ssid = (char*)e->user_data;
-    Serial.println(ssid);
+    LOG_LN(ssid);
     wifi_pass_entry(ssid);
 }
 
@@ -98,7 +98,7 @@ static void wifi_keyboard_cb_manual_ssid(lv_event_t * e){
     const char * text = lv_textarea_get_text(ta);
     char * text_copy = (char*)malloc(strlen(text) + 1);
     strcpy(text_copy, text);
-    Serial.println(text_copy);
+    LOG_LN(text_copy);
     wifi_pass_entry(text_copy);
 }
 
@@ -120,7 +120,7 @@ void wifi_init_inner(){
             WiFi.begin(global_config.wifi_SSID, global_config.wifi_password);
         }
         
-        Serial.printf("Connecting to %s with a password length of %d\n", global_config.wifi_SSID, strlen(global_config.wifi_password));
+        LOG_LN(("Connecting to %s with a password length of %d\n", global_config.wifi_SSID, strlen(global_config.wifi_password)))
 
         lv_obj_t * label = lv_label_create(lv_scr_act());
         lv_label_set_text(label, "Connecting to WiFi");
@@ -222,7 +222,7 @@ void wifi_init(){
     while (!global_config.wifi_configured || WiFi.status() != WL_CONNECTED){
         if (millis() - print_timer > print_freq){
             print_timer = millis();
-            Serial.printf("WiFi Status: %s\n", errs[WiFi.status()]);
+            LOG_LN(("WiFi Status: %s\n", errs[WiFi.status()]))
         }
         
         lv_handler();
@@ -235,7 +235,7 @@ ulong start_time_recovery = 0;
 
 void wifi_ok(){
     if (WiFi.status() != WL_CONNECTED){
-        Serial.println("WiFi Connection Lost. Reconnecting...");
+        LOG_LN("WiFi Connection Lost. Reconnecting...");
         freeze_request_thread();
         WiFi.disconnect();
         delay(5000); // Wait for the WiFi to disconnect
@@ -253,9 +253,9 @@ void wifi_ok(){
 
         while (WiFi.status() != WL_CONNECTED){
             delay(1000);
-            Serial.printf("WiFi Status: %s\n", errs[WiFi.status()]);
+            LOG_LN(("WiFi Status: %s\n", errs[WiFi.status()]))
             if (millis() - start_time_recovery > 15000){
-                Serial.println("WiFi Connection failed to reconnect. Restarting...");
+                LOG_LN("WiFi Connection failed to reconnect. Restarting...");
                 ESP.restart();
             }
         }

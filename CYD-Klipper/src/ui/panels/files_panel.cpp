@@ -19,7 +19,7 @@ static void btn_print_file(lv_event_t * e){
     SETUP_HTTP_CLIENT("/printer/print/start?filename=" + urlEncode(selected_file->name));
 
     int httpCode = client.POST("");
-    Serial.printf("Print start: HTTP %d\n", httpCode);
+    LOG_LN(("Print start: HTTP %d\n", httpCode))
 }
 
 static void btn_print_file_verify(lv_event_t * e){

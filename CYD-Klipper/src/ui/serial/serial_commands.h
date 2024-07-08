@@ -22,6 +22,8 @@ void ip(String argv[]);
 void rotation(String argv[]);
 void brightness(String argv[]);
 void printer(String argv[]);
+void debug(String argv[]);
+void echo(String argv[]);
 
 int find_command(String cmd);
 }

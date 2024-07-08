@@ -23,6 +23,7 @@ A ESP32-2432S028R is required to run this project. You can find out where to buy
 - Execute predefined gcode macros
 - Toggle Moonraker power devices
 - OTA updates
+- Serial console over USB (115200 8n1, echo off, LF/LF)
 
 ### Install
 

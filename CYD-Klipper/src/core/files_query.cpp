@@ -29,7 +29,7 @@ FILESYSTEM_FILE* get_files(int limit)
     freeze_request_thread();
     clear_files();
 
-    Serial.printf("Heap space pre-file-parse: %d bytes\n", esp_get_free_heap_size());
+    LOG_LN(("Heap space pre-file-parse: %d bytes\n", esp_get_free_heap_size()))
     std::list<FILESYSTEM_FILE> files;
 
     auto timer_request = millis();
@@ -41,7 +41,7 @@ FILESYSTEM_FILE* get_files(int limit)
     if (httpCode == 200){
         JsonDocument doc;
         auto parseResult = deserializeJson(doc, client.getStream());
-        Serial.printf("Json parse: %s\n", parseResult.c_str());
+        LOG_LN(("Json parse: %s\n", parseResult.c_str()))
         auto result = doc["result"].as<JsonArray>();
 
         for (auto file : result){
@@ -62,7 +62,7 @@ FILESYSTEM_FILE* get_files(int limit)
             
             f.name = (char*)malloc(strlen(path) + 1);
             if (f.name == NULL){
-                Serial.println("Failed to allocate memory");
+                LOG_LN("Failed to allocate memory");
                 continue;
             }
             strcpy(f.name, path);
@@ -88,7 +88,7 @@ FILESYSTEM_FILE* get_files(int limit)
     FILESYSTEM_FILE* result = (FILESYSTEM_FILE*)malloc(size);
 
     if (result == NULL){
-        Serial.println("Failed to allocate memory");
+        LOG_LN("Failed to allocate memory");
 
         for (auto file : files){
             free(file.name);
@@ -106,8 +106,8 @@ FILESYSTEM_FILE* get_files(int limit)
         result += 1;
     }
 
-    Serial.printf("Heap space post-file-parse: %d bytes\n", esp_get_free_heap_size());
-    Serial.printf("Got %d files. Request took %dms, parsing took %dms\n", files.size(), timer_parse - timer_request, millis() - timer_parse);
+    LOG_LN(("Heap space post-file-parse: %d bytes\n", esp_get_free_heap_size()))
+    LOG_LN(("Got %d files. Request took %dms, parsing took %dms\n", files.size(), timer_parse - timer_request, millis() - timer_parse))
     unfreeze_request_thread();
     return last_query;
 }

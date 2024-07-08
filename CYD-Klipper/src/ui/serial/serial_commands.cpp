@@ -7,6 +7,14 @@
 
 namespace serial_console {
 
+/* How to add a new command:
+  - add the handler; function signature must be like: void handler(String argv[])
+  - add {"command_name", &handler_name, argc} to commandHandlers
+        (argc = num of args + 1; argv[0] is always the command name)
+  - add the handler signature to serial_command.h
+  - add description to help()
+  - optionally add handling the new preference to sets() and settings() if it modifies global_config
+*/
 
 HANDLER commandHandlers[] = {
     {"help", &help, 1},
@@ -20,9 +28,34 @@ HANDLER commandHandlers[] = {
     {"ip", &ip, 3},
     {"rotation", &rotation, 2},
     {"brightness", &brightness, 2},
-    {"printer", &printer, 2}
+    {"printer", &printer, 2},
+    {"debug", &debug, 2},
+    {"echo", &echo, 2}
 };
 
+void help(String argv[])
+{
+    Serial.println("Serial console commands:");
+    Serial.println("");
+    Serial.println("settings             - show current settings");
+    Serial.println("sets                 - show current settings as commands for copy-paste");
+    Serial.println("erase [item]         - unconfigure parameter (key|touch|ssid|ip|all)");
+    Serial.println("reset                - restart CYD-klipper");
+    Serial.println("touch [xm xo ym yo]  - set touchscreen multipliers and offsets");
+    Serial.println("ssid [name pass]     - set the network SSID and password to connect to");
+    Serial.println("ip [address port]    - set Moonraker address");
+    Serial.println("key [key]            - set the Moonraker API key");
+    Serial.println("rotation [on|off]    - set rotate screen 180 degrees");
+    Serial.println("brightness [num]     - set screen brightness");
+    Serial.println("printer [num|-1]     - set active printer#; -1 for multi-printer mode off");
+    Serial.println("debug [on|off]       - set printing of debug messages to serial console (not saved)");
+    Serial.println("echo [on|off]        - set remote echo (eecchhoo ooffff) (not saved)");
+    Serial.println("help                 - this help");
+    Serial.println("");
+    Serial.println("Settings are saved immediately but come into effect after reset");
+    Serial.println("Unlike GUI, serial console does not validate if settings");
+    Serial.println("you enter work correctly. This is a double-edged sword.");
+}
 
 // this must be here, because serial_console doesn't have a clue about sizeof(commandHandlers) at compile time
 int find_command(String cmd)
@@ -41,27 +74,6 @@ void reset(String argv[])
     ESP.restart();
 }
 
-void help(String argv[])
-{
-    Serial.println("Serial console commands:");
-    Serial.println("");
-    Serial.println("settings             - show current settings");
-    Serial.println("sets                 - show current settings as commands for copy-paste");
-    Serial.println("erase [item]         - unconfigure parameter (key|touch|ssid|ip|all)");
-    Serial.println("reset                - restart CYD-klipper");
-    Serial.println("touch [xm xo ym yo]  - set touchscreen multipliers and offsets");
-    Serial.println("ssid [name pass]     - set the network SSID and password to connect to");
-    Serial.println("ip [address port]    - set Moonraker address");
-    Serial.println("key [key]            - set the Moonraker API key");
-    Serial.println("rotation [on|off]       - set rotate screen 180 degrees");
-    Serial.println("brightness [num]     - set screen brightness");
-    Serial.println("printer [num|-1]     - set active printer#; -1 for multi-printer mode off");
-    Serial.println("help                 - this help");
-    Serial.println("");
-    Serial.println("Settings are saved immediately but come into effect after reset");
-    Serial.println("Unlike GUI, serial console does not validate if settings");
-    Serial.println("you enter work correctly. This is a double-edged sword.");
-}
 void sets(String argv[])
 {
 
@@ -69,7 +81,13 @@ void sets(String argv[])
 
     if(global_config.wifi_configured)
     {
-        Serial.printf("ssid %s %s\n",global_config.wifi_SSID, global_config.wifi_password);
+        Serial.printf("ssid %s %s\n",global_config.wifi_SSID,
+#if DISPLAY_SECRETS
+        global_config.wifi_password
+#else
+        "[redacted]"
+#endif    
+        );
     }
     else
     {
@@ -87,7 +105,13 @@ void sets(String argv[])
 
     if(get_current_printer_config()->auth_configured)
     {
-        Serial.printf("key %s\n",get_current_printer_config()->klipper_auth);
+        Serial.printf("key %s\n",
+#if DISPLAY_SECRETS
+        get_current_printer_config()->klipper_auth
+#else
+        "[redacted]"
+#endif    
+        );
     }
     else
     {
@@ -124,7 +148,14 @@ void settings(String argv[])
 
     if(global_config.wifi_configured)
     {
-        Serial.printf("SSID: %s   Password: %s\n",global_config.wifi_SSID, global_config.wifi_password);
+        Serial.printf("SSID: %s   Password: %s\n",global_config.wifi_SSID, 
+#if DISPLAY_SECRETS
+        global_config.wifi_password
+#else
+        "[redacted]"
+#endif        
+        
+        );
     }
     else
     {
@@ -142,7 +173,13 @@ void settings(String argv[])
 
     if(get_current_printer_config()->auth_configured)
     {
-        Serial.printf("Moonraker API key: %s\n",get_current_printer_config()->klipper_auth);
+        Serial.printf("Moonraker API key: %s\n",
+#if DISPLAY_SECRETS
+        get_current_printer_config()->klipper_auth
+#else
+        "[redacted]"
+#endif        
+        );
     }
     else
     {
@@ -295,5 +332,39 @@ void printer(String argv[])
     }
 
 }
+
+void debug(String argv[])
+{
+    if(argv[1] == "on")
+    {
+        temporary_config.debug = true;
+        
+    }
+    else if (argv[1] == "off")
+    {
+        temporary_config.debug = false;
+    }
+    else
+    {
+        Serial.println("debug can be on or off");
+    }
+}
+
+void echo(String argv[])
+{
+    if(argv[1] == "on")
+    {
+        temporary_config.remote_echo = true;
+    }
+    else if (argv[1] == "off")
+    {
+        temporary_config.remote_echo = false;
+    }
+    else
+    {
+        Serial.println("Echo can be on or off");
+    }
+}
+
 
 }
