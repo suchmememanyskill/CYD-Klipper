@@ -3,7 +3,7 @@
 #include <HardwareSerial.h>
 #include <WString.h>
 
-#define MAX_COMDLINE_SIZE 255
+#define MAX_COMDLINE_SIZE 80
 #define MAX_WORDS 6
 
 namespace serial_console
@@ -127,7 +127,7 @@ namespace serial_console
     // main "engine": non-blockingly read until newline found, parse, execute.
     void run()
     {
-        static char cmdline[MAX_COMDLINE_SIZE + 1];
+        static char cmdline[MAX_COMDLINE_SIZE + 1] = {0};
         if (!read_string_until('\n', cmdline, MAX_COMDLINE_SIZE))
             return;
 
