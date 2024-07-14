@@ -26,7 +26,7 @@ void configure_http_client(HTTPClient &client, String url, bool stream, int time
 
     client.begin(url);
 
-    if (get_current_printer_config()->auth_configured) {
-        client.addHeader("X-Api-Key", get_current_printer_config()->klipper_auth);
+    if (config->auth_configured) {
+        client.addHeader("X-Api-Key", config->klipper_auth);
     }
 }
