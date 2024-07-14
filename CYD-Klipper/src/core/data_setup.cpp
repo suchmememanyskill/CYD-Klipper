@@ -349,7 +349,7 @@ void fetch_printer_data_minimal()
 
         delay(10);
         HTTPClient client;
-        configure_http_client(client, get_full_url("/printer/objects/query?webhooks&print_stats&virtual_sdcard", config), true, 1000);
+        configure_http_client(client, get_full_url("/printer/objects/query?webhooks&print_stats&virtual_sdcard", config), true, 1000, config);
         freeze_request_thread();
 
         int httpCode = client.GET();
