@@ -52,14 +52,14 @@ bool has_32_32_gcode_img(const char* filename)
         }
 
         if (chosen_thumb != NULL){
-            LOG_LN(("Found 32x32 PNG gcode img at %s\n", filename))
+            LOG_F(("Found 32x32 PNG gcode img at %s\n", filename))
             strcpy(img_filename_path, chosen_thumb);
             return true;
         }
     }
     else 
     {
-        LOG_LN(("Failed to fetch gcode image data: %d\n", httpCode))
+        LOG_F(("Failed to fetch gcode image data: %d\n", httpCode))
     }
 
     return false;

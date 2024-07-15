@@ -32,7 +32,7 @@ void verify_version()
     
     GLOBAL_CONFIG config = {0};
     preferences.getBytes("global_config", &config, sizeof(config));
-    LOG_LN(("Config version: %d\n", config.version))
+    LOG_F(("Config version: %d\n", config.version))
     if (config.version != CONFIG_VERSION) {
         LOG_LN("Clearing Global Config");
         preferences.clear();
@@ -133,7 +133,10 @@ void load_global_config()
     preferences.getBytes("global_config", &global_config, sizeof(global_config));
     preferences.end();
 
-    temporary_config.debug = (bool) REPO_DEVELOPMENT;
+    #if defined REPO_DEVELOPMENT  &&  REPO_DEVELOPMENT == 1
+        temporary_config.debug = true;
+    #else
+        temporary_config.debug = false;
+    #endif
     temporary_config.remote_echo = true;
-
 }

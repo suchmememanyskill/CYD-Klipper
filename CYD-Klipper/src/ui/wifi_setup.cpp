@@ -120,7 +120,7 @@ void wifi_init_inner(){
             WiFi.begin(global_config.wifi_SSID, global_config.wifi_password);
         }
         
-        LOG_LN(("Connecting to %s with a password length of %d\n", global_config.wifi_SSID, strlen(global_config.wifi_password)))
+        LOG_F(("Connecting to %s with a password length of %d\n", global_config.wifi_SSID, strlen(global_config.wifi_password)))
 
         lv_obj_t * label = lv_label_create(lv_scr_act());
         lv_label_set_text(label, "Connecting to WiFi");
@@ -222,7 +222,7 @@ void wifi_init(){
     while (!global_config.wifi_configured || WiFi.status() != WL_CONNECTED){
         if (millis() - print_timer > print_freq){
             print_timer = millis();
-            LOG_LN(("WiFi Status: %s\n", errs[WiFi.status()]))
+            LOG_F(("WiFi Status: %s\n", errs[WiFi.status()]))
         }
         
         lv_handler();
@@ -253,7 +253,7 @@ void wifi_ok(){
 
         while (WiFi.status() != WL_CONNECTED){
             delay(1000);
-            LOG_LN(("WiFi Status: %s\n", errs[WiFi.status()]))
+            LOG_F(("WiFi Status: %s\n", errs[WiFi.status()]))
             if (millis() - start_time_recovery > 15000){
                 LOG_LN("WiFi Connection failed to reconnect. Restarting...");
                 ESP.restart();

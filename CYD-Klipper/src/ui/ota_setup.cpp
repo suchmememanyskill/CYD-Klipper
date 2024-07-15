@@ -90,7 +90,7 @@ void ota_init()
 {
     //ota_pull.AllowDowngrades(true);
     int result = ota_pull.CheckForOTAUpdate(ota_url, REPO_VERSION, ESP32OTAPull::ActionType::DONT_DO_UPDATE);
-    LOG_LN(("OTA Update Result: %d\n", result))
+    LOG_F(("OTA Update Result: %d\n", result))
     update_available = result == ESP32OTAPull::UPDATE_AVAILABLE;
 
     if (global_config.auto_ota_update && update_available)

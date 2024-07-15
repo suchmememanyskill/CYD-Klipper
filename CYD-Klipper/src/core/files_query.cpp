@@ -29,7 +29,7 @@ FILESYSTEM_FILE* get_files(int limit)
     freeze_request_thread();
     clear_files();
 
-    LOG_LN(("Heap space pre-file-parse: %d bytes\n", esp_get_free_heap_size()))
+    LOG_F(("Heap space pre-file-parse: %d bytes\n", esp_get_free_heap_size()))
     std::list<FILESYSTEM_FILE> files;
 
     auto timer_request = millis();
@@ -41,7 +41,7 @@ FILESYSTEM_FILE* get_files(int limit)
     if (httpCode == 200){
         JsonDocument doc;
         auto parseResult = deserializeJson(doc, client.getStream());
-        LOG_LN(("Json parse: %s\n", parseResult.c_str()))
+        LOG_F(("Json parse: %s\n", parseResult.c_str()))
         auto result = doc["result"].as<JsonArray>();
 
         for (auto file : result){
@@ -106,8 +106,8 @@ FILESYSTEM_FILE* get_files(int limit)
         result += 1;
     }
 
-    LOG_LN(("Heap space post-file-parse: %d bytes\n", esp_get_free_heap_size()))
-    LOG_LN(("Got %d files. Request took %dms, parsing took %dms\n", files.size(), timer_parse - timer_request, millis() - timer_parse))
+    LOG_F(("Heap space post-file-parse: %d bytes\n", esp_get_free_heap_size()))
+    LOG_F(("Got %d files. Request took %dms, parsing took %dms\n", files.size(), timer_parse - timer_request, millis() - timer_parse))
     unfreeze_request_thread();
     return last_query;
 }
