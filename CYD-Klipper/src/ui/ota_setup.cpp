@@ -49,7 +49,7 @@ void do_update_callback(int offset, int totallength)
 
 void ota_do_update(bool variant_automatic)
 {
-    Serial.println("Starting OTA Update");
+    LOG_LN("Starting OTA Update");
     lv_obj_clean(lv_scr_act());
 
     lv_obj_t *panel = lv_create_empty_panel(lv_scr_act());
@@ -67,7 +67,7 @@ void ota_do_update(bool variant_automatic)
     lv_label_set_text(update_label, "0/0");
 
     if (!variant_automatic) {
-        Serial.println("Freezing Background Tasks");
+        LOG_LN("Freezing Background Tasks");
         screen_timer_wake();
         screen_timer_stop();
         freeze_request_thread();
@@ -90,7 +90,7 @@ void ota_init()
 {
     //ota_pull.AllowDowngrades(true);
     int result = ota_pull.CheckForOTAUpdate(ota_url, REPO_VERSION, ESP32OTAPull::ActionType::DONT_DO_UPDATE);
-    Serial.printf("OTA Update Result: %d\n", result);
+    LOG_F(("OTA Update Result: %d\n", result))
     update_available = result == ESP32OTAPull::UPDATE_AVAILABLE;
 
     if (global_config.auto_ota_update && update_available)

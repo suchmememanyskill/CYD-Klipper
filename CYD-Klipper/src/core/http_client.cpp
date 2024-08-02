@@ -2,16 +2,19 @@
 
 String get_full_url(String url_part, PRINTER_CONFIG * config)
 {
+    if (config == NULL){
+        config = get_current_printer_config();
+    }
+
     return "http://" + String(config->klipper_host) + ":" + String(config->klipper_port) + url_part;
 }
 
-String get_full_url(String url_part)
+void configure_http_client(HTTPClient &client, String url, bool stream, int timeout, PRINTER_CONFIG * config)
 {
-    return "http://" + String(get_current_printer_config()->klipper_host) + ":" + String(get_current_printer_config()->klipper_port) + url_part;
-}
+    if (config == NULL){
+        config = get_current_printer_config();
+    }
 
-void configure_http_client(HTTPClient &client, String url, bool stream, int timeout)
-{
     if (stream){
         client.useHTTP10(true);
     }
@@ -23,7 +26,7 @@ void configure_http_client(HTTPClient &client, String url, bool stream, int time
 
     client.begin(url);
 
-    if (get_current_printer_config()->auth_configured) {
-        client.addHeader("X-Api-Key", get_current_printer_config()->klipper_auth);
+    if (config->auth_configured) {
+        client.addHeader("X-Api-Key", config->klipper_auth);
     }
 }

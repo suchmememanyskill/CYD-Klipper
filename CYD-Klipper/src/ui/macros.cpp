@@ -8,7 +8,7 @@ PRINTER_CONFIG * curernt_config = NULL;
 static void btn_press(lv_event_t * e){
     lv_obj_t * btn = lv_event_get_target(e);
     const char* macro = (const char*)lv_event_get_user_data(e);
-    Serial.printf("Macro: %s\n", macro);
+    LOG_F(("Macro: %s\n", macro))
     send_gcode(false, macro);
 }
 
@@ -25,7 +25,7 @@ static void power_device_toggle(lv_event_t * e)
     auto state = lv_obj_get_state(lv_event_get_target(e));
     bool checked = (state & LV_STATE_CHECKED == LV_STATE_CHECKED);
     const char* power_device_name = (const char*)lv_event_get_user_data(e);
-    Serial.printf("Power Device: %s, State: %d -> %d\n", power_device_name, !checked, checked);
+    LOG_F(("Power Device: %s, State: %d -> %d\n", power_device_name, !checked, checked))
 
     if (curernt_config != NULL)
         set_power_state(power_device_name, checked, curernt_config);

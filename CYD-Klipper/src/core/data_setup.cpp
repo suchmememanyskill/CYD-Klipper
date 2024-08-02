@@ -43,7 +43,7 @@ void unfreeze_render_thread(){
 
 void send_gcode(bool wait, const char *gcode)
 {
-    Serial.printf("Sending gcode: %s\n", gcode);
+    LOG_F(("Sending gcode: %s\n", gcode))
 
     SETUP_HTTP_CLIENT_FULL("/printer/gcode/script?script=" + urlEncode(gcode), false, wait ? 5000 : 750);
     try
@@ -52,7 +52,7 @@ void send_gcode(bool wait, const char *gcode)
     }
     catch (...)
     {
-        Serial.println("Failed to send gcode");
+        LOG_LN("Failed to send gcode");
     }
 }
 
@@ -73,7 +73,7 @@ int get_slicer_time_estimate_s()
     JsonDocument doc;
     deserializeJson(doc, client.getStream());
     int time_estimate_s = doc["result"]["estimated_time"];
-    Serial.printf("Got slicer time estimate: %ds\n", time_estimate_s);
+    LOG_F(("Got slicer time estimate: %ds\n", time_estimate_s))
     return time_estimate_s;
 }
 
@@ -330,7 +330,7 @@ void fetch_printer_data()
             unfreeze_render_thread();
         }
 
-        Serial.printf("Failed to fetch printer data: %d\n", httpCode);
+        LOG_F(("Failed to fetch printer data: %d\n", httpCode))
     }
 }
 
@@ -349,7 +349,7 @@ void fetch_printer_data_minimal()
 
         delay(10);
         HTTPClient client;
-        configure_http_client(client, get_full_url("/printer/objects/query?webhooks&print_stats&virtual_sdcard", config), true, 1000);
+        configure_http_client(client, get_full_url("/printer/objects/query?webhooks&print_stats&virtual_sdcard", config), true, 1000, config);
         freeze_request_thread();
 
         int httpCode = client.GET();

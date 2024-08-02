@@ -3,6 +3,7 @@
 #include "lvgl.h"
 
 GLOBAL_CONFIG global_config = {0};
+TEMPORARY_CONFIG temporary_config = {0};
 
 COLOR_DEF color_defs[] = {
     {LV_PALETTE_BLUE, 0, LV_PALETTE_RED},
@@ -31,9 +32,9 @@ void verify_version()
     
     GLOBAL_CONFIG config = {0};
     preferences.getBytes("global_config", &config, sizeof(config));
-    Serial.printf("Config version: %d\n", config.version);
+    LOG_F(("Config version: %d\n", config.version))
     if (config.version != CONFIG_VERSION) {
-        Serial.println("Clearing Global Config");
+        LOG_LN("Clearing Global Config");
         preferences.clear();
     }
 
@@ -131,4 +132,11 @@ void load_global_config()
     preferences.begin("global_config", true);
     preferences.getBytes("global_config", &global_config, sizeof(global_config));
     preferences.end();
+
+    #if defined REPO_DEVELOPMENT  &&  REPO_DEVELOPMENT == 1
+        temporary_config.debug = true;
+    #else
+        temporary_config.debug = false;
+    #endif
+    temporary_config.remote_echo = true;
 }

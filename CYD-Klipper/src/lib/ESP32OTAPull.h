@@ -100,7 +100,7 @@ private:
                     size_t bytes_written = Update.write(buff, bytes_read);
                     if (bytes_read != bytes_written)
                     {
-                        // Serial.printf("Unexpected error in OTA: %d %d %d\n", bytes_to_read, bytes_read, bytes_written);
+                        // LOG_F(("Unexpected error in OTA: %d %d %d\n", bytes_to_read, bytes_read, bytes_written))
                         break;
                     }
                     offset += bytes_written;
@@ -212,8 +212,8 @@ public:
             String CDevice = config["Device"].isNull() ? "" : (const char *)config["Device"];
             CVersion = config["Version"].isNull() ? "" : (const char *)config["Version"];
             String CConfig = config["Config"].isNull() ? "" : (const char *)config["Config"];
-            //Serial.printf("Checking %s %s %s %s\n", CBoard.c_str(), CDevice.c_str(), CVersion.c_str(), CConfig.c_str());
-            //Serial.printf("Against %s %s %s %s\n", BoardName.c_str(), DeviceName.c_str(), CurrentVersion, ConfigName.c_str());
+            //LOG_F(("Checking %s %s %s %s\n", CBoard.c_str(), CDevice.c_str(), CVersion.c_str(), CConfig.c_str()))
+            //LOG_F(("Against %s %s %s %s\n", BoardName.c_str(), DeviceName.c_str(), CurrentVersion, ConfigName.c_str()))
             if ((CBoard.isEmpty() || CBoard == BoardName) &&
                 (CDevice.isEmpty() || CDevice == DeviceName) &&
                 (CConfig.isEmpty() || CConfig == ConfigName))
