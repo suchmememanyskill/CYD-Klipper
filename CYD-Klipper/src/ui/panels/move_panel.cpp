@@ -75,7 +75,7 @@ static void keyboard_cb_edit_move_increment(lv_event_t * e)
     }
     
     unsigned short* items[] = {get_current_printer_config()->printer_move_x_steps, get_current_printer_config()->printer_move_y_steps, get_current_printer_config()->printer_move_z_steps};
-    Serial.printf("Setting increment %d %d %f\n", selected_column, selected_row, increment);
+    LOG_F(("Setting increment %d %d %f\n", selected_column, selected_row, increment))
     items[selected_column][selected_row] = increment * 10;
     write_global_config();
     nav_buttons_setup(PANEL_MOVE);

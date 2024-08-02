@@ -5,6 +5,7 @@
 
 #define CONFIG_VERSION 6
 #define PRINTER_CONFIG_COUNT 8
+#define DISPLAY_SECRETS 0
 
 enum {
     REMAINING_TIME_CALC_PERCENTAGE = 0,
@@ -86,7 +87,14 @@ typedef struct _GLOBAL_CONFIG {
     unsigned char screen_timeout;
     unsigned char printer_index;
 } GLOBAL_CONFIG;
+
+// Volatile/temporary config that doesn't survive a reset
+typedef struct _TEMPORARY_CONFIG {
+    bool debug : 1;
+    bool remote_echo : 1;
+} TEMPORARY_CONFIG;
     
+
 typedef struct _COLOR_DEF {
     lv_palette_t primary_color;
     short primary_color_light;
@@ -94,7 +102,12 @@ typedef struct _COLOR_DEF {
 } COLOR_DEF;
 
 extern GLOBAL_CONFIG global_config;
+extern TEMPORARY_CONFIG temporary_config;
 extern COLOR_DEF color_defs[];
+
+#define LOG(x) if(temporary_config.debug){ Serial.print(x);}
+#define LOG_LN(x) if(temporary_config.debug){ Serial.println(x);}
+#define LOG_F(x) if(temporary_config.debug){ Serial.printf x ;}   // use with double braces, LOF_F(("x=%d\n",x));
 
 void write_global_config();
 void verify_version();

@@ -4,6 +4,7 @@
 #include "lvgl.h"
 #include "../ui/ui_utils.h"
 #include <Esp.h>
+#include "../ui/serial/serial_console.h"
 
 #ifndef CPU_FREQ_HIGH
 #define CPU_FREQ_HIGH 240
@@ -117,6 +118,7 @@ void lv_do_calibration(){
     
     while (true){
         lv_handler();
+        serial_console::run();
 
         if (point[0] != 0 && point[1] != 0){
             break;
@@ -175,7 +177,7 @@ void lv_do_calibration(){
     global_config.screen_cal_y_offset = 10.0 - ((float)y1 * global_config.screen_cal_y_mult);
 
     if (global_config.screen_cal_x_mult == std::numeric_limits<float>::infinity() || global_config.screen_cal_y_mult == std::numeric_limits<float>::infinity()){
-        Serial.println("Calibration failed, please try again");
+        LOG_LN("Calibration failed, please try again");
         ESP.restart();
     }
 
@@ -183,7 +185,7 @@ void lv_do_calibration(){
     write_global_config();
 
     lv_obj_clean(lv_scr_act());
-    Serial.printf("Calibration done: X*%.2f + %.2f, Y*%.2f + %.2f\n", global_config.screen_cal_x_mult, global_config.screen_cal_x_offset, global_config.screen_cal_y_mult, global_config.screen_cal_y_offset);
+    LOG_F(("Calibration done: X*%.2f + %.2f, Y*%.2f + %.2f\n", global_config.screen_cal_x_mult, global_config.screen_cal_x_offset, global_config.screen_cal_y_mult, global_config.screen_cal_y_offset))
 }
 
 void set_screen_brightness()
@@ -208,7 +210,7 @@ void screen_timer_wake()
 
     // Reset cpu freq
     setCpuFrequencyMhz(CPU_FREQ_HIGH);
-    Serial.printf("CPU Speed: %d MHz\n", ESP.getCpuFreqMHz());
+    LOG_F(("CPU Speed: %d MHz\n", ESP.getCpuFreqMHz()))
 #endif
 }
 
@@ -220,7 +222,7 @@ void screen_timer_sleep(lv_timer_t *timer)
 
     // Screen is off, no need to make the cpu run fast, the user won't notice ;)
     setCpuFrequencyMhz(CPU_FREQ_LOW);
-    Serial.printf("CPU Speed: %d MHz\n", ESP.getCpuFreqMHz());
+    LOG_F(("CPU Speed: %d MHz\n", ESP.getCpuFreqMHz()))
 #endif
 }
 

@@ -2,6 +2,7 @@
 #include "core/screen_driver.h"
 #include "ui/wifi_setup.h"
 #include "ui/ip_setup.h"
+#include "ui/serial/serial_console.h"
 #include "lvgl.h"
 #include "core/data_setup.h"
 #include "ui/main_ui.h"
@@ -12,11 +13,11 @@
 
 void setup() {
     Serial.begin(115200);
-    Serial.println("Hello World");
+    serial_console::greet();
     load_global_config();
     screen_setup();
     lv_setup();
-    Serial.println("Screen init done");
+    LOG_LN("Screen init done");
     
     wifi_init();
     ota_init();
@@ -31,6 +32,7 @@ void loop(){
     wifi_ok();
     data_loop();
     lv_handler();
+    serial_console::run();
 
     if (is_ready_for_ota_update())
     {

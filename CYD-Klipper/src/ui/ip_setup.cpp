@@ -10,6 +10,7 @@
 #include "switch_printer.h"
 #include "macros.h"
 #include "../core/lv_setup.h"
+#include "serial/serial_console.h"
 
 lv_obj_t * hostEntry;
 lv_obj_t * portEntry;
@@ -66,7 +67,7 @@ connection_status_t verify_ip(){
         return httpCode == 200 ? CONNECT_OK : CONNECT_FAIL;
     }
     catch (...) {
-        Serial.println("Failed to connect");
+        LOG_LN("Failed to connect");
         return CONNECT_FAIL;
     }
 }
@@ -253,5 +254,6 @@ void ip_init(){
     while (!get_current_printer_config()->ip_configured)
     {
         lv_handler();
+        serial_console::run();
     }
 }
