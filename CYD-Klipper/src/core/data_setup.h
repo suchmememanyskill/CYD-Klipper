@@ -54,6 +54,7 @@ extern int klipper_request_consecutive_fail_count;
 
 void data_loop();
 void data_setup();
+void send_estop();
 void send_gcode(bool wait, const char* gcode);
 void move_printer(const char* axis, float amount, bool relative);
 

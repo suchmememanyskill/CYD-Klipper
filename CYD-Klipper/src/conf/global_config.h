@@ -70,6 +70,7 @@ typedef struct _GLOBAL_CONFIG {
             bool display_mode : 1; // Driver specifc usage. Currently only used on ESP32-2432S028R to fix the screen on the usb-c model
             bool disable_m117_messaging : 1;
             bool sort_macros : 1;
+            bool show_estop : 1;
         };
     };
 

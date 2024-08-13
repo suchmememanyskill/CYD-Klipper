@@ -69,6 +69,11 @@ static void btn_click_resume(lv_event_t * e){
     send_gcode(true, "RESUME");
 }
 
+static void btn_click_estop(lv_event_t * e){
+    send_estop();
+    send_gcode(false, "M112");
+}
+
 void progress_panel_init(lv_obj_t* panel){
     auto panel_width = CYD_SCREEN_PANEL_WIDTH_PX - CYD_SCREEN_GAP_PX * 3;
     const auto button_size_mult = 1.3f;
@@ -172,5 +177,19 @@ void progress_panel_init(lv_obj_t* panel){
         lv_obj_set_style_text_font(label, &CYD_SCREEN_FONT_SMALL, 0);
         lv_obj_add_event_cb(label, update_printer_data_stats, LV_EVENT_MSG_RECEIVED, NULL);
         lv_msg_subsribe_obj(DATA_PRINTER_DATA, label, NULL);
+    }
+
+    if (global_config.show_estop)
+    {
+        lv_obj_t * btn = lv_btn_create(panel);
+        lv_obj_set_flex_grow(btn, 1);
+        lv_obj_add_event_cb(btn, btn_click_estop, LV_EVENT_CLICKED, NULL);
+        lv_obj_set_height(btn, CYD_SCREEN_MIN_BUTTON_HEIGHT_PX);
+        
+        lv_obj_align(btn, LV_ALIGN_TOP_LEFT, CYD_SCREEN_GAP_PX, CYD_SCREEN_GAP_PX);
+
+        label = lv_label_create(btn);
+        lv_label_set_text(label, "EMERGENCY STOP");
+        lv_obj_center(label);
     }
 }
