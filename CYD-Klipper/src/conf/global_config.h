@@ -71,6 +71,7 @@ typedef struct _GLOBAL_CONFIG {
             bool disable_m117_messaging : 1;
             bool sort_macros : 1;
             bool show_estop : 1;
+            bool full_filenames : 1;
         };
     };
 

@@ -101,10 +101,28 @@ void progress_panel_init(lv_obj_t* panel){
         lv_msg_subsribe_obj(DATA_PRINTER_DATA, label, NULL);
     }
 
+    // Emergency Stop
+    if (global_config.show_estop){
+        lv_obj_t * btn = lv_btn_create(center_panel);
+        lv_obj_add_event_cb(btn, btn_click_estop, LV_EVENT_CLICKED, NULL);
+        lv_obj_set_height(btn, CYD_SCREEN_MIN_BUTTON_HEIGHT_PX);
+        lv_obj_align(btn, LV_ALIGN_CENTER, LV_ALIGN_CENTER, CYD_SCREEN_GAP_PX);
+
+        lv_obj_set_style_bg_opa(btn, LV_OPA_TRANSP, LV_PART_MAIN);
+        lv_obj_set_style_outline_width(btn, 1, LV_PART_MAIN);
+        lv_obj_set_style_outline_color(btn, lv_color_hex(0xFF0000), LV_PART_MAIN);
+        lv_obj_set_style_text_color(btn, lv_color_hex(0xFF0000), LV_PART_MAIN);
+
+        lv_obj_t * label = lv_label_create(btn);
+        lv_label_set_text(label, LV_SYMBOL_POWER " EMERGENCY STOP");
+        lv_obj_center(label);
+    }
+
     // Filename
     lv_obj_t * label = lv_label_create(center_panel);
     lv_label_set_text(label, printer.print_filename);
-    lv_label_set_long_mode(label, LV_LABEL_LONG_SCROLL_CIRCULAR);
+    if (global_config.full_filenames) lv_label_set_long_mode(label, LV_LABEL_LONG_WRAP);
+    else lv_label_set_long_mode(label, LV_LABEL_LONG_SCROLL_CIRCULAR);
     lv_obj_set_width(label, panel_width);
     
     // Progress Bar
@@ -177,19 +195,5 @@ void progress_panel_init(lv_obj_t* panel){
         lv_obj_set_style_text_font(label, &CYD_SCREEN_FONT_SMALL, 0);
         lv_obj_add_event_cb(label, update_printer_data_stats, LV_EVENT_MSG_RECEIVED, NULL);
         lv_msg_subsribe_obj(DATA_PRINTER_DATA, label, NULL);
-    }
-
-    if (global_config.show_estop)
-    {
-        lv_obj_t * btn = lv_btn_create(panel);
-        lv_obj_set_flex_grow(btn, 1);
-        lv_obj_add_event_cb(btn, btn_click_estop, LV_EVENT_CLICKED, NULL);
-        lv_obj_set_height(btn, CYD_SCREEN_MIN_BUTTON_HEIGHT_PX);
-        
-        lv_obj_align(btn, LV_ALIGN_TOP_LEFT, CYD_SCREEN_GAP_PX, CYD_SCREEN_GAP_PX);
-
-        label = lv_label_create(btn);
-        lv_label_set_text(label, "EMERGENCY STOP");
-        lv_obj_center(label);
     }
 }
