@@ -78,44 +78,32 @@ void progress_panel_init(lv_obj_t* panel){
     auto panel_width = CYD_SCREEN_PANEL_WIDTH_PX - CYD_SCREEN_GAP_PX * 3;
     const auto button_size_mult = 1.3f;
 
-    lv_obj_t * center_panel = lv_create_empty_panel(panel);
-    lv_obj_set_size(center_panel, panel_width, LV_SIZE_CONTENT);
-    lv_layout_flex_column(center_panel);
-
-    if (get_current_printer_config()->show_stats_on_progress_panel == SHOW_STATS_ON_PROGRESS_PANEL_ALL)
-    {
-        lv_obj_align(center_panel, LV_ALIGN_TOP_MID, 0, CYD_SCREEN_GAP_PX);
-    }
-    else 
-    {
-        lv_obj_align(center_panel, LV_ALIGN_CENTER, 0, 0);
-    }
-
-    
-    if (get_current_printer_config()->show_stats_on_progress_panel == SHOW_STATS_ON_PROGRESS_PANEL_LAYER)
-    {
-        lv_obj_t * label = lv_label_create(panel);
-        lv_obj_align(label, LV_ALIGN_TOP_MID, 0, CYD_SCREEN_GAP_PX);
-        lv_obj_set_style_text_font(label, &CYD_SCREEN_FONT_SMALL, 0);
-        lv_obj_add_event_cb(label, update_printer_data_stats, LV_EVENT_MSG_RECEIVED, NULL);
-        lv_msg_subsribe_obj(DATA_PRINTER_DATA, label, NULL);
-    }
-
     // Emergency Stop
     if (global_config.show_estop){
-        lv_obj_t * btn = lv_btn_create(center_panel);
+        lv_obj_t * btn = lv_btn_create(panel);
         lv_obj_add_event_cb(btn, btn_click_estop, LV_EVENT_CLICKED, NULL);
+        
         lv_obj_set_height(btn, CYD_SCREEN_MIN_BUTTON_HEIGHT_PX);
-        lv_obj_align(btn, LV_ALIGN_CENTER, LV_ALIGN_CENTER, CYD_SCREEN_GAP_PX);
-
-        lv_obj_set_style_bg_opa(btn, LV_OPA_TRANSP, LV_PART_MAIN);
-        lv_obj_set_style_outline_width(btn, 1, LV_PART_MAIN);
-        lv_obj_set_style_outline_color(btn, lv_color_hex(0xFF0000), LV_PART_MAIN);
-        lv_obj_set_style_text_color(btn, lv_color_hex(0xFF0000), LV_PART_MAIN);
+        lv_obj_align(btn, LV_ALIGN_TOP_MID, 0, CYD_SCREEN_GAP_PX);
+        lv_obj_set_style_bg_color(btn, lv_color_hex(0xFF0000), LV_PART_MAIN);
 
         lv_obj_t * label = lv_label_create(btn);
         lv_label_set_text(label, LV_SYMBOL_POWER " EMERGENCY STOP");
         lv_obj_center(label);
+    }
+
+    lv_obj_t * center_panel = lv_create_empty_panel(panel);
+    lv_obj_set_size(center_panel, panel_width, LV_SIZE_CONTENT);
+    lv_layout_flex_column(center_panel);
+
+    // Only align progress bar to top mid if necessary to make room for all extras
+    if (get_current_printer_config()->show_stats_on_progress_panel == SHOW_STATS_ON_PROGRESS_PANEL_ALL && CYD_SCREEN_HEIGHT_PX <= 320)
+    {
+        lv_obj_align(center_panel, LV_ALIGN_TOP_MID, 0, CYD_SCREEN_MIN_BUTTON_HEIGHT_PX+(3 * CYD_SCREEN_GAP_PX));
+    }
+    else 
+    {
+        lv_obj_align(center_panel, LV_ALIGN_CENTER, 0, 0);
     }
 
     // Filename
@@ -188,7 +176,7 @@ void progress_panel_init(lv_obj_t* panel){
     lv_obj_align(btn, LV_ALIGN_BOTTOM_RIGHT, -2 * CYD_SCREEN_GAP_PX - CYD_SCREEN_MIN_BUTTON_WIDTH_PX * button_size_mult, -1 * CYD_SCREEN_GAP_PX);
     lv_obj_set_size(btn, CYD_SCREEN_MIN_BUTTON_WIDTH_PX * button_size_mult, CYD_SCREEN_MIN_BUTTON_HEIGHT_PX * button_size_mult);
 
-    if (get_current_printer_config()->show_stats_on_progress_panel >= SHOW_STATS_ON_PROGRESS_PANEL_PARTIAL)
+    if (get_current_printer_config()->show_stats_on_progress_panel > SHOW_STATS_ON_PROGRESS_PANEL_NONE)
     {
         label = lv_label_create(panel);
         lv_obj_align(label, LV_ALIGN_BOTTOM_LEFT, CYD_SCREEN_GAP_PX, -1 * CYD_SCREEN_GAP_PX);
