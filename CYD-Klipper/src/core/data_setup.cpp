@@ -56,6 +56,21 @@ void send_gcode(bool wait, const char *gcode)
     }
 }
 
+void send_estop()
+{
+    LOG_LN("Sending estop");
+
+    SETUP_HTTP_CLIENT_FULL("/printer/emergency_stop", false, 5000);
+    try
+    {
+        client.GET();
+    }
+    catch (...)
+    {
+        LOG_LN("Failed to send estop");
+    }
+}
+
 int get_slicer_time_estimate_s()
 {
     if (printer.state == PRINTER_STATE_IDLE)
