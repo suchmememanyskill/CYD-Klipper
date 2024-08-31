@@ -80,7 +80,7 @@ namespace serial_console
         String word = "";
         do
         {
-            if (input[index] == '\t' || input[index] == ' ' || input[index] == '\n' || input[index] == '\r' || input[index] == '\0')
+            if (input[index] == '\t' || (input[index] == ' ' && (index <= 0 || input[index - 1] != '\\')) || input[index] == '\n' || input[index] == '\r' || input[index] == '\0')
             {
                 if (word.length() > 0)
                 {
@@ -101,7 +101,11 @@ namespace serial_console
             }
             else
             {
-                word += input[index];
+                if (input[index] != '\\')
+                {
+                    word += input[index];
+                }
+
                 index++;
             }
         } while (1);

@@ -94,7 +94,11 @@ void files_panel_init(lv_obj_t* panel){
     int count = 0;
     while (files != NULL && files->name != NULL && count <= 20){
         lv_obj_t * btn = lv_list_add_btn(list, LV_SYMBOL_FILE, files->name);
-        lv_obj_set_style_bg_opa(btn, LV_OPA_TRANSP, 0); 
+        lv_obj_set_style_bg_opa(btn, LV_OPA_TRANSP, 0);
+              
+        if (global_config.full_filenames){
+            lv_label_set_long_mode(lv_obj_get_child(btn, 1), LV_LABEL_LONG_WRAP);
+        }
         lv_obj_add_event_cb(btn, btn_print_file_verify, LV_EVENT_CLICKED, (void*)files);
 
         files += 1;

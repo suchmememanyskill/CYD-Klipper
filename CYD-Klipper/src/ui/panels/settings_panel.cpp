@@ -117,6 +117,20 @@ static void sort_macros_switch(lv_event_t* e){
     write_global_config();
 }
 
+static void show_estop_switch(lv_event_t* e){
+    auto state = lv_obj_get_state(lv_event_get_target(e));
+    bool checked = (state & LV_STATE_CHECKED == LV_STATE_CHECKED);
+    global_config.show_estop = checked;
+    write_global_config();
+}
+
+static void full_filenames_switch(lv_event_t* e){
+    auto state = lv_obj_get_state(lv_event_get_target(e));
+    bool checked = (state & LV_STATE_CHECKED == LV_STATE_CHECKED);
+    global_config.full_filenames = checked;
+    write_global_config();
+}
+
 static void rotate_screen_switch(lv_event_t* e){
     auto state = lv_obj_get_state(lv_event_get_target(e));
     bool checked = (state & LV_STATE_CHECKED == LV_STATE_CHECKED);
@@ -217,6 +231,8 @@ void settings_section_behaviour(lv_obj_t* panel)
             : "Calls FILAMENT_RETRACT and\nFILAMENT_EXTRUDE in temperature menu\nwhen enabled");
 
     lv_create_custom_menu_switch("Sort Macros A->Z", panel, sort_macros_switch, global_config.sort_macros);
+    lv_create_custom_menu_switch("Show Emergency Stop", panel, show_estop_switch, global_config.show_estop);
+    lv_create_custom_menu_switch("Show Full Filenames", panel, full_filenames_switch, global_config.full_filenames);
 }
 
 void settings_section_device(lv_obj_t* panel)
