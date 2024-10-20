@@ -28,7 +28,7 @@ void error_panel_init(lv_obj_t* panel)
     lv_label_set_text(label, printer.state_message);
     lv_obj_set_width(label, CYD_SCREEN_PANEL_WIDTH_PX - CYD_SCREEN_GAP_PX * 2);
     lv_label_set_long_mode(label, LV_LABEL_LONG_WRAP);
-
+    
     lv_obj_t * button_row = lv_create_empty_panel(panel);
     lv_obj_set_size(button_row, CYD_SCREEN_PANEL_WIDTH_PX - CYD_SCREEN_GAP_PX * 2, CYD_SCREEN_MIN_BUTTON_HEIGHT_PX);
     lv_layout_flex_row(button_row);
