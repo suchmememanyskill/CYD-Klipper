@@ -6,6 +6,10 @@ class KlipperPrinter : BasePrinter
 {
     private:
         unsigned char lock_absolute_relative_mode_swap{};
+        unsigned char klipper_request_consecutive_fail_count{};
+        unsigned int slicer_estimated_print_time_s{};
+        unsigned int last_slicer_time_query{};
+        float gcode_offset[3]{};
 
     public:
         KlipperPrinter(int index) : BasePrinter(index)
@@ -26,19 +30,22 @@ class KlipperPrinter : BasePrinter
                 | PrinterTemperatureDeviceNozzle1;
         }
 
-        bool move_printer(const char* axis, float amount, bool relative) = 0;
-        bool execute_feature(PrinterFeatures feature) = 0;
-        bool connect() = 0;
-        bool fetch(PrinterData& data) = 0;
-        void commit_fetch(PrinterData& data) = 0;
-        bool fetch_min(PrinterDataMinimal& data) = 0;
-        void disconnect() = 0;
-        bool get_macros(Macros& macros) = 0;
-        bool execute_macro(const char* macro) = 0;
-        bool get_power_devices(PowerDevices& power_devices) = 0;
-        bool set_power_device_state(const char* device_name, bool state) = 0;
-        bool get_files(Files& files) = 0;
-        bool start_file(const char* file) = 0;
-        bool set_target_temperature(PrinterTemperatureDevice device, float temperature) = 0;
+        bool move_printer(const char* axis, float amount, bool relative);
+        bool execute_feature(PrinterFeatures feature);
+        bool connect();
+        bool fetch();
+        PrinterDataMinimal fetch_min();
+        void disconnect();
+        Macros get_macros();
+        int get_macros_count();
+        bool execute_macro(const char* macro);
+        PowerDevices get_power_devices();
+        int get_power_devices_count();
+        bool set_power_device_state(const char* device_name, bool state);
+        Files get_files();
+        bool start_file(const char* file);
+        bool set_target_temperature(PrinterTemperatureDevice device, float temperature);
         bool send_gcode(const char* gcode, bool wait = true);
+        int get_slicer_time_estimate_s();
+        void configure_http_client(HTTPClient &client, String url_part, bool stream, int timeout);
 };

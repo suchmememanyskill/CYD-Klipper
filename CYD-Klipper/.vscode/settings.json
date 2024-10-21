@@ -13,7 +13,8 @@
         "cstddef": "cpp",
         "functional": "cpp",
         "*.tcc": "cpp",
-        "cmath": "cpp"
+        "cmath": "cpp",
+        "system_error": "cpp"
     },
     "cmake.configureOnOpen": false
 }

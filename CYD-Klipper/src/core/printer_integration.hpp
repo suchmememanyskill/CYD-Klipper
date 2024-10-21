@@ -39,6 +39,20 @@ enum PrinterTemperatureDevice
     PrinterTemperatureDeviceChamber = BIT(9),
 };
 
+enum PrinterTemperatureDeviceIndex
+{
+    PrinterTemperatureDeviceIndexBed = 0,
+    PrinterTemperatureDeviceIndexNozzle1 = 1,
+    PrinterTemperatureDeviceIndexNozzle2 = 2,
+    PrinterTemperatureDeviceIndexNozzle3 = 3,
+    PrinterTemperatureDeviceIndexNozzle4 = 4,
+    PrinterTemperatureDeviceIndexNozzle5 = 5,
+    PrinterTemperatureDeviceIndexNozzle6 = 6,
+    PrinterTemperatureDeviceIndexNozzle7 = 7,
+    PrinterTemperatureDeviceIndexNozzle8 = 8,
+    PrinterTemperatureDeviceIndexChamber = 9,
+};
+
 inline PrinterTemperatureDevice operator|(PrinterTemperatureDevice a, PrinterTemperatureDevice b)
 {
     return static_cast<PrinterTemperatureDevice>(static_cast<int>(a) | static_cast<int>(b));
@@ -83,26 +97,30 @@ typedef struct _PrinterData {
         int feedrate_mm_per_s;
 } PrinterData;
 
-typedef struct _PrinterDataMinimal {
+typedef struct  {
     unsigned char state;
     float print_progress; // 0 -> 1
     unsigned int power_devices;
+    bool success;
 } PrinterDataMinimal;
 
 typedef struct {
     const char** macros;
     unsigned int count;
+    bool success;
 } Macros;
 
 typedef struct {
     const char** power_devices;
     const bool* power_states;
     unsigned int count;
+    bool success;
 } PowerDevices;
 
 typedef struct {
     const char** available_files;
     unsigned int count;
+    bool success;
 } Files;
 
 typedef struct {
@@ -127,24 +145,28 @@ class BasePrinter
         virtual bool move_printer(const char* axis, float amount, bool relative) = 0;
         virtual bool execute_feature(PrinterFeatures feature) = 0;
         virtual bool connect() = 0;
-        virtual bool fetch(PrinterData& data) = 0;
-        virtual void commit_fetch(PrinterData& data) = 0;
-        virtual bool fetch_min(PrinterDataMinimal& data) = 0;
+        virtual bool fetch() = 0;
+        virtual PrinterDataMinimal fetch_min() = 0;
         virtual void disconnect() = 0;
-        virtual bool get_macros(Macros& macros) = 0;
+        virtual Macros get_macros() = 0;
+        virtual int get_macros_count() = 0;
         virtual bool execute_macro(const char* macro) = 0;
-        virtual bool get_power_devices(PowerDevices& power_devices) = 0;
+        virtual PowerDevices get_power_devices() = 0;
+        virtual int get_power_devices_count() = 0;
         virtual bool set_power_device_state(const char* device_name, bool state) = 0;
-        virtual bool get_files(Files& files) = 0;
+        virtual Files get_files() = 0;
         virtual bool start_file(const char* file) = 0;
         virtual bool set_target_temperature(PrinterTemperatureDevice device, float temperature) = 0;
 
-        BasePrinter(unsigned char index) {
-            config_index = index;
-            // TODO: Fetch printer config and global config
-        }
+        BasePrinter(unsigned char index);
+        PrinterData* CopyPrinterData();
 };
 
 BasePrinter* get_current_printer();
 BasePrinter* get_printer(int idx);
-void initialize_printer();
+void initialize_printers();
+
+void store_available_popup_message(const char *message);
+void send_available_popup_message();
+void send_available_data_message();
+void send_available_state_message();
