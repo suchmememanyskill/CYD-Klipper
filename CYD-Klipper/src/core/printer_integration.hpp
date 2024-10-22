@@ -77,6 +77,7 @@ typedef struct _PrinterData {
         };
         PrinterState state;
         char* state_message;
+        char* popup_message;
         float temperatures[10];
         float target_temperatures[10];
         PrinterTemperatureDevice AvailableDevices;
@@ -159,14 +160,9 @@ class BasePrinter
         virtual bool set_target_temperature(PrinterTemperatureDevice device, float temperature) = 0;
 
         BasePrinter(unsigned char index);
-        PrinterData* CopyPrinterData();
+        PrinterData* AnnouncePrinterData();
 };
 
 BasePrinter* get_current_printer();
 BasePrinter* get_printer(int idx);
 void initialize_printers();
-
-void store_available_popup_message(const char *message);
-void send_available_popup_message();
-void send_available_data_message();
-void send_available_state_message();

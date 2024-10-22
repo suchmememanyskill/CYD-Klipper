@@ -211,11 +211,6 @@ bool KlipperPrinter::fetch()
 
             if (printer_data.state_message == NULL || strcmp(printer_data.state_message, message))
             {
-                if (printer_data.state_message != NULL)
-                {
-                    free(printer_data.state_message);
-                }
-
                 printer_data.state_message = (char *)malloc(strlen(message) + 1);
                 strcpy(printer_data.state_message, message);
             }
@@ -286,11 +281,6 @@ bool KlipperPrinter::fetch()
 
                 if (filename != NULL && (printer_data.print_filename == NULL || strcmp(printer_data.print_filename, filename)))
                 {
-                    if (printer_data.print_filename != NULL)
-                    {
-                        free(printer_data.print_filename);
-                    }
-
                     printer_data.print_filename = (char *)malloc(strlen(filename) + 1);
                     strcpy(printer_data.print_filename, filename);
                 }
@@ -325,7 +315,12 @@ bool KlipperPrinter::fetch()
             {
                 printer_data.print_progress = status["display_status"]["progress"];
                 const char* message = status["display_status"]["message"];
-                store_available_popup_message(message);
+
+                if (message != NULL && (printer_data.popup_message == NULL || strcmp(printer_data.popup_message, message)))
+                {
+                    printer_data.popup_message = (char*)malloc(strlen(message) + 1);
+                    strcpy(printer_data.popup_message, message);
+                }
             }
 
             if (printer_data.state == PrinterStatePrinting && printer_data.print_progress > 0)
@@ -458,5 +453,25 @@ PrinterDataMinimal KlipperPrinter::fetch_min()
     {
         data.state = PrinterStateOffline;
         data.power_devices = get_power_devices_count();
+    }
+}
+
+void KlipperPrinter::disconnect()
+{
+    // Nothing to disconnect, everything is http request based
+
+    if (printer_data.state_message != NULL)
+    {
+        free(printer_data.state_message);
+    }
+
+    if (printer_data.print_filename != NULL)
+    {
+        free(printer_data.print_filename);
+    }
+
+    if (printer_data.popup_message != NULL)
+    {
+        free(printer_data.popup_message);
     }
 }
