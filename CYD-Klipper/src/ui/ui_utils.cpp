@@ -34,6 +34,17 @@ void destroy_event_user_data(lv_event_t * e){
     lv_obj_del(obj);
 }
 
+void destroy_event_free_data(lv_event_t * e)
+{
+    void* data = lv_event_get_user_data(e);
+    free(data);
+}
+
+void on_destroy_free_data(lv_obj_t * element, void* ptr)
+{
+    lv_obj_add_event_cb(element, destroy_event_free_data, LV_EVENT_DELETE, ptr);
+}
+
 void lv_create_fullscreen_button_matrix_popup(lv_obj_t * root, lv_event_cb_t title, lv_button_column_t* columns, int column_count){
     const auto full_panel_width = CYD_SCREEN_WIDTH_PX - CYD_SCREEN_GAP_PX * 3;
     const auto full_panel_inner_width = full_panel_width - CYD_SCREEN_GAP_PX * 2 - 4;

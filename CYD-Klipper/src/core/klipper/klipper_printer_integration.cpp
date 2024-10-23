@@ -3,12 +3,11 @@
 #include <HTTPClient.h>
 #include <UrlEncode.h>
 #include <ArduinoJson.h>
+#include <list>
 
 void KlipperPrinter::configure_http_client(HTTPClient &client, String url_part, bool stream, int timeout)
 {
-    if (stream){
-        client.useHTTP10(true);
-    }
+    client.useHTTP10(stream);
 
     if (timeout > 0){
         client.setTimeout(timeout);
@@ -29,9 +28,9 @@ int KlipperPrinter::get_slicer_time_estimate_s()
 
     HTTPClient client;
     configure_http_client(client, "/server/files/metadata?filename=" + urlEncode(printer_data.print_filename), true, 5000);
-    int httpCode = client.GET();
+    int http_code = client.GET();
 
-    if (httpCode != 200) 
+    if (http_code != 200) 
         return 0;
     
     JsonDocument doc;
@@ -165,10 +164,10 @@ bool KlipperPrinter::connect()
     HTTPClient client;
     configure_http_client(client, "/printer/info", false, 1000);
 
-    int httpCode;
+    int http_code;
     try {
-        httpCode = client.GET();
-        return httpCode == 200;
+        http_code = client.GET();
+        return http_code == 200;
     }
     catch (...) {
         LOG_LN("Failed to connect");
@@ -181,8 +180,8 @@ bool KlipperPrinter::fetch()
     HTTPClient client;
     configure_http_client(client, "/printer/objects/query?extruder&heater_bed&toolhead&gcode_move&virtual_sdcard&print_stats&webhooks&fan&display_status", true, 1000);
 
-    int httpCode = client.GET();
-    if (httpCode == 200)
+    int http_code = client.GET();
+    if (http_code == 200)
     {
         if (printer_data.state == PrinterStateOffline)
         {
@@ -367,7 +366,7 @@ bool KlipperPrinter::fetch()
     else
     {
         klipper_request_consecutive_fail_count++;
-        LOG_F(("Failed to fetch printer data: %d\n", httpCode));
+        LOG_F(("Failed to fetch printer data: %d\n", http_code));
 
         if (klipper_request_consecutive_fail_count >= 5) 
         {
@@ -399,8 +398,8 @@ PrinterDataMinimal KlipperPrinter::fetch_min()
     HTTPClient client;
     configure_http_client(client, "/printer/objects/query?webhooks&print_stats&virtual_sdcard", true, 1000);
 
-    int httpCode = client.GET();
-    if (httpCode == 200)
+    int http_code = client.GET();
+    if (http_code == 200)
     {
         data.state = PrinterStateIdle;
         data.power_devices = get_power_devices_count();
@@ -459,19 +458,356 @@ PrinterDataMinimal KlipperPrinter::fetch_min()
 void KlipperPrinter::disconnect()
 {
     // Nothing to disconnect, everything is http request based
+}
 
-    if (printer_data.state_message != NULL)
-    {
-        free(printer_data.state_message);
+Macros KlipperPrinter::get_macros()
+{
+    HTTPClient client;
+    Macros macros;
+
+    configure_http_client(client, "/printer/gcode/help", true, 1000);
+    int http_code = client.GET();
+
+    if (http_code == 200){
+        JsonDocument doc;
+        deserializeJson(doc, client.getStream());
+        auto result = doc["result"].as<JsonObject>();
+        macros.macros = (char**)malloc(sizeof(char*) * 32);
+        macros.count = 0;
+        macros.success = true;
+
+        for (JsonPair i : result){
+            const char *key = i.key().c_str();
+            const char *value = i.value().as<String>().c_str();
+            if (strcmp(value, "CYD_SCREEN_MACRO") == 0) {
+                char* macro = (char*)malloc(strlen(key) + 1);
+                strcpy(macro, key);
+                macros.macros[macros.count++] = macro;
+            }
+        }
+
+        if (global_config->sort_macros)
+        {
+            std::sort(macros.macros, macros.macros + macros.count, [](const char* a, const char* b) {
+                return strcmp(a, b) < 0;
+            });
+        }
     }
 
-    if (printer_data.print_filename != NULL)
-    {
-        free(printer_data.print_filename);
+    return macros;
+}
+
+int KlipperPrinter::get_macros_count()
+{
+    HTTPClient client;
+    configure_http_client(client, "/printer/gcode/help", true, 1000);
+
+    int http_code = client.GET();
+
+    if (http_code == 200){
+        JsonDocument doc;
+        deserializeJson(doc, client.getStream());
+        auto result = doc["result"].as<JsonObject>();
+
+        int count = 0;
+
+        for (JsonPair i : result){
+            const char *value = i.value().as<String>().c_str();
+            if (strcmp(value, "CYD_SCREEN_MACRO") == 0) {
+                count++;
+            }
+        }
+
+        return count;
+    }
+    else {
+        return 0;
+    }
+}
+
+bool KlipperPrinter::execute_macro(const char* macro)
+{
+    return send_gcode(macro);
+}
+
+PowerDevices KlipperPrinter::get_power_devices()
+{
+    HTTPClient client;
+    PowerDevices power_devices;
+    configure_http_client(client, "/machine/device_power/devices", true, 1000);
+
+    int http_code = client.GET();
+
+    if (http_code == 200){
+        JsonDocument doc;
+        deserializeJson(doc, client.getStream());
+        auto result = doc["result"]["devices"].as<JsonArray>();
+        power_devices.power_devices = (char**)malloc(sizeof(char*) * 16);
+        power_devices.power_states = (bool*)malloc(sizeof(bool) * 16);
+        power_devices.count = 0;
+        power_devices.success = true;
+
+        for (auto i : result){
+            const char * device_name = i["device"];
+            const char * device_state = i["status"];
+            power_devices.power_devices[power_devices.count] = (char*)malloc(strlen(device_name) + 1);
+            strcpy(power_devices.power_devices[power_devices.count], device_name);
+            power_devices.power_states[power_devices.count] = strcmp(device_state, "on") == 0;
+            power_devices.count++;
+        }
     }
 
-    if (printer_data.popup_message != NULL)
-    {
-        free(printer_data.popup_message);
+    return power_devices;
+}
+
+int KlipperPrinter::get_power_devices_count()
+{
+    HTTPClient client;
+    configure_http_client(client, "/machine/device_power/devices", true, 1000);
+
+    int http_code = client.GET();
+
+    if (http_code == 200){
+        JsonDocument doc;
+        deserializeJson(doc, client.getStream());
+        auto result = doc["result"]["devices"].as<JsonArray>();
+
+        int count = 0;
+
+        for (auto i : result){
+            count++;
+        }
+
+        return count;
     }
+    else {
+        return 0;
+    }
+}
+
+bool KlipperPrinter::set_power_device_state(const char* device_name, bool state)
+{
+    HTTPClient client;
+    configure_http_client(client, "/machine/device_power/device?device=" + urlEncode(device_name) + "&action=" + (state ? "on" : "off"), true, 1000);
+    return client.POST("") == 200;
+}
+
+typedef struct {
+    char* name;
+    float modified;
+} FileSystemFile;
+
+#define KLIPPER_FILE_FETCH_LIMIT 20
+
+Files KlipperPrinter::get_files()
+{
+    Files files_result;
+    HTTPClient client;
+    LOG_F(("Heap space pre-file-parse: %d bytes\n", esp_get_free_heap_size()))
+    std::list<FileSystemFile> files;
+
+    auto timer_request = millis();
+    configure_http_client(client, "/server/files/list", true, 5000);
+
+    int http_code = client.GET();
+    auto timer_parse = millis();
+
+    if (http_code == 200){
+        JsonDocument doc;
+        auto parseResult = deserializeJson(doc, client.getStream());
+        LOG_F(("Json parse: %s\n", parseResult.c_str()))
+        auto result = doc["result"].as<JsonArray>();
+
+        for (auto file : result){
+            FileSystemFile f = {0};
+            const char* path = file["path"];
+            float modified = file["modified"];
+            auto file_iter = files.begin();
+
+            while (file_iter != files.end()){
+                if ((*file_iter).modified < modified)
+                    break;
+
+                file_iter++;
+            }
+
+            if (file_iter == files.end() && files.size() >= KLIPPER_FILE_FETCH_LIMIT)
+                continue;
+            
+            f.name = (char*)malloc(strlen(path) + 1);
+            if (f.name == NULL){
+                LOG_LN("Failed to allocate memory");
+                continue;
+            }
+            strcpy(f.name, path);
+            f.modified = modified;
+
+            if (file_iter != files.end())
+                files.insert(file_iter, f);
+            else 
+                files.push_back(f);
+
+            if (files.size() > KLIPPER_FILE_FETCH_LIMIT){
+                auto last_entry = files.back();
+
+                if (last_entry.name != NULL)
+                    free(last_entry.name);
+
+                files.pop_back();
+            }
+        }
+    }
+
+    files_result.available_files = (char**)malloc(sizeof(char*) * files.size());
+
+    if (files_result.available_files == NULL){
+        LOG_LN("Failed to allocate memory");
+
+        for (auto file : files){
+            free(file.name);
+        }
+
+        return files_result;
+    }
+
+    for (auto file : files){
+        files_result.available_files[files_result.count++] = file.name;
+    }
+
+    files_result.success = true;
+
+    LOG_F(("Heap space post-file-parse: %d bytes\n", esp_get_free_heap_size()))
+    LOG_F(("Got %d files. Request took %dms, parsing took %dms\n", files.size(), timer_parse - timer_request, millis() - timer_parse))
+    return files_result;    
+}
+
+bool KlipperPrinter::start_file(const char *filename)
+{
+    HTTPClient client;
+    configure_http_client(client, "/printer/print/start?filename=" + urlEncode(filename), false, 1000);
+
+    int httpCode = client.POST("");
+    LOG_F(("Print start: HTTP %d\n", httpCode))
+}
+
+bool KlipperPrinter::set_target_temperature(PrinterTemperatureDevice device, float temperature)
+{
+    char gcode[64] = {0};
+
+    switch (device)
+    {
+        case PrinterTemperatureDeviceBed:
+            sprintf(gcode, "M140 S%d", temperature);
+            break;
+        case PrinterTemperatureDeviceNozzle1:
+            sprintf(gcode, "M104 S%d", temperature);
+            break;
+        default:
+            LOG_F(("Unknown temperature device %d was requested to heat to %.2f", device, temperature));
+            return false;
+    }
+
+    return send_gcode(gcode);
+}
+
+unsigned char* KlipperPrinter::get_32_32_png_image_thumbnail(const char* gcode_filename)
+{
+    HTTPClient client;
+    configure_http_client(client, "/server/files/thumbnails?filename=", true, 1000);
+    char* img_filename_path = NULL;
+    unsigned char* data_png = NULL;
+
+    int http_code = 0;
+    try 
+    {
+        http_code = client.GET();
+    }
+    catch (...)
+    {
+        LOG_LN("Exception while fetching gcode img location");
+        return NULL;
+    }
+
+    if (http_code == 200)
+    {
+        JsonDocument doc;
+        deserializeJson(doc, client.getStream());
+        auto result = doc["result"].as<JsonArray>();
+        const char* chosen_thumb = NULL;
+
+        for (auto file : result){
+            int width = file["width"];
+            int height = file["height"];
+            int size = file["size"];
+            const char* thumbnail = file["thumbnail_path"];
+
+            if (width != height || width != 32)
+                continue;
+
+            if (strcmp(thumbnail + strlen(thumbnail) - 4, ".png"))
+                continue;
+
+            chosen_thumb = thumbnail;
+            break;
+        }
+
+        if (chosen_thumb != NULL){
+            LOG_F(("Found 32x32 PNG gcode img at %s\n", gcode_filename))
+            img_filename_path = (char*)malloc(strlen(chosen_thumb) + 1);
+            strcpy(img_filename_path, chosen_thumb);
+        }
+    }
+    else 
+    {
+        LOG_F(("Failed to fetch gcode image data: %d\n", http_code))
+    }
+
+    if (img_filename_path == NULL)
+    {
+        return NULL;
+    }
+
+    client.end();
+
+    configure_http_client(client, "/server/files/gcodes/" + urlEncode(img_filename_path), false, 2000);
+
+    int http_code = 0;
+    try 
+    {
+        http_code = client.GET();
+    }
+    catch (...)
+    {
+        LOG_LN("Exception while fetching gcode img");
+        return NULL;
+    }
+
+    if (http_code == 200)
+    {
+        size_t len = client.getSize();
+        if (len <= 0)
+        {
+            LOG_LN("No gcode img data");
+            return NULL;
+        }
+
+        data_png = (unsigned char*)malloc(len + 1);
+
+        if (data_png != NULL)
+        {
+            if (len != client.getStream().readBytes(data_png, len))
+            {
+                LOG_LN("Failed to read gcode img data");
+                free(data_png);
+            }
+            else 
+            {
+                free(img_filename_path);
+                return data_png;
+            }
+        }
+    }
+
+    free(img_filename_path);
+    return NULL;
 }

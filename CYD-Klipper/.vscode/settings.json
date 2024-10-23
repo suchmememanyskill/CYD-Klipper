@@ -14,7 +14,8 @@
         "functional": "cpp",
         "*.tcc": "cpp",
         "cmath": "cpp",
-        "system_error": "cpp"
+        "system_error": "cpp",
+        "random": "cpp"
     },
     "cmake.configureOnOpen": false
 }

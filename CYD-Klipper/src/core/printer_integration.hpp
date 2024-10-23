@@ -106,14 +106,14 @@ typedef struct  {
 } PrinterDataMinimal;
 
 typedef struct {
-    const char** macros;
+    char** macros;
     unsigned int count;
     bool success;
 } Macros;
 
 typedef struct {
-    const char** power_devices;
-    const bool* power_states;
+    char** power_devices;
+    bool* power_states;
     unsigned int count;
     bool success;
 } PowerDevices;
@@ -125,8 +125,8 @@ typedef struct {
 } Files;
 
 typedef struct {
-    lv_event_ct_b set_label;
-    lv_event_ct_b open_panel;
+    lv_event_cb_t set_label;
+    lv_event_cb_t open_panel;
 } PrinterUiPanel;
 
 class BasePrinter 
@@ -156,7 +156,8 @@ class BasePrinter
         virtual int get_power_devices_count() = 0;
         virtual bool set_power_device_state(const char* device_name, bool state) = 0;
         virtual Files get_files() = 0;
-        virtual bool start_file(const char* file) = 0;
+        virtual bool start_file(const char* filename) = 0;
+        virtual unsigned char* get_32_32_png_image_thumbnail(const char* gcode_filename);
         virtual bool set_target_temperature(PrinterTemperatureDevice device, float temperature) = 0;
 
         BasePrinter(unsigned char index);

@@ -43,7 +43,8 @@ class KlipperPrinter : BasePrinter
         int get_power_devices_count();
         bool set_power_device_state(const char* device_name, bool state);
         Files get_files();
-        bool start_file(const char* file);
+        bool start_file(const char* filename);
+        unsigned char* get_32_32_png_image_thumbnail(const char* gcode_filename);
         bool set_target_temperature(PrinterTemperatureDevice device, float temperature);
         bool send_gcode(const char* gcode, bool wait = true);
         int get_slicer_time_estimate_s();
