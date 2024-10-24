@@ -6,9 +6,8 @@
 
 static void set_fan_speed_text(lv_event_t * e) {
     lv_obj_t * label = lv_event_get_target(e);
-    KlipperPrinter* printer = (KlipperPrinter*)get_current_printer(); // TODO: pass by ref
     char data[16];
-    sprintf(data, "Fan: %.0f%%", printer->printer_data.fan_speed * 100);
+    sprintf(data, "Fan: %.0f%%", get_current_printer_data()->fan_speed * 100);
     lv_label_set_text(label, data);
 }
 
@@ -43,7 +42,7 @@ static void set_zoffset_text_ex(lv_event_t * e) {
     lv_obj_t * label = lv_event_get_target(e);
     KlipperPrinter* printer = (KlipperPrinter*)get_current_printer(); // TODO: pass by ref
     char data[32];
-    sprintf(data, "Z Offset: %.03f, Z: %.03f", printer->gcode_offset[2], printer->printer_data.position[2]);
+    sprintf(data, "Z Offset: %.03f, Z: %.03f", printer->gcode_offset[2], get_current_printer_data()->position[2]);
     lv_label_set_text(label, data);
 }
 
@@ -82,9 +81,8 @@ lv_button_column_t zoffset_columns[] = {
 
 static void set_speed_mult_text(lv_event_t * e){
     lv_obj_t * label = lv_event_get_target(e);
-    KlipperPrinter* printer = (KlipperPrinter*)get_current_printer(); // TODO: pass by ref
     char data[16];
-    sprintf(data, "Speed: %.0f%%", printer->printer_data.speed_mult * 100);
+    sprintf(data, "Speed: %.0f%%", get_current_printer_data()->speed_mult * 100);
     lv_label_set_text(label, data);
 }
 
@@ -99,8 +97,8 @@ static void set_speed_mult(lv_event_t * e){
 static void set_speed_mult_offset(lv_event_t * e){
     int speed = (int)lv_event_get_user_data(e);
     KlipperPrinter* printer = (KlipperPrinter*)get_current_printer(); // TODO: pass by ref
-    float result = printer->printer_data.speed_mult * 100 + speed;
-    printer->printer_data.speed_mult = result / 100;
+    float result = get_current_printer_data()->speed_mult * 100 + speed;
+    get_current_printer_data()->speed_mult = result / 100;
     char gcode[16];
     sprintf(gcode, "M220 S%.0f", result);
     printer->send_gcode(gcode);
@@ -121,9 +119,8 @@ lv_button_column_t speed_mult_columns[] = {
 
 static void set_extrude_mult_text(lv_event_t * e){
     lv_obj_t * label = lv_event_get_target(e);
-    KlipperPrinter* printer = (KlipperPrinter*)get_current_printer(); // TODO: pass by ref
     char data[16];
-    sprintf(data, "Flow: %.0f%%", printer->printer_data.extrude_mult * 100);
+    sprintf(data, "Flow: %.0f%%", get_current_printer_data()->extrude_mult * 100);
     lv_label_set_text(label, data);
 }
 
@@ -138,8 +135,8 @@ static void set_extrude_mult(lv_event_t * e){
 static void set_extrude_mult_offset(lv_event_t * e){
     int speed = (int)lv_event_get_user_data(e);
     KlipperPrinter* printer = (KlipperPrinter*)get_current_printer(); // TODO: pass by ref
-    float result = printer->printer_data.extrude_mult * 100 + speed;
-    printer->printer_data.extrude_mult = result / 100;
+    float result = get_current_printer_data()->extrude_mult * 100 + speed;
+    get_current_printer_data()->extrude_mult = result / 100;
     char gcode[16];
     sprintf(gcode, "M221 S%.0f", result);
     printer->send_gcode(gcode);
@@ -160,7 +157,7 @@ static void open_fan_speed_panel(lv_event_t * e){
 }
 
 static void open_zoffset_panel(lv_event_t * e){
-    lv_create_fullscreen_button_matrix_popup(lv_scr_act(), set_zoffset_text_ex, zoffset_columns, (get_current_printer()->printer_data.state == PrinterStateIdle) ? 3 : 2);
+    lv_create_fullscreen_button_matrix_popup(lv_scr_act(), set_zoffset_text_ex, zoffset_columns, get_current_printer_data()->state == PrinterStateIdle ? 3 : 2);
 }
 
 static void open_speed_mult_panel(lv_event_t * e){

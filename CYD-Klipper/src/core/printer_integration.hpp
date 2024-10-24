@@ -132,14 +132,14 @@ class BasePrinter
 {
     protected:
         unsigned char config_index{};
+        GLOBAL_CONFIG* global_config{};
+        PrinterData printer_data{};
+        PRINTER_CONFIG* printer_config{};
     
     public:
-        PrinterData printer_data{};
         PrinterFeatures supported_features{};
         PrinterTemperatureDevice supported_temperature_devices{};
         PrinterUiPanel* custom_menus{};
-        PRINTER_CONFIG* printer_config{};
-        GLOBAL_CONFIG* global_config{};
         unsigned char custom_menus_count{};
 
         virtual bool move_printer(const char* axis, float amount, bool relative) = 0;
@@ -166,3 +166,4 @@ class BasePrinter
 BasePrinter* get_current_printer();
 BasePrinter* get_printer(int idx);
 void initialize_printers();
+PrinterData* get_current_printer_data();

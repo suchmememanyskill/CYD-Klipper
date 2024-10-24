@@ -462,6 +462,7 @@ PrinterDataMinimal KlipperPrinter::fetch_min()
 void KlipperPrinter::disconnect()
 {
     // Nothing to disconnect, everything is http request based
+    printer_data.state = PrinterStateOffline;
 }
 
 Macros KlipperPrinter::get_macros()

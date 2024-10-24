@@ -70,3 +70,8 @@ BasePrinter* get_printer(int idx)
 {
     return registered_printers + idx;
 }
+
+PrinterData* get_current_printer_data()
+{
+    return printer_data_copy;
+}
