@@ -61,7 +61,7 @@ bool KlipperPrinter::send_gcode(const char *gcode, bool wait)
 bool KlipperPrinter::move_printer(const char* axis, float amount, bool relative)
 {
     if (!printer_data.homed_axis || printer_data.state == PrinterStatePrinting)
-        return true;
+        return false;
 
     char gcode[64];
     const char* extra = (amount > 0) ? "+" : "";
@@ -86,6 +86,7 @@ bool KlipperPrinter::move_printer(const char* axis, float amount, bool relative)
     send_gcode(gcode);
 
     lock_absolute_relative_mode_swap = 2;
+    return true;
 }
 
 bool KlipperPrinter::execute_feature(PrinterFeatures feature)
@@ -155,8 +156,9 @@ bool KlipperPrinter::execute_feature(PrinterFeatures feature)
             return send_gcode("M104 S0\nM140 S0");
         default:
             LOG_F(("Unsupported printer feature %d", feature));
-            return false;
     }
+
+    return false;
 }
 
 bool KlipperPrinter::connect()
@@ -453,6 +455,8 @@ PrinterDataMinimal KlipperPrinter::fetch_min()
         data.state = PrinterStateOffline;
         data.power_devices = get_power_devices_count();
     }
+
+    return data;
 }
 
 void KlipperPrinter::disconnect()
@@ -686,8 +690,9 @@ bool KlipperPrinter::start_file(const char *filename)
     HTTPClient client;
     configure_http_client(client, "/printer/print/start?filename=" + urlEncode(filename), false, 1000);
 
-    int httpCode = client.POST("");
-    LOG_F(("Print start: HTTP %d\n", httpCode))
+    int http_code = client.POST("");
+    LOG_F(("Print start: HTTP %d\n", http_code))
+    return http_code == 200;
 }
 
 bool KlipperPrinter::set_target_temperature(PrinterTemperatureDevice device, float temperature)

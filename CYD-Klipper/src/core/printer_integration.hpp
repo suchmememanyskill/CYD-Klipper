@@ -1,5 +1,4 @@
 #pragma once
-#include "lvgl.h"
 #include "../conf/global_config.h"
 
 #define BIT(x) 1 << x
@@ -125,8 +124,8 @@ typedef struct {
 } Files;
 
 typedef struct {
-    lv_event_cb_t set_label;
-    lv_event_cb_t open_panel;
+    void* set_label;  // type lv_event_cb_t
+    void* open_panel; // type lv_event_cb_t
 } PrinterUiPanel;
 
 class BasePrinter 

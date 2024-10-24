@@ -2,16 +2,17 @@
 
 #include "../printer_integration.hpp"
 
-class KlipperPrinter : BasePrinter
+class KlipperPrinter : public BasePrinter
 {
     private:
         unsigned char lock_absolute_relative_mode_swap{};
         unsigned char klipper_request_consecutive_fail_count{};
         unsigned int slicer_estimated_print_time_s{};
         unsigned int last_slicer_time_query{};
-        float gcode_offset[3]{};
 
     public:
+        float gcode_offset[3]{};
+
         KlipperPrinter(int index) : BasePrinter(index)
         {
             supported_features = PrinterFeatureRestart
@@ -28,6 +29,8 @@ class KlipperPrinter : BasePrinter
 
             supported_temperature_devices = PrinterTemperatureDeviceBed 
                 | PrinterTemperatureDeviceNozzle1;
+
+            init_ui_panels();
         }
 
         bool move_printer(const char* axis, float amount, bool relative);
@@ -49,4 +52,5 @@ class KlipperPrinter : BasePrinter
         bool send_gcode(const char* gcode, bool wait = true);
         int get_slicer_time_estimate_s();
         void configure_http_client(HTTPClient &client, String url_part, bool stream, int timeout);
+        void init_ui_panels();
 };

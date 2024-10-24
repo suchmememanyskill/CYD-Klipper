@@ -40,7 +40,7 @@ void destroy_event_free_data(lv_event_t * e)
     free(data);
 }
 
-void on_destroy_free_data(lv_obj_t * element, void* ptr)
+void lv_on_destroy_free_data(lv_obj_t * element, void* ptr)
 {
     lv_obj_add_event_cb(element, destroy_event_free_data, LV_EVENT_DELETE, ptr);
 }
