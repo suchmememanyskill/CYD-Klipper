@@ -156,7 +156,14 @@ void fetch_printer_data()
 
 void fetch_printer_data_minimal()
 {
-    // TODO
+    PrinterDataMinimal* data = (PrinterDataMinimal*)malloc(sizeof(PrinterDataMinimal) * get_printer_count());
+    for (int i = 0; i < get_printer_count(); i++)
+    {
+        BasePrinter* printer = get_printer(i);
+        *(data + i) = printer->fetch_min();
+    }
+    announce_printer_data_minimal(data);
+    free(data);
 }
 
 void data_loop()

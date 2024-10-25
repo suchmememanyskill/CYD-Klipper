@@ -1,7 +1,9 @@
 #include "printer_integration.hpp"
 
 unsigned char current_printer_index = 0;
+unsigned char total_printers;
 BasePrinter* registered_printers;
+PrinterDataMinimal* minimal_data_copy;
 PrinterData* printer_data_copy;
 
 BasePrinter::BasePrinter(unsigned char index)
@@ -74,4 +76,15 @@ BasePrinter* get_printer(int idx)
 PrinterData* get_current_printer_data()
 {
     return printer_data_copy;
+}
+
+unsigned int get_printer_count()
+{
+    return total_printers;
+}
+
+void announce_printer_data_minimal(PrinterDataMinimal* printer_data)
+{
+    memcpy(printer_data_copy, printer_data, sizeof(PrinterDataMinimal) * total_printers);
+    lv_msg_send(DATA_PRINTER_MINIMAL, get_current_printer());
 }

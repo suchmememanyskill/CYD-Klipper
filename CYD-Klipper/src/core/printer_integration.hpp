@@ -167,3 +167,5 @@ BasePrinter* get_current_printer();
 BasePrinter* get_printer(int idx);
 void initialize_printers();
 PrinterData* get_current_printer_data();
+unsigned int get_printer_count();
+void announce_printer_data_minimal(PrinterDataMinimal* printer_data);
