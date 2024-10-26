@@ -48,7 +48,7 @@ class KlipperPrinter : public BasePrinter
         Files get_files();
         bool start_file(const char* filename);
         unsigned char* get_32_32_png_image_thumbnail(const char* gcode_filename);
-        bool set_target_temperature(PrinterTemperatureDevice device, float temperature);
+        bool set_target_temperature(PrinterTemperatureDevice device, unsigned int temperature);
         bool send_gcode(const char* gcode, bool wait = true);
         int get_slicer_time_estimate_s();
         void configure_http_client(HTTPClient &client, String url_part, bool stream, int timeout);

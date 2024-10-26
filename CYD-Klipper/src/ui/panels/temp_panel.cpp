@@ -1,8 +1,8 @@
 #include "lvgl.h"
-#include "../../core/data_setup.h"
 #include "../../conf/global_config.h"
 #include <HardwareSerial.h>
 #include "../ui_utils.h"
+#include "../../core/printer_integration.hpp"
 
 enum temp_target{
     TARGET_HOTEND,
@@ -16,37 +16,43 @@ enum temp_target{
 };
 
 static temp_target keyboard_target;
-static char hotend_buff[40];
-static char bed_buff[40];
+
+
 static bool temp_edit_mode = false;
 lv_obj_t* root_panel;
 
 static void update_printer_data_hotend_temp(lv_event_t * e){
     lv_obj_t * label = lv_event_get_target(e);
-    sprintf(hotend_buff, "Hotend: %.0f C (Target: %.0f C)", printer.extruder_temp, printer.extruder_target_temp);
+    char hotend_buff[40];
+    sprintf(hotend_buff, "Hotend: %.0f C (Target: %.0f C)", 
+        get_current_printer_data()->temperatures[PrinterTemperatureDeviceIndex::PrinterTemperatureDeviceIndexNozzle1], 
+        get_current_printer_data()->target_temperatures[PrinterTemperatureDeviceIndex::PrinterTemperatureDeviceIndexNozzle1]);
     lv_label_set_text(label, hotend_buff);
 }
 
 static void update_printer_data_bed_temp(lv_event_t * e){
     lv_obj_t * label = lv_event_get_target(e);
-    sprintf(bed_buff, "Bed: %.0f C (Target: %.0f C)", printer.bed_temp, printer.bed_target_temp);
+    char bed_buff[40];
+    sprintf(bed_buff, "Bed: %.0f C (Target: %.0f C)", 
+        get_current_printer_data()->temperatures[PrinterTemperatureDeviceIndex::PrinterTemperatureDeviceIndexBed], 
+        get_current_printer_data()->target_temperatures[PrinterTemperatureDeviceIndex::PrinterTemperatureDeviceIndexBed]);
     lv_label_set_text(label, bed_buff);
 }
 
 static short get_temp_preset(int target){
     switch (target){
         case TARGET_HOTEND_CONFIG_1:
-            return get_current_printer_config()->hotend_presets[0];
+            return get_current_printer()->printer_config->hotend_presets[0];
         case TARGET_HOTEND_CONFIG_2:
-            return get_current_printer_config()->hotend_presets[1];
+            return get_current_printer()->printer_config->hotend_presets[1];
         case TARGET_HOTEND_CONFIG_3:
-            return get_current_printer_config()->hotend_presets[2];
+            return get_current_printer()->printer_config->hotend_presets[2];
         case TARGET_BED_CONFIG_1:
-            return get_current_printer_config()->bed_presets[0];
+            return get_current_printer()->printer_config->bed_presets[0];
         case TARGET_BED_CONFIG_2:
-            return get_current_printer_config()->bed_presets[1];
+            return get_current_printer()->printer_config->bed_presets[1];
         case TARGET_BED_CONFIG_3:
-            return get_current_printer_config()->bed_presets[2];
+            return get_current_printer()->printer_config->bed_presets[2];
         default:
             return -1;
     }
@@ -63,7 +69,7 @@ static void update_temp_preset_label(lv_event_t * e){
 
 void UpdateConfig(){
     write_global_config();
-    lv_msg_send(DATA_PRINTER_TEMP_PRESET, &printer);
+    lv_msg_send(DATA_PRINTER_TEMP_PRESET, get_current_printer());
 }
 
 static void keyboard_callback(lv_event_t * e){
@@ -76,40 +82,36 @@ static void keyboard_callback(lv_event_t * e){
     if (temp < 0 || temp > 500){
         return;
     }
-
-    char gcode[64];
         
     switch (keyboard_target){
         case TARGET_HOTEND:
-            sprintf(gcode, "M104 S%d", temp);
-            send_gcode(true, gcode);
+            get_current_printer()->set_target_temperature(PrinterTemperatureDevice::PrinterTemperatureDeviceNozzle1, temp);
             break;
         case TARGET_BED:
-            sprintf(gcode, "M140 S%d", temp);
-            send_gcode(true, gcode);
+            get_current_printer()->set_target_temperature(PrinterTemperatureDevice::PrinterTemperatureDeviceBed, temp);
             break;
         case TARGET_HOTEND_CONFIG_1:
-            get_current_printer_config()->hotend_presets[0] = temp;
+            get_current_printer()->printer_config->hotend_presets[0] = temp;
             UpdateConfig();
             break;
         case TARGET_HOTEND_CONFIG_2:
-            get_current_printer_config()->hotend_presets[1] = temp;
+            get_current_printer()->printer_config->hotend_presets[1] = temp;
             UpdateConfig();
             break;
         case TARGET_HOTEND_CONFIG_3:
-            get_current_printer_config()->hotend_presets[2] = temp;
+            get_current_printer()->printer_config->hotend_presets[2] = temp;
             UpdateConfig();
             break;
         case TARGET_BED_CONFIG_1:
-            get_current_printer_config()->bed_presets[0] = temp;
+            get_current_printer()->printer_config->bed_presets[0] = temp;
             UpdateConfig();
             break;
         case TARGET_BED_CONFIG_2:
-            get_current_printer_config()->bed_presets[1] = temp;
+            get_current_printer()->printer_config->bed_presets[1] = temp;
             UpdateConfig();
             break;
         case TARGET_BED_CONFIG_3:
-            get_current_printer_config()->bed_presets[2] = temp;
+            get_current_printer()->printer_config->bed_presets[2] = temp;
             UpdateConfig();
             break;
     }
@@ -126,28 +128,19 @@ static void show_keyboard_with_bed(lv_event_t * e){
 }
 
 static void cooldown_temp(lv_event_t * e){
-    if (printer.state == PRINTER_STATE_PRINTING){
+    if (get_current_printer_data()->state == PrinterState::PrinterStatePrinting){
         return;
     }
     
-    send_gcode(true, "M104 S0");
-    send_gcode(true, "M140 S0");
+    get_current_printer()->execute_feature(PrinterFeatures::PrinterFeatureCooldown);
 }
 
 static void btn_extrude(lv_event_t * e){
-    if (printer.state == PRINTER_STATE_PRINTING){
+    if (get_current_printer_data()->state == PrinterState::PrinterStatePrinting){
         return;
     }
 
-    if (get_current_printer_config()->custom_filament_move_macros)
-    {
-        send_gcode(true, "FILAMENT_EXTRUDE");
-    }
-    else 
-    {
-        send_gcode(true, "M83");
-        send_gcode(true, "G1 E25 F300");
-    }
+    get_current_printer()->execute_feature(PrinterFeatures::PrinterFeatureExtrude);
 }
 
 static void set_temp_via_preset(lv_event_t * e){
@@ -160,13 +153,10 @@ static void set_temp_via_preset(lv_event_t * e){
         return;
     }
 
-    char gcode[64];
-    if (target <= TARGET_HOTEND_CONFIG_3)
-        sprintf(gcode, "M104 S%d", value);
-    else 
-        sprintf(gcode, "M140 S%d", value);
-    
-    send_gcode(true, gcode);
+    get_current_printer()->set_target_temperature(TARGET_HOTEND_CONFIG_3
+        ? PrinterTemperatureDevice::PrinterTemperatureDeviceNozzle1
+        : PrinterTemperatureDevice::PrinterTemperatureDeviceBed
+        , value);
 }
 
 static void btn_toggleable_edit(lv_event_t * e){
@@ -176,19 +166,11 @@ static void btn_toggleable_edit(lv_event_t * e){
 }
 
 static void btn_retract(lv_event_t * e){
-    if (printer.state == PRINTER_STATE_PRINTING){
+    if (get_current_printer_data()->state == PrinterState::PrinterStatePrinting){
         return;
     }
 
-    if (get_current_printer_config()->custom_filament_move_macros)
-    {
-        send_gcode(true, "FILAMENT_RETRACT");
-    }
-    else 
-    {
-        send_gcode(true, "M83");
-        send_gcode(true, "G1 E-25 F300");
-    }
+    get_current_printer()->execute_feature(PrinterFeatures::PrinterFeatureRetract);
 }
 
 static void set_chart_range(lv_event_t * e) {
@@ -218,25 +200,25 @@ static void set_chart_range(lv_event_t * e) {
 static void set_hotend_temp_chart(lv_event_t * e){
     lv_obj_t * chart = lv_event_get_target(e);
     lv_chart_series_t * series = (lv_chart_series_t *)lv_event_get_user_data(e);
-    lv_chart_set_next_value(chart, series, printer.extruder_temp);
+    lv_chart_set_next_value(chart, series, get_current_printer_data()->temperatures[PrinterTemperatureDeviceIndex::PrinterTemperatureDeviceIndexNozzle1]);
 }
 
 static void set_hotend_target_temp_chart(lv_event_t * e){
     lv_obj_t * chart = lv_event_get_target(e);
     lv_chart_series_t * series = (lv_chart_series_t *)lv_event_get_user_data(e);
-    lv_chart_set_next_value(chart, series, printer.extruder_target_temp);
+    lv_chart_set_next_value(chart, series, get_current_printer_data()->target_temperatures[PrinterTemperatureDeviceIndex::PrinterTemperatureDeviceIndexNozzle1]);
 }
 
 static void set_bed_temp_chart(lv_event_t * e){
     lv_obj_t * chart = lv_event_get_target(e);
     lv_chart_series_t * series = (lv_chart_series_t *)lv_event_get_user_data(e);
-    lv_chart_set_next_value(chart, series, printer.bed_temp);
+    lv_chart_set_next_value(chart, series, get_current_printer_data()->temperatures[PrinterTemperatureDeviceIndex::PrinterTemperatureDeviceIndexBed]);
 }
 
 static void set_bed_target_temp_chart(lv_event_t * e){
     lv_obj_t * chart = lv_event_get_target(e);
     lv_chart_series_t * series = (lv_chart_series_t *)lv_event_get_user_data(e);
-    lv_chart_set_next_value(chart, series, printer.bed_target_temp);
+    lv_chart_set_next_value(chart, series, get_current_printer_data()->target_temperatures[PrinterTemperatureDeviceIndex::PrinterTemperatureDeviceIndexBed]);
 }
 
 void create_charts(lv_obj_t * root)
@@ -251,13 +233,13 @@ void create_charts(lv_obj_t * root)
     lv_chart_set_update_mode(chart, LV_CHART_UPDATE_MODE_SHIFT);
 
     lv_chart_series_t * ser1 = lv_chart_add_series(chart, lv_palette_main(LV_PALETTE_ORANGE), LV_CHART_AXIS_PRIMARY_Y);
-    lv_chart_set_all_value(chart, ser1, printer.extruder_target_temp);
+    lv_chart_set_all_value(chart, ser1, get_current_printer_data()->target_temperatures[PrinterTemperatureDeviceIndex::PrinterTemperatureDeviceIndexNozzle1]);
     lv_chart_series_t * ser2 = lv_chart_add_series(chart, lv_palette_main(LV_PALETTE_RED), LV_CHART_AXIS_PRIMARY_Y);
-    lv_chart_set_all_value(chart, ser2, printer.extruder_temp);
+    lv_chart_set_all_value(chart, ser2, get_current_printer_data()->temperatures[PrinterTemperatureDeviceIndex::PrinterTemperatureDeviceIndexNozzle1]);
     lv_chart_series_t * ser3 = lv_chart_add_series(chart, lv_palette_main(LV_PALETTE_TEAL), LV_CHART_AXIS_PRIMARY_Y);
-    lv_chart_set_all_value(chart, ser3, printer.bed_target_temp);
+    lv_chart_set_all_value(chart, ser3, get_current_printer_data()->temperatures[PrinterTemperatureDeviceIndex::PrinterTemperatureDeviceIndexBed]);
     lv_chart_series_t * ser4 = lv_chart_add_series(chart, lv_palette_main(LV_PALETTE_BLUE), LV_CHART_AXIS_PRIMARY_Y);
-    lv_chart_set_all_value(chart, ser4, printer.bed_temp);
+    lv_chart_set_all_value(chart, ser4, get_current_printer_data()->target_temperatures[PrinterTemperatureDeviceIndex::PrinterTemperatureDeviceIndexBed]);
 
     lv_obj_add_event_cb(chart, set_hotend_target_temp_chart, LV_EVENT_MSG_RECEIVED, ser1);
     lv_obj_add_event_cb(chart, set_hotend_temp_chart, LV_EVENT_MSG_RECEIVED, ser2);
@@ -391,5 +373,5 @@ void temp_panel_init(lv_obj_t * panel){
     lv_obj_center(label);
 
     lv_obj_scroll_to_y(root_temp_panel, 9999, LV_ANIM_OFF);
-    lv_msg_send(DATA_PRINTER_TEMP_PRESET, &printer);
+    lv_msg_send(DATA_PRINTER_TEMP_PRESET, get_current_printer());
 }

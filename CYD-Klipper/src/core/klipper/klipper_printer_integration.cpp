@@ -696,7 +696,7 @@ bool KlipperPrinter::start_file(const char *filename)
     return http_code == 200;
 }
 
-bool KlipperPrinter::set_target_temperature(PrinterTemperatureDevice device, float temperature)
+bool KlipperPrinter::set_target_temperature(PrinterTemperatureDevice device, unsigned int temperature)
 {
     char gcode[64] = {0};
 

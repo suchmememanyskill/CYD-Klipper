@@ -78,7 +78,9 @@ static void btn_print_file_verify(lv_event_t * e){
 }
 
 void files_panel_init(lv_obj_t* panel){
+    freeze_request_thread();
     Files files = get_current_printer()->get_files();
+    unfreeze_request_thread();
 
     if (!files.success || files.count <= 0){
         lv_obj_t * label = lv_label_create(panel);
