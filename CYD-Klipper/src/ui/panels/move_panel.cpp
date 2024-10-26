@@ -5,6 +5,7 @@
 #include "../ui_utils.h"
 #include <stdio.h>
 #include <Esp.h>
+#include "../../core/printer_integration.hpp"
 
 static bool last_homing_state = false;
 static bool move_edit_mode = false;
@@ -21,7 +22,7 @@ char z_offset_labels[6 * OFFSET_LABEL_SIZE] = {0};
 
 static void calculate_offsets_from_current_printer()
 {
-    unsigned short* items[] = {get_current_printer_config()->printer_move_x_steps, get_current_printer_config()->printer_move_y_steps, get_current_printer_config()->printer_move_z_steps};
+    unsigned short* items[] = {get_current_printer()->printer_config->printer_move_x_steps, get_current_printer()->printer_config->printer_move_y_steps, get_current_printer()->printer_config->printer_move_z_steps};
     float* offsets[] = {(float*)x_offsets, (float*)y_offsets, (float*)z_offsets};
     char * labels[] = {(char*)x_offset_labels, (char*)y_offset_labels, (char*)z_offset_labels};
 
@@ -74,7 +75,7 @@ static void keyboard_cb_edit_move_increment(lv_event_t * e)
         return;
     }
     
-    unsigned short* items[] = {get_current_printer_config()->printer_move_x_steps, get_current_printer_config()->printer_move_y_steps, get_current_printer_config()->printer_move_z_steps};
+    unsigned short* items[] = {get_current_printer()->printer_config->printer_move_x_steps, get_current_printer()->printer_config->printer_move_y_steps, get_current_printer()->printer_config->printer_move_z_steps};
     LOG_F(("Setting increment %d %d %f\n", selected_column, selected_row, increment))
     items[selected_column][selected_row] = increment * 10;
     write_global_config();
@@ -109,7 +110,7 @@ static void x_line_button_press(lv_event_t * e) {
     }
     
     float data = *data_pointer;
-    move_printer("X", data, true);
+    get_current_printer()->move_printer("X", data, true);
 }
 
 static void y_line_button_press(lv_event_t * e) {
@@ -122,7 +123,7 @@ static void y_line_button_press(lv_event_t * e) {
     }
 
     float data = *data_pointer;
-    move_printer("Y", data, true);
+    get_current_printer()->move_printer("Y", data, true);
 }
 
 static void z_line_button_press(lv_event_t * e) {
@@ -135,27 +136,27 @@ static void z_line_button_press(lv_event_t * e) {
     }
 
     float data = *data_pointer;
-    move_printer("Z", data, true);
+    get_current_printer()->move_printer("Z", data, true);
 }
 
 static void x_pos_update(lv_event_t * e){
     lv_obj_t * label = lv_event_get_target(e);
     char x_pos_buff[12];
-    sprintf(x_pos_buff, "X: %.1f", printer.position[0]);
+    sprintf(x_pos_buff, "X: %.1f", get_current_printer_data()->position[0]);
     lv_label_set_text(label, x_pos_buff);
 }
 
 static void y_pos_update(lv_event_t * e){
     lv_obj_t * label = lv_event_get_target(e);
     char y_pos_buff[12];
-    sprintf(y_pos_buff, "Y: %.1f", printer.position[1]);
+    sprintf(y_pos_buff, "Y: %.1f", get_current_printer_data()->position[1]);
     lv_label_set_text(label, y_pos_buff);
 }
 
 static void z_pos_update(lv_event_t * e){
     lv_obj_t * label = lv_event_get_target(e);
     char z_pos_buff[12];
-    sprintf(z_pos_buff, "Z: %.2f", printer.position[2]);
+    sprintf(z_pos_buff, "Z: %.2f", get_current_printer_data()->position[2]);
     lv_label_set_text(label, z_pos_buff);
 }
 
@@ -163,17 +164,17 @@ lv_event_cb_t button_callbacks[] = {x_line_button_press, y_line_button_press, z_
 lv_event_cb_t position_callbacks[] = {x_pos_update, y_pos_update, z_pos_update};
 
 static void home_button_click(lv_event_t * e) {
-    if (printer.state == PRINTER_STATE_PRINTING)
+    if (get_current_printer_data()->state == PrinterState::PrinterStatePrinting)
         return;
 
-    send_gcode(false, "G28");
+    get_current_printer()->execute_feature(PrinterFeatures::PrinterFeatureHome);
 } 
 
 static void disable_steppers_click(lv_event_t * e) {
-    if (printer.state == PRINTER_STATE_PRINTING)
+    if (get_current_printer_data()->state == PrinterState::PrinterStatePrinting)
         return;
 
-    send_gcode(true, "M18");
+    get_current_printer()->execute_feature(PrinterFeatures::PrinterFeatureDisableSteppers);
 } 
 
 static void switch_to_stat_panel(lv_event_t * e) {
@@ -194,7 +195,7 @@ static void line_custom_set(const char * axis, const char *text)
     if (pos < 0 || pos > 500)
         return;
 
-    move_printer(axis, pos, false);
+    get_current_printer()->move_printer(axis, pos, false);
 }
 
 static void x_line_custom_callback(lv_event_t * e) {
@@ -339,28 +340,28 @@ inline void root_panel_steppers_unlocked(lv_obj_t * root_panel){
 }
 
 static void root_panel_state_update(lv_event_t * e){
-    if (last_homing_state == printer.homed_axis)
+    if (last_homing_state == get_current_printer_data()->homed_axis)
         return;
 
     lv_obj_t * panel = lv_event_get_target(e);
-    last_homing_state = printer.homed_axis;
+    last_homing_state = get_current_printer_data()->homed_axis;
 
     lv_obj_clean(panel);
 
-    if (printer.homed_axis) 
+    if (get_current_printer_data()->homed_axis) 
         root_panel_steppers_locked(panel);
     else 
         root_panel_steppers_unlocked(panel);
 }
 
 void move_panel_init(lv_obj_t* panel){
-    if (printer.state == PRINTER_STATE_PRINTING){
+    if (get_current_printer_data()->state == PrinterState::PrinterStatePrinting){
         stats_panel_init(panel);
         return;
     }
 
     calculate_offsets_from_current_printer();
-    last_homing_state = !printer.homed_axis;
+    last_homing_state = !get_current_printer_data()->homed_axis;
 
     lv_obj_add_event_cb(panel, root_panel_state_update, LV_EVENT_MSG_RECEIVED, NULL);
     lv_msg_subsribe_obj(DATA_PRINTER_DATA, panel, NULL);

@@ -2,10 +2,10 @@
 #include "global_config.h"
 #include "lvgl.h"
 
-GLOBAL_CONFIG global_config = {0};
-TEMPORARY_CONFIG temporary_config = {0};
+GlobalConfig global_config = {0};
+TemporaryConfig temporary_config = {0};
 
-COLOR_DEF color_defs[] = {
+ColorDefinition color_defs[] = {
     {LV_PALETTE_BLUE, 0, LV_PALETTE_RED},
     {LV_PALETTE_GREEN, 0, LV_PALETTE_PURPLE},
     {LV_PALETTE_LIME, -2, LV_PALETTE_PURPLE},
@@ -30,7 +30,7 @@ void verify_version()
     if (!preferences.begin("global_config", false))
         return;
     
-    GLOBAL_CONFIG config = {0};
+    GlobalConfig config = {0};
     preferences.getBytes("global_config", &config, sizeof(config));
     LOG_F(("Config version: %d\n", config.version))
     if (config.version != CONFIG_VERSION) {
@@ -41,7 +41,7 @@ void verify_version()
     preferences.end();
 }
 
-PRINTER_CONFIG* get_current_printer_config()
+PrinterConfiguration* get_current_printer_config()
 {
     return &global_config.printer_config[global_config.printer_index];
 }
@@ -70,8 +70,8 @@ void set_printer_config_index(int index)
     if (index < 0 || index >= PRINTER_CONFIG_COUNT)
         return;
 
-    PRINTER_CONFIG* old_config = &global_config.printer_config[global_config.printer_index];
-    PRINTER_CONFIG* new_config = &global_config.printer_config[index];
+    PrinterConfiguration* old_config = &global_config.printer_config[global_config.printer_index];
+    PrinterConfiguration* new_config = &global_config.printer_config[index];
 
     global_config.printer_index = index;
 

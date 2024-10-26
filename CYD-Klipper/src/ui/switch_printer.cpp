@@ -17,7 +17,7 @@ void switch_printer(int index)
 
 static void btn_switch_printer(lv_event_t *e){
     lv_obj_t *btn = lv_event_get_target(e);
-    PRINTER_CONFIG * config = (PRINTER_CONFIG*)lv_event_get_user_data(e);
+    PrinterConfiguration * config = (PrinterConfiguration*)lv_event_get_user_data(e);
     int index = config - global_config.printer_config;
 
     switch_printer(index);
@@ -45,7 +45,7 @@ void switch_printer_init() {
     lv_obj_center(label);
 
     for (int i = 0; i < PRINTER_CONFIG_COUNT; i++){
-        PRINTER_CONFIG * config = &global_config.printer_config[i];
+        PrinterConfiguration * config = &global_config.printer_config[i];
         const char* printer_name = (config->printer_name[0] == 0) ? config->klipper_host : config->printer_name;
 
         if (config == get_current_printer_config() && config->ip_configured)

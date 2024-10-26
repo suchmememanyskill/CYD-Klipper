@@ -97,7 +97,7 @@ typedef struct _PrinterData {
         int feedrate_mm_per_s;
 } PrinterData;
 
-typedef struct  {
+typedef struct {
     unsigned char state;
     float print_progress; // 0 -> 1
     unsigned int power_devices;
@@ -118,7 +118,7 @@ typedef struct {
 } PowerDevices;
 
 typedef struct {
-    const char** available_files;
+    char** available_files;
     unsigned int count;
     bool success;
 } Files;
@@ -132,11 +132,10 @@ class BasePrinter
 {
     protected:
         unsigned char config_index{};
-        GLOBAL_CONFIG* global_config{};
         PrinterData printer_data{};
-        PRINTER_CONFIG* printer_config{};
-    
+        
     public:
+        PrinterConfiguration* printer_config{};
         PrinterFeatures supported_features{};
         PrinterTemperatureDevice supported_temperature_devices{};
         PrinterUiPanel* custom_menus{};
@@ -148,12 +147,15 @@ class BasePrinter
         virtual bool fetch() = 0;
         virtual PrinterDataMinimal fetch_min() = 0;
         virtual void disconnect() = 0;
+        // Free macros externally when done
         virtual Macros get_macros() = 0;
         virtual int get_macros_count() = 0;
         virtual bool execute_macro(const char* macro) = 0;
+        // Free power devices externally when done
         virtual PowerDevices get_power_devices() = 0;
         virtual int get_power_devices_count() = 0;
         virtual bool set_power_device_state(const char* device_name, bool state) = 0;
+        // Free files externally when done
         virtual Files get_files() = 0;
         virtual bool start_file(const char* filename) = 0;
         virtual unsigned char* get_32_32_png_image_thumbnail(const char* gcode_filename);
@@ -161,7 +163,14 @@ class BasePrinter
 
         BasePrinter(unsigned char index);
         PrinterData* AnnouncePrinterData();
+        void save_printer_config();
 };
+
+#define DATA_PRINTER_STATE 1
+#define DATA_PRINTER_DATA 2
+#define DATA_PRINTER_TEMP_PRESET 3
+#define DATA_PRINTER_MINIMAL 4
+#define DATA_PRINTER_POPUP 5
 
 BasePrinter* get_current_printer();
 BasePrinter* get_printer(int idx);
@@ -169,3 +178,7 @@ void initialize_printers();
 PrinterData* get_current_printer_data();
 unsigned int get_printer_count();
 void announce_printer_data_minimal(PrinterDataMinimal* printer_data);
+PrinterDataMinimal* get_printer_data_minimal(int idx);
+int get_current_printer_index();
+void add_printer();
+void set_current_printer(int idx);

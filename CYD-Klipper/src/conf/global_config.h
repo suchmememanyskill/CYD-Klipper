@@ -20,7 +20,14 @@ enum {
     SHOW_STATS_ON_PROGRESS_PANEL_ALL = 3,
 };
 
-typedef struct _PRINTER_CONFIG {
+enum PrinterType {
+    PrinterTypeKlipper = 0,
+    PrinterTypeKlipperSerial = 1,
+    PrinterTypeBambu = 2,
+    PrinterTypeOctoprint = 3,
+};
+
+typedef struct {
     union {
         unsigned int raw;
         struct {
@@ -35,6 +42,7 @@ typedef struct _PRINTER_CONFIG {
             unsigned char show_stats_on_progress_panel : 2;
 
             bool custom_filament_move_macros : 1;
+            PrinterType printer_type : 3;
         };
     };
 
@@ -51,9 +59,9 @@ typedef struct _PRINTER_CONFIG {
     unsigned short printer_move_x_steps[3];
     unsigned short printer_move_y_steps[3];
     unsigned short printer_move_z_steps[3];
-} PRINTER_CONFIG;
+} PrinterConfiguration;
 
-typedef struct _GLOBAL_CONFIG {
+typedef struct {
     unsigned char version;
     union {
         unsigned int raw;
@@ -75,7 +83,7 @@ typedef struct _GLOBAL_CONFIG {
         };
     };
 
-    PRINTER_CONFIG printer_config[PRINTER_CONFIG_COUNT];
+    PrinterConfiguration printer_config[PRINTER_CONFIG_COUNT];
 
     float screen_cal_x_offset;
     float screen_cal_x_mult;
@@ -88,24 +96,23 @@ typedef struct _GLOBAL_CONFIG {
     unsigned char brightness;
     unsigned char screen_timeout;
     unsigned char printer_index;
-} GLOBAL_CONFIG;
+} GlobalConfig;
 
 // Volatile/temporary config that doesn't survive a reset
-typedef struct _TEMPORARY_CONFIG {
+typedef struct {
     bool debug : 1;
     bool remote_echo : 1;
-} TEMPORARY_CONFIG;
+} TemporaryConfig;
     
-
-typedef struct _COLOR_DEF {
+typedef struct {
     lv_palette_t primary_color;
     short primary_color_light;
     lv_palette_t secondary_color;
-} COLOR_DEF;
+} ColorDefinition;
 
-extern GLOBAL_CONFIG global_config;
-extern TEMPORARY_CONFIG temporary_config;
-extern COLOR_DEF color_defs[];
+extern GlobalConfig global_config;
+extern TemporaryConfig temporary_config;
+extern ColorDefinition color_defs[];
 
 #define LOG(x) if(temporary_config.debug){ Serial.print(x);}
 #define LOG_LN(x) if(temporary_config.debug){ Serial.println(x);}
@@ -115,9 +122,9 @@ void write_global_config();
 void verify_version();
 void load_global_config();
 
-PRINTER_CONFIG* get_current_printer_config();
-int get_printer_config_count();
-void set_printer_config_index(int index);
-int get_printer_config_free_index();
+//PRINTER_CONFIG* get_current_printer_config();
+//int get_printer_config_count();
+//void set_printer_config_index(int index);
+//int get_printer_config_free_index();
 
 #endif // !_GLOBAL_CONFIG_INIT

@@ -1,4 +1,6 @@
 #include "printer_integration.hpp"
+#include "lv_setup.h"
+#include "screen_driver.h"
 
 unsigned char current_printer_index = 0;
 unsigned char total_printers;
@@ -20,12 +22,6 @@ BasePrinter::BasePrinter(unsigned char index)
     // TODO: Fetch printer config and global config
 }
 
-#define DATA_PRINTER_STATE 1
-#define DATA_PRINTER_DATA 2
-#define DATA_PRINTER_TEMP_PRESET 3
-#define DATA_PRINTER_MINIMAL 4
-#define DATA_PRINTER_POPUP 5
-
 PrinterData* BasePrinter::AnnouncePrinterData()
 {
     char* old_state_message = printer_data_copy->state_message;
@@ -37,16 +33,16 @@ PrinterData* BasePrinter::AnnouncePrinterData()
     if (old_state_message != printer_data_copy->state_message)
     {
         free(old_state_message);
-        lv_msg_send(DATA_PRINTER_STATE, get_current_printer());
-    }
-    else if (printer_data.state != printer_data_copy->state)
-    {
-        lv_msg_send(DATA_PRINTER_STATE, get_current_printer());
     }
 
     if (old_print_filename != printer_data_copy->print_filename)
     {
         free(old_print_filename);
+    }
+
+    if (printer_data.state != printer_data_copy->state)
+    {
+        lv_msg_send(DATA_PRINTER_STATE, get_current_printer());
     }
 
     if (old_popup_message != printer_data_copy->popup_message)
@@ -73,6 +69,11 @@ BasePrinter* get_printer(int idx)
     return registered_printers + idx;
 }
 
+int get_current_printer_index()
+{
+    return current_printer_index;
+}
+
 PrinterData* get_current_printer_data()
 {
     return printer_data_copy;
@@ -87,4 +88,27 @@ void announce_printer_data_minimal(PrinterDataMinimal* printer_data)
 {
     memcpy(printer_data_copy, printer_data, sizeof(PrinterDataMinimal) * total_printers);
     lv_msg_send(DATA_PRINTER_MINIMAL, get_current_printer());
+}
+
+PrinterDataMinimal* get_printer_data_minimal(int idx)
+{
+    return &(minimal_data_copy[idx]);
+}
+
+void BasePrinter::save_printer_config()
+{
+    // TODO
+}
+
+
+void add_printer()
+{
+
+}
+
+void set_current_printer(int idx)
+{
+    //set_printer_config_index(index);
+    set_color_scheme();
+    set_invert_display();
 }

@@ -15,7 +15,12 @@
         "*.tcc": "cpp",
         "cmath": "cpp",
         "system_error": "cpp",
-        "random": "cpp"
+        "random": "cpp",
+        "optional": "cpp",
+        "limits": "cpp",
+        "memory": "cpp",
+        "new": "cpp",
+        "type_traits": "cpp"
     },
     "cmake.configureOnOpen": false
 }

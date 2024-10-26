@@ -1,13 +1,19 @@
 #include "panel.h"
 #include "../../core/data_setup.h"
 #include "../ui_utils.h"
+#include "../../core/printer_integration.hpp"
 
 static void btn_click_restart(lv_event_t * e){
-    send_gcode(false, "RESTART");
+    get_current_printer()->execute_feature(PrinterFeatureRestart);
 }
 
 static void btn_click_firmware_restart(lv_event_t * e){
-    send_gcode(false, "FIRMWARE_RESTART");
+    get_current_printer()->execute_feature(PrinterFeatureFirmwareRestart);
+}
+
+static void set_state_message_text(lv_event_t * e) {
+    lv_obj_t * label = lv_event_get_target(e);
+    lv_label_set_text(label, get_current_printer_data()->state_message);
 }
 
 void error_panel_init(lv_obj_t* panel) 
@@ -25,9 +31,10 @@ void error_panel_init(lv_obj_t* panel)
     lv_obj_set_width(panel_with_text, CYD_SCREEN_PANEL_WIDTH_PX - CYD_SCREEN_GAP_PX * 2);
 
     label = lv_label_create(panel_with_text);
-    lv_label_set_text(label, printer.state_message);
     lv_obj_set_width(label, CYD_SCREEN_PANEL_WIDTH_PX - CYD_SCREEN_GAP_PX * 2);
     lv_label_set_long_mode(label, LV_LABEL_LONG_WRAP);
+    lv_obj_add_event_cb(label, set_state_message_text, LV_EVENT_MSG_RECEIVED, NULL);
+    lv_msg_subscribe_obj(DATA_PRINTER_DATA, label, NULL);
     
     lv_obj_t * button_row = lv_create_empty_panel(panel);
     lv_obj_set_size(button_row, CYD_SCREEN_PANEL_WIDTH_PX - CYD_SCREEN_GAP_PX * 2, CYD_SCREEN_MIN_BUTTON_HEIGHT_PX);

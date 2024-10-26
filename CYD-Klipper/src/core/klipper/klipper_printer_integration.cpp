@@ -144,7 +144,7 @@ bool KlipperPrinter::execute_feature(PrinterFeatures feature)
                 return false;
             }
 
-            if (get_current_printer_config()->custom_filament_move_macros)
+            if (get_current_printer()->printer_config->custom_filament_move_macros)
             {
                 return send_gcode("FILAMENT_RETRACT");
             }
@@ -491,7 +491,7 @@ Macros KlipperPrinter::get_macros()
             }
         }
 
-        if (global_config->sort_macros)
+        if (global_config.sort_macros)
         {
             std::sort(macros.macros, macros.macros + macros.count, [](const char* a, const char* b) {
                 return strcmp(a, b) < 0;

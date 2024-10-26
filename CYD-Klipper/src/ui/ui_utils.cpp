@@ -40,9 +40,9 @@ void destroy_event_free_data(lv_event_t * e)
     free(data);
 }
 
-void lv_on_destroy_free_data(lv_obj_t * element, void* ptr)
+void lv_obj_on_destroy_free_data(lv_obj_t * element, const void* ptr)
 {
-    lv_obj_add_event_cb(element, destroy_event_free_data, LV_EVENT_DELETE, ptr);
+    lv_obj_add_event_cb(element, destroy_event_free_data, LV_EVENT_DELETE, (void*)ptr);
 }
 
 void lv_create_fullscreen_button_matrix_popup(lv_obj_t * root, lv_event_cb_t title, lv_button_column_t* columns, int column_count){

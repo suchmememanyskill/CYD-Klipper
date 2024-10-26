@@ -1,5 +1,4 @@
 #include "lvgl.h"
-#include "../../core/macros_query.h"
 
 #define SIZEOF(arr) (sizeof(arr) / sizeof(*arr))
 
