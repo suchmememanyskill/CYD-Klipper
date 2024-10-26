@@ -169,10 +169,10 @@ static void open_extrude_mult_panel(lv_event_t * e){
 }
 
 static PrinterUiPanel klipper_ui_panels[4] {
-    { .set_label = set_fan_speed_text, .open_panel = open_fan_speed_panel },
-    { .set_label = set_zoffset_text, .open_panel = open_zoffset_panel },
-    { .set_label = set_speed_mult_text, .open_panel = open_speed_mult_panel },
-    { .set_label = set_extrude_mult_text, .open_panel = open_extrude_mult_panel }
+    { .set_label = (void*)set_fan_speed_text, .open_panel = (void*)open_fan_speed_panel },
+    { .set_label = (void*)set_zoffset_text, .open_panel = (void*)open_zoffset_panel },
+    { .set_label = (void*)set_speed_mult_text, .open_panel = (void*)open_speed_mult_panel },
+    { .set_label = (void*)set_extrude_mult_text, .open_panel = (void*)open_extrude_mult_panel }
 };
 
 void KlipperPrinter::init_ui_panels()
