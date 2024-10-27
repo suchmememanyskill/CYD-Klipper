@@ -317,15 +317,15 @@ void brightness(String argv[])
 void printer(String argv[])
 {
     int ndx = argv[1].toInt();
-    if(ndx == -1)
+    if(ndx <= -1)
     {
         global_config.multi_printer_mode = false;
-        switch_printer(0);
+        set_current_printer(0);
     }
-    else if( ndx >=0 && ndx < PRINTER_CONFIG_COUNT)
+    else if( ndx >= 0 && ndx < get_printer_count())
     {
         global_config.multi_printer_mode = true;
-        switch_printer(ndx);
+        set_current_printer(ndx);
     }
     else
     {
