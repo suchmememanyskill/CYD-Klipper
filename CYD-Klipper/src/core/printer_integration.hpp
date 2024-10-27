@@ -165,7 +165,7 @@ class BasePrinter
         virtual Files get_files() = 0;
         virtual bool start_file(const char* filename) = 0;
         // Free thumbnail externally when done
-        virtual Thumbnail get_32_32_png_image_thumbnail(const char* gcode_filename);
+        virtual Thumbnail get_32_32_png_image_thumbnail(const char* gcode_filename) = 0;
         virtual bool set_target_temperature(PrinterTemperatureDevice device, unsigned int temperature) = 0;
 
         BasePrinter(unsigned char index);
