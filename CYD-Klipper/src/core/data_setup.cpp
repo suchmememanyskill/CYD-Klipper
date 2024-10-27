@@ -3,6 +3,7 @@
 #include <esp_task_wdt.h>
 #include <UrlEncode.h>
 #include "printer_integration.hpp"
+#include "klipper/klipper_printer_integration.hpp"
 
 SemaphoreHandle_t freezeRenderThreadSemaphore, freezeRequestThreadSemaphore;
 const long data_update_interval = 780;
@@ -101,6 +102,22 @@ TaskHandle_t background_loop;
 
 void data_setup()
 {
+    BasePrinter** available_printers = (BasePrinter**)malloc(sizeof(BasePrinter*) * PRINTER_CONFIG_COUNT);
+    int count = 0;
+
+    for (int i = 0; i < PRINTER_CONFIG_COUNT; i++)
+    {
+        if (global_config.printer_config[i].setup_complete)
+        {
+            switch (global_config.printer_config[i].printer_type)
+            {
+                case PrinterType::PrinterTypeKlipper:
+                    available_printers[count++] = new KlipperPrinter(i);
+            }
+        }
+    }
+
+    initialize_printers(available_printers, count);
     semaphore_init();
     fetch_printer_data();
     freeze_render_thread();

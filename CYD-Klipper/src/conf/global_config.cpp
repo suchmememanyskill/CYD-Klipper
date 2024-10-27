@@ -46,11 +46,11 @@ PrinterConfiguration* get_current_printer_config()
     return &global_config.printer_config[global_config.printer_index];
 }
 
-int get_printer_config_count()
+int global_config_get_printer_config_count()
 {
     int count = 0;
     for (int i = 0; i < PRINTER_CONFIG_COUNT; i++) {
-        if (global_config.printer_config[i].ip_configured)
+        if (global_config.printer_config[i].setup_complete)
             count++;
     }
     return count;
@@ -59,10 +59,70 @@ int get_printer_config_count()
 int get_printer_config_free_index()
 {
     for (int i = 0; i < PRINTER_CONFIG_COUNT; i++) {
-        if (!global_config.printer_config[i].ip_configured)
+        if (!global_config.printer_config[i].setup_complete)
             return i;
     }
     return -1;
+}
+
+void global_config_add_new_printer()
+{
+    int free_index = get_printer_config_free_index();
+    if (free_index <= -1)
+    {
+        return;
+    }
+
+    PrinterConfiguration* old_config = &global_config.printer_config[global_config.printer_index];
+    PrinterConfiguration* new_config = &global_config.printer_config[free_index];
+
+    new_config->raw = old_config->raw;
+    new_config->ip_configured = false;
+    new_config->auth_configured = false;
+
+    new_config->printer_name[0] = 0;
+    new_config->klipper_host[0] = 0;
+    new_config->klipper_auth[0] = 0;
+    new_config->klipper_port = 0;
+
+    new_config->color_scheme = old_config->color_scheme;
+
+    // TODO: Replace with memcpy
+    for (int i = 0; i < 3; i++){
+        new_config->hotend_presets[i] = old_config->hotend_presets[i];
+        new_config->bed_presets[i] = old_config->bed_presets[i];
+    }
+
+    for (int i = 0; i < 3; i++){
+        new_config->printer_move_x_steps[i] = old_config->printer_move_x_steps[i];
+        new_config->printer_move_y_steps[i] = old_config->printer_move_y_steps[i];
+        new_config->printer_move_z_steps[i] = old_config->printer_move_z_steps[i];
+    }
+
+    write_global_config();
+    ESP.restart();
+}
+
+void global_config_set_printer(int idx)
+{
+    if (idx < 0 || idx >= PRINTER_CONFIG_COUNT)
+        return;
+
+    global_config.printer_index = idx;
+    write_global_config();
+}
+
+void global_config_delete_printer(int idx)
+{
+    if (global_config.printer_index == idx)
+    {
+        return;
+    } 
+
+    PrinterConfiguration* config = &global_config.printer_config[idx];
+    config->setup_complete = false;
+    write_global_config();
+    ESP.restart();
 }
 
 void set_printer_config_index(int index)

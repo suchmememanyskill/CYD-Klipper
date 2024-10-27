@@ -3,7 +3,7 @@
 
 #include "lvgl.h"
 
-#define CONFIG_VERSION 6
+#define CONFIG_VERSION 7
 #define PRINTER_CONFIG_COUNT 8
 #define DISPLAY_SECRETS 0
 
@@ -32,17 +32,17 @@ typedef struct {
         unsigned int raw;
         struct {
             // Internal
+            bool setup_complete : 1;
             bool ip_configured : 1;
             bool auth_configured : 1;
+            bool custom_filament_move_macros : 1;
+            PrinterType printer_type : 3;
 
             // External
             bool light_mode : 1;
             bool invert_colors : 1;
             unsigned char remaining_time_calc_mode : 2;
             unsigned char show_stats_on_progress_panel : 2;
-
-            bool custom_filament_move_macros : 1;
-            PrinterType printer_type : 3;
         };
     };
 
@@ -122,8 +122,12 @@ void write_global_config();
 void verify_version();
 void load_global_config();
 
+void global_config_add_new_printer();
+void global_config_set_printer(int idx);
+void global_config_delete_printer(int idx);
+
 //PRINTER_CONFIG* get_current_printer_config();
-//int get_printer_config_count();
+int global_config_get_printer_config_count();
 //void set_printer_config_index(int index);
 //int get_printer_config_free_index();
 

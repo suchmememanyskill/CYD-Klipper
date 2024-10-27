@@ -3,7 +3,6 @@
 #include "../../ui/ui_utils.h"
 #include <stdio.h>
 
-
 static void set_fan_speed_text(lv_event_t * e) {
     lv_obj_t * label = lv_event_get_target(e);
     char data[16];

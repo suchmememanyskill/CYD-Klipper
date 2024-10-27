@@ -163,7 +163,6 @@ class BasePrinter
 
         BasePrinter(unsigned char index);
         PrinterData* AnnouncePrinterData();
-        void save_printer_config();
 };
 
 #define DATA_PRINTER_STATE 1
@@ -174,11 +173,10 @@ class BasePrinter
 
 BasePrinter* get_current_printer();
 BasePrinter* get_printer(int idx);
-void initialize_printers();
+void initialize_printers(BasePrinter** printers, unsigned char total);
 PrinterData* get_current_printer_data();
 unsigned int get_printer_count();
 void announce_printer_data_minimal(PrinterDataMinimal* printer_data);
 PrinterDataMinimal* get_printer_data_minimal(int idx);
 int get_current_printer_index();
-void add_printer();
 void set_current_printer(int idx);

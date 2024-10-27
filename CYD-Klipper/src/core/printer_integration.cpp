@@ -4,13 +4,14 @@
 
 unsigned char current_printer_index = 0;
 unsigned char total_printers;
-BasePrinter* registered_printers;
+BasePrinter** registered_printers;
 PrinterDataMinimal* minimal_data_copy;
 PrinterData* printer_data_copy;
 
 BasePrinter::BasePrinter(unsigned char index)
 {
     config_index = index;
+    printer_config = &global_config.printer_config[index];
 
     printer_data.state_message = (char*)malloc(1);
     printer_data.print_filename = (char*)malloc(1);
@@ -54,9 +55,13 @@ PrinterData* BasePrinter::AnnouncePrinterData()
     lv_msg_send(DATA_PRINTER_DATA, get_current_printer());
 }
 
-void initialize_printers()
+void initialize_printers(BasePrinter** printers, unsigned char total)
 {
     printer_data_copy = (PrinterData*)malloc(sizeof(PrinterData));
+    minimal_data_copy = (PrinterDataMinimal*)malloc(sizeof(PrinterDataMinimal) *  total_printers);
+    memset(minimal_data_copy, 0, sizeof(PrinterDataMinimal) *  total_printers);
+    registered_printers = printers;
+    total_printers = total;
 }
 
 BasePrinter* get_current_printer()
@@ -66,7 +71,7 @@ BasePrinter* get_current_printer()
 
 BasePrinter* get_printer(int idx)
 {
-    return registered_printers + idx;
+    return registered_printers[idx];
 }
 
 int get_current_printer_index()
@@ -86,7 +91,7 @@ unsigned int get_printer_count()
 
 void announce_printer_data_minimal(PrinterDataMinimal* printer_data)
 {
-    memcpy(printer_data_copy, printer_data, sizeof(PrinterDataMinimal) * total_printers);
+    memcpy(minimal_data_copy, printer_data, sizeof(PrinterDataMinimal) * total_printers);
     lv_msg_send(DATA_PRINTER_MINIMAL, get_current_printer());
 }
 
@@ -95,20 +100,10 @@ PrinterDataMinimal* get_printer_data_minimal(int idx)
     return &(minimal_data_copy[idx]);
 }
 
-void BasePrinter::save_printer_config()
-{
-    // TODO
-}
-
-
-void add_printer()
-{
-
-}
-
 void set_current_printer(int idx)
 {
-    //set_printer_config_index(index);
+    current_printer_index = idx;
+    global_config_set_printer(idx);
     set_color_scheme();
     set_invert_display();
 }

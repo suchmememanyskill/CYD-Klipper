@@ -165,9 +165,7 @@ static void btn_printer_secondary(lv_event_t * e)
         return;
     }
 
-    printer->printer_config->ip_configured = false;
-    write_global_config();
-
+    global_config_delete_printer(config_index);
     nav_buttons_setup(PANEL_PRINTER);
 }
 
@@ -196,7 +194,7 @@ static void btn_printer_activate(lv_event_t * e)
 
 static void btn_printer_add(lv_event_t * e)
 {
-    add_printer();
+    global_config_add_new_printer();
 }
 
 void create_printer_ui(PrinterConfiguration * config, lv_obj_t * root)
