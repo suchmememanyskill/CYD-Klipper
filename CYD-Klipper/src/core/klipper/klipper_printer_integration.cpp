@@ -369,11 +369,6 @@ bool KlipperPrinter::fetch()
     return true;
 }
 
-int KlipperPrinter::get_power_devices_count()
-{
-    return 0;
-}
-
 PrinterDataMinimal KlipperPrinter::fetch_min()
 {
     PrinterDataMinimal data = {0};
