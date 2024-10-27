@@ -38,11 +38,15 @@ static void on_state_change(void * s, lv_msg_t * m){
     else {
         nav_buttons_setup(PANEL_PROGRESS);
     }
-    
-    lv_msg_send(DATA_PRINTER_DATA, get_current_printer());
+}
+
+static void on_popup_message(void * s, lv_msg_t * m)
+{
+    lv_create_popup_message(get_current_printer_data()->popup_message, 10000);
 }
 
 void main_ui_setup(){
     lv_msg_subscribe(DATA_PRINTER_STATE, on_state_change, NULL);
+    lv_msg_subscribe(DATA_PRINTER_POPUP, on_popup_message, NULL);
     on_state_change(NULL, NULL);
 }
