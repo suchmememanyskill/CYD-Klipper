@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../printer_integration.hpp"
+#include <HTTPClient.h>
 
 class KlipperPrinter : public BasePrinter
 {

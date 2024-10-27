@@ -5,7 +5,6 @@
 #include "../ui/ui_utils.h"
 #include <Esp.h>
 #include "../ui/serial/serial_console.h"
-#include "printer_integration.hpp"
 
 #ifndef CPU_FREQ_HIGH
 #define CPU_FREQ_HIGH 240
@@ -255,7 +254,7 @@ void set_screen_timer_period()
 
 void set_color_scheme()
 {
-    PrinterConfiguration *config = get_current_printer()->printer_config;
+    PrinterConfiguration *config = &global_config.printer_config[global_config.printer_index];
     lv_disp_t *dispp = lv_disp_get_default();
     lv_color_t main_color = {0};
     ColorDefinition color_def = color_defs[config->color_scheme];

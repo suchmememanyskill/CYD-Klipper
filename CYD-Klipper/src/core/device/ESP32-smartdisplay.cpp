@@ -21,7 +21,7 @@ void set_invert_display()
 
 void lv_screen_intercept(_lv_disp_drv_t *disp_drv, const lv_area_t *area, lv_color_t *color_p)
 {
-    if (get_current_printer_config()->invert_colors) {
+    if (global_config.printer_config[global_config.printer_index].invert_colors) {
         uint32_t w = (area->x2 - area->x1 + 1);
         uint32_t h = (area->y2 - area->y1 + 1);
 

@@ -4,9 +4,7 @@
 #include <HTTPClient.h>
 #include "core/data_setup.h"
 #include "ui_utils.h"
-#include "../core/macros_query.h"
 #include "panels/panel.h"
-#include "../core/http_client.h"
 #include "switch_printer.h"
 #include "macros.h"
 #include "../core/lv_setup.h"
@@ -101,13 +99,13 @@ static void keyboard_event_ip_entry(lv_event_t * e) {
     }
     else if (code == LV_EVENT_READY) 
     {
-        strcpy(get_current_printer_config()->klipper_host, lv_textarea_get_text(hostEntry));
-        get_current_printer_config()->klipper_port = atoi(lv_textarea_get_text(portEntry));
+        strcpy(global_config.printer_config[global_config.printer_index].klipper_host, lv_textarea_get_text(hostEntry));
+        global_config.printer_config[global_config.printer_index].klipper_port = atoi(lv_textarea_get_text(portEntry));
 
         connection_status_t status = verify_ip();
         if (status == CONNECT_OK)
         {
-            get_current_printer_config()->ip_configured = true;
+            global_config.printer_config[global_config.printer_index].ip_configured = true;
             write_global_config();
         }
         else if (status == CONNECT_AUTH_REQUIRED)
@@ -136,12 +134,13 @@ static void keyboard_event_auth_entry(lv_event_t * e) {
         int len = strlen(txt);
         if (len > 0)
         {
-            get_current_printer_config()->auth_configured = true;
-            strcpy(get_current_printer_config()->klipper_auth, txt);
+            global_config.printer_config[global_config.printer_index].auth_configured = true;
+            strcpy(global_config.printer_config[global_config.printer_index].klipper_auth, txt);
 
             if (verify_ip() == CONNECT_OK)
             {
-                get_current_printer_config()->ip_configured = true;
+                global_config.printer_config[global_config.printer_index].ip_configured = true;
+                global_config.printer_config[global_config.printer_index].setup_complete = true;
                 write_global_config();
             }
             else 
@@ -158,7 +157,7 @@ static void keyboard_event_auth_entry(lv_event_t * e) {
 
 void show_auth_entry()
 {
-    get_current_printer_config()->klipper_auth[32] = 0;
+    global_config.printer_config[global_config.printer_index].klipper_auth[32] = 0;
     lv_obj_clean(lv_scr_act());
 
     lv_obj_t * root = lv_create_empty_panel(lv_scr_act());
@@ -180,8 +179,8 @@ void show_auth_entry()
     lv_textarea_set_max_length(passEntry, 32);
     lv_textarea_set_one_line(passEntry, true);
 
-    if (get_current_printer_config()->auth_configured)
-        lv_textarea_set_text(passEntry, get_current_printer_config()->klipper_auth);
+    if (global_config.printer_config[global_config.printer_index].auth_configured)
+        lv_textarea_set_text(passEntry, global_config.printer_config[global_config.printer_index].klipper_auth);
     else
         lv_textarea_set_text(passEntry, "");
 
@@ -246,12 +245,12 @@ void show_ip_entry()
 }
 
 void ip_init(){
-    if (!get_current_printer_config()->ip_configured)
+    if (!global_config.printer_config[global_config.printer_index].setup_complete)
     {
         show_ip_entry();
     }
     
-    while (!get_current_printer_config()->ip_configured)
+    while (!global_config.printer_config[global_config.printer_index].setup_complete)
     {
         lv_handler();
         serial_console::run();
