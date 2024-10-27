@@ -716,8 +716,9 @@ bool KlipperPrinter::set_target_temperature(PrinterTemperatureDevice device, uns
     return send_gcode(gcode);
 }
 
-unsigned char* KlipperPrinter::get_32_32_png_image_thumbnail(const char* gcode_filename)
+Thumbnail KlipperPrinter::get_32_32_png_image_thumbnail(const char* gcode_filename)
 {
+    Thumbnail thumbnail = {0};
     HTTPClient client;
     configure_http_client(client, "/server/files/thumbnails?filename=", true, 1000);
     char* img_filename_path = NULL;
@@ -731,7 +732,7 @@ unsigned char* KlipperPrinter::get_32_32_png_image_thumbnail(const char* gcode_f
     catch (...)
     {
         LOG_LN("Exception while fetching gcode img location");
-        return NULL;
+        return thumbnail;
     }
 
     if (http_code == 200)
@@ -770,7 +771,7 @@ unsigned char* KlipperPrinter::get_32_32_png_image_thumbnail(const char* gcode_f
 
     if (img_filename_path == NULL)
     {
-        return NULL;
+        return thumbnail;
     }
 
     client.end();
@@ -785,7 +786,7 @@ unsigned char* KlipperPrinter::get_32_32_png_image_thumbnail(const char* gcode_f
     catch (...)
     {
         LOG_LN("Exception while fetching gcode img");
-        return NULL;
+        return thumbnail;
     }
 
     if (http_code == 200)
@@ -794,7 +795,7 @@ unsigned char* KlipperPrinter::get_32_32_png_image_thumbnail(const char* gcode_f
         if (len <= 0)
         {
             LOG_LN("No gcode img data");
-            return NULL;
+            return thumbnail;
         }
 
         data_png = (unsigned char*)malloc(len + 1);
@@ -808,12 +809,13 @@ unsigned char* KlipperPrinter::get_32_32_png_image_thumbnail(const char* gcode_f
             }
             else 
             {
-                free(img_filename_path);
-                return data_png;
+                thumbnail.png = data_png;
+                thumbnail.size = len;
+                thumbnail.success = true;
             }
         }
     }
 
     free(img_filename_path);
-    return NULL;
+    return thumbnail;
 }

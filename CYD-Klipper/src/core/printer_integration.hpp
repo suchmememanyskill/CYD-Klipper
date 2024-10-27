@@ -128,6 +128,12 @@ typedef struct {
     void* open_panel; // type lv_event_cb_t
 } PrinterUiPanel;
 
+typedef struct {
+    bool success;
+    unsigned int size;
+    unsigned char* png;
+} Thumbnail;
+
 class BasePrinter 
 {
     protected:
@@ -158,7 +164,8 @@ class BasePrinter
         // Free files externally when done
         virtual Files get_files() = 0;
         virtual bool start_file(const char* filename) = 0;
-        virtual unsigned char* get_32_32_png_image_thumbnail(const char* gcode_filename);
+        // Free thumbnail externally when done
+        virtual Thumbnail get_32_32_png_image_thumbnail(const char* gcode_filename);
         virtual bool set_target_temperature(PrinterTemperatureDevice device, unsigned int temperature) = 0;
 
         BasePrinter(unsigned char index);

@@ -6,7 +6,6 @@
 #include <HardwareSerial.h>
 #include "../ui_utils.h"
 #include "../../core/lv_setup.h"
-#include "../gcode_img.h"
 #include <UrlEncode.h>
 #include "../../core/printer_integration.hpp"
 
@@ -62,10 +61,26 @@ static void btn_print_file_verify(lv_event_t * e){
     lv_label_set_text(label, LV_SYMBOL_OK);
     lv_obj_center(label);
 
-    lv_obj_t* img = show_gcode_img(selected_file);
+    freeze_request_thread();
+    Thumbnail thumbnail = get_current_printer()->get_32_32_png_image_thumbnail(selected_file);
+    unfreeze_request_thread();
 
-    if (img != NULL){
-        lv_obj_set_parent(img, panel);
+    lv_obj_t * img = NULL;
+
+    if (thumbnail.success)
+    {
+        lv_img_dsc_t* img_header = (lv_img_dsc_t*)malloc(sizeof(lv_img_dsc_t));
+        lv_obj_on_destroy_free_data(panel, img_header);
+
+        memset(img_header, 0, sizeof(img_header));
+        img_header->header.w = 32;
+        img_header->header.h = 32;
+        img_header->data_size = thumbnail.size;
+        img_header->header.cf = LV_IMG_CF_RAW_ALPHA;
+        img_header->data = thumbnail.png;
+
+        img = lv_img_create(panel);
+        lv_img_set_src(img, img_header);
         lv_obj_align(img, LV_ALIGN_TOP_LEFT, 0, 0);
 
         lv_obj_t * text_center_panel = lv_create_empty_panel(panel);
