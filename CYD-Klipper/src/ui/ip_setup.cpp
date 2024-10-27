@@ -9,6 +9,7 @@
 #include "macros.h"
 #include "../core/lv_setup.h"
 #include "serial/serial_console.h"
+#include "../core/klipper/klipper_printer_integration.hpp"
 
 lv_obj_t * hostEntry;
 lv_obj_t * portEntry;
@@ -46,30 +47,6 @@ static const lv_btnmatrix_ctrl_t hex_numpad_ctrl[] = {
     1, 1, 1, 1, LV_KEYBOARD_CTRL_BTN_FLAGS | 1,
 };
 
-enum connection_status_t {
-    CONNECT_FAIL = 0,
-    CONNECT_OK = 1,
-    CONNECT_AUTH_REQUIRED = 2,
-};
-
-connection_status_t verify_ip(){
-    SETUP_HTTP_CLIENT_FULL("/printer/info", true, 1000);
-
-    int httpCode;
-    try {
-        httpCode = client.GET();
-
-        if (httpCode == 401)
-            return CONNECT_AUTH_REQUIRED;
-
-        return httpCode == 200 ? CONNECT_OK : CONNECT_FAIL;
-    }
-    catch (...) {
-        LOG_LN("Failed to connect");
-        return CONNECT_FAIL;
-    }
-}
-
 static void keyboard_event_ip_entry(lv_event_t * e) {
     lv_event_code_t code = lv_event_get_code(e);
     lv_obj_t * ta = lv_event_get_target(e);
@@ -102,13 +79,13 @@ static void keyboard_event_ip_entry(lv_event_t * e) {
         strcpy(global_config.printer_config[global_config.printer_index].klipper_host, lv_textarea_get_text(hostEntry));
         global_config.printer_config[global_config.printer_index].klipper_port = atoi(lv_textarea_get_text(portEntry));
 
-        connection_status_t status = verify_ip();
-        if (status == CONNECT_OK)
+        ConnectionStatus status = connection_test_klipper(&global_config.printer_config[global_config.printer_index]);
+        if (status == ConnectionStatus::ConnectOk)
         {
             global_config.printer_config[global_config.printer_index].ip_configured = true;
             write_global_config();
         }
-        else if (status == CONNECT_AUTH_REQUIRED)
+        else if (status == ConnectionStatus::ConnectAuthRequired)
         {
             show_auth_entry();
         }
@@ -137,7 +114,7 @@ static void keyboard_event_auth_entry(lv_event_t * e) {
             global_config.printer_config[global_config.printer_index].auth_configured = true;
             strcpy(global_config.printer_config[global_config.printer_index].klipper_auth, txt);
 
-            if (verify_ip() == CONNECT_OK)
+            if (connection_test_klipper(&global_config.printer_config[global_config.printer_index]) == ConnectionStatus::ConnectOk)
             {
                 global_config.printer_config[global_config.printer_index].ip_configured = true;
                 global_config.printer_config[global_config.printer_index].setup_complete = true;

@@ -163,18 +163,7 @@ bool KlipperPrinter::execute_feature(PrinterFeatures feature)
 
 bool KlipperPrinter::connect()
 {
-    HTTPClient client;
-    configure_http_client(client, "/printer/info", false, 1000);
-
-    int http_code;
-    try {
-        http_code = client.GET();
-        return http_code == 200;
-    }
-    catch (...) {
-        LOG_LN("Failed to connect");
-        return false;
-    }
+    return connection_test_klipper(printer_config) == ConnectionStatus::ConnectOk;
 }
 
 bool KlipperPrinter::fetch()
@@ -778,7 +767,7 @@ Thumbnail KlipperPrinter::get_32_32_png_image_thumbnail(const char* gcode_filena
 
     configure_http_client(client, "/server/files/gcodes/" + urlEncode(img_filename_path), false, 2000);
 
-    int http_code = 0;
+    http_code = 0;
     try 
     {
         http_code = client.GET();
@@ -818,4 +807,33 @@ Thumbnail KlipperPrinter::get_32_32_png_image_thumbnail(const char* gcode_filena
 
     free(img_filename_path);
     return thumbnail;
+}
+
+ConnectionStatus connection_test_klipper(PrinterConfiguration* config)
+{
+    HTTPClient client;
+
+    client.setTimeout(1000);
+    client.setConnectTimeout(1000);
+    client.begin("http://" + String(config->klipper_host) + ":" + String(config->klipper_port) + "/printer/info");
+
+    if (config->auth_configured) {
+        client.addHeader("X-Api-Key", config->klipper_auth);
+    }
+
+    int http_code;
+    try {
+        http_code = client.GET();
+
+        if (http_code == 403)
+        {
+            return ConnectionStatus::ConnectAuthRequired;
+        }
+
+        return http_code == 200 ? ConnectionStatus::ConnectOk : ConnectionStatus::ConnectFail;
+    }
+    catch (...) {
+        LOG_LN("Failed to connect");
+        return ConnectionStatus::ConnectFail;
+    }
 }

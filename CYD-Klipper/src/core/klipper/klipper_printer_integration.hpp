@@ -55,3 +55,11 @@ class KlipperPrinter : public BasePrinter
         void configure_http_client(HTTPClient &client, String url_part, bool stream, int timeout);
         void init_ui_panels();
 };
+
+enum ConnectionStatus {
+    ConnectFail = 0,
+    ConnectOk = 1,
+    ConnectAuthRequired = 2,
+};
+
+ConnectionStatus connection_test_klipper(PrinterConfiguration* config);

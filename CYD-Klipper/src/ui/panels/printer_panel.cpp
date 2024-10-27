@@ -166,7 +166,6 @@ static void btn_printer_secondary(lv_event_t * e)
     }
 
     global_config_delete_printer(config_index);
-    nav_buttons_setup(PANEL_PRINTER);
 }
 
 static void btn_printer_rename(lv_event_t * e)
