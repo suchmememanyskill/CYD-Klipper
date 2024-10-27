@@ -53,6 +53,7 @@ PrinterData* BasePrinter::AnnouncePrinterData()
     }
 
     lv_msg_send(DATA_PRINTER_DATA, get_current_printer());
+    return printer_data_copy;
 }
 
 void initialize_printers(BasePrinter** printers, unsigned char total)

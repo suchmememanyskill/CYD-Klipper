@@ -1,7 +1,6 @@
 #pragma once
 #include "../conf/global_config.h"
-
-#define BIT(x) 1 << x
+#include <esp_task_wdt.h>
 
 enum PrinterFeatures {
     PrinterFeatureRestart = BIT(0),
