@@ -70,6 +70,7 @@ void global_config_add_new_printer()
     int free_index = get_printer_config_free_index();
     if (free_index <= -1)
     {
+        LOG_LN("No available slot for new printer");
         return;
     }
 
@@ -77,6 +78,7 @@ void global_config_add_new_printer()
     PrinterConfiguration* new_config = &global_config.printer_config[free_index];
 
     new_config->raw = old_config->raw;
+    new_config->setup_complete = false;
     new_config->ip_configured = false;
     new_config->auth_configured = false;
 
@@ -99,7 +101,7 @@ void global_config_add_new_printer()
         new_config->printer_move_z_steps[i] = old_config->printer_move_z_steps[i];
     }
 
-    write_global_config();
+    global_config_set_printer(free_index);
     ESP.restart();
 }
 

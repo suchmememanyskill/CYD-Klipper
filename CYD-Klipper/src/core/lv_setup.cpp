@@ -72,6 +72,7 @@ void lv_touch_intercept(lv_indev_drv_t *indev_driver, lv_indev_data_t *data)
             }
 
             data->state = LV_INDEV_STATE_REL;
+            delay(300); // Some screens don't debounce their signal properly
         }
 
         screen_timer_wake();

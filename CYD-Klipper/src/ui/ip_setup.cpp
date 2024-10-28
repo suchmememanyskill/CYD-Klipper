@@ -198,14 +198,26 @@ void show_ip_entry()
     lv_textarea_set_one_line(hostEntry, true);
     lv_obj_add_flag(hostEntry, LV_OBJ_FLAG_USER_1);
     lv_textarea_set_max_length(hostEntry, 63);
-    lv_textarea_set_text(hostEntry, "");
     lv_obj_set_flex_grow(hostEntry, 3);
 
     portEntry = lv_textarea_create(textbow_row);
     lv_textarea_set_one_line(portEntry, true);
     lv_textarea_set_max_length(portEntry, 5);
-    lv_textarea_set_text(portEntry, "80");
+    
     lv_obj_set_flex_grow(portEntry, 1);
+
+    if (global_config.printer_config[global_config.printer_index].ip_configured)
+    {
+        char buff[7] = {0};
+        sprintf(buff, "%d", global_config.printer_config[global_config.printer_index].klipper_port);
+        lv_textarea_set_text(hostEntry, global_config.printer_config[global_config.printer_index].klipper_host);
+        lv_textarea_set_text(portEntry, buff);
+    }
+    else 
+    {
+        lv_textarea_set_text(hostEntry, "");
+        lv_textarea_set_text(portEntry, "80");
+    }
 
     lv_obj_t * keyboard = lv_keyboard_create(root);
     lv_keyboard_set_map(keyboard, LV_KEYBOARD_MODE_USER_1, kb_map, kb_ctrl);

@@ -371,9 +371,10 @@ bool KlipperPrinter::fetch()
 
 PrinterDataMinimal KlipperPrinter::fetch_min()
 {
-    PrinterDataMinimal data = {0};
+    PrinterDataMinimal data = {};
+    data.success = false;
 
-    if (!printer_config->ip_configured)
+    if (!printer_config->setup_complete)
     {
         data.state = PrinterStateOffline;
         return data;
@@ -387,7 +388,7 @@ PrinterDataMinimal KlipperPrinter::fetch_min()
     int http_code = client.GET();
     if (http_code == 200)
     {
-        data.state = PrinterStateIdle;
+        data.state = PrinterState::PrinterStateIdle;
         data.power_devices = get_power_devices_count();
 
         JsonDocument doc;
@@ -400,7 +401,7 @@ PrinterDataMinimal KlipperPrinter::fetch_min()
 
             if (strcmp(state, "shutdown") == 0)
             {
-                data.state = PrinterStateError;
+                data.state = PrinterState::PrinterStateError;
             }
         }
 
@@ -417,26 +418,26 @@ PrinterDataMinimal KlipperPrinter::fetch_min()
 
                 if (state == nullptr)
                 {
-                    data.state = PrinterStateError;
+                    data.state = PrinterState::PrinterStateError;
                 }
                 else if (strcmp(state, "printing") == 0)
                 {
-                    data.state = PrinterStatePrinting;
+                    data.state = PrinterState::PrinterStatePrinting;
                 }
                 else if (strcmp(state, "paused") == 0)
                 {
-                    data.state = PrinterStatePaused;
+                    data.state = PrinterState::PrinterStatePaused;
                 }
                 else if (strcmp(state, "complete") == 0 || strcmp(state, "cancelled") == 0 || strcmp(state, "standby") == 0)
                 {
-                    data.state = PrinterStateIdle;
+                    data.state = PrinterState::PrinterStateIdle;
                 }
             }
         }
     }
     else 
     {
-        data.state = PrinterStateOffline;
+        data.state = PrinterState::PrinterStateOffline;
         data.power_devices = get_power_devices_count();
     }
 

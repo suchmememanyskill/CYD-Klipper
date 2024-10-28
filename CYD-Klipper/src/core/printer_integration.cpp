@@ -72,10 +72,11 @@ PrinterData* BasePrinter::AnnouncePrinterData()
 
 void initialize_printers(BasePrinter** printers, unsigned char total)
 {
+    LOG_F(("Initializing %d printers\n", total))
     printer_data_copy = (PrinterData*)malloc(sizeof(PrinterData));
-    minimal_data_copy = (PrinterDataMinimal*)malloc(sizeof(PrinterDataMinimal) *  total_printers);
+    minimal_data_copy = (PrinterDataMinimal*)malloc(sizeof(PrinterDataMinimal) *  total);
     memset(printer_data_copy, 0, sizeof(PrinterData));
-    memset(minimal_data_copy, 0, sizeof(PrinterDataMinimal) *  total_printers);
+    memset(minimal_data_copy, 0, sizeof(PrinterDataMinimal) *  total);
     registered_printers = printers;
     total_printers = total;
 }

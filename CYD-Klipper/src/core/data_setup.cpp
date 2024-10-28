@@ -61,18 +61,17 @@ void fetch_printer_data()
 
 void fetch_printer_data_minimal()
 {
-    PrinterDataMinimal* data = (PrinterDataMinimal*)malloc(sizeof(PrinterDataMinimal) * get_printer_count());
+    PrinterDataMinimal data[PRINTER_CONFIG_COUNT] = {{}};
     for (int i = 0; i < get_printer_count(); i++)
     {
         freeze_request_thread();
         BasePrinter* printer = get_printer(i);
         unfreeze_request_thread();
-        *(data + i) = printer->fetch_min();
+        data[i] = printer->fetch_min();
     }
     freeze_render_thread();
     announce_printer_data_minimal(data);
     unfreeze_render_thread();
-    free(data);
 }
 
 void data_loop()

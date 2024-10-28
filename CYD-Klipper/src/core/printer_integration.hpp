@@ -97,7 +97,7 @@ typedef struct _PrinterData {
 } PrinterData;
 
 typedef struct {
-    unsigned char state;
+    PrinterState state;
     float print_progress; // 0 -> 1
     unsigned int power_devices;
     bool success;

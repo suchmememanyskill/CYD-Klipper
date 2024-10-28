@@ -170,7 +170,9 @@ static void btn_printer_secondary(lv_event_t * e)
 
 static void btn_printer_rename(lv_event_t * e)
 {
-    keyboard_config = (PrinterConfiguration*)lv_event_get_user_data(e);
+    int config_index = (int)lv_event_get_user_data(e);
+    BasePrinter* printer = get_printer(config_index);
+    keyboard_config = printer->printer_config;
     lv_create_keyboard_text_entry(keyboard_callback, "Rename Printer", LV_KEYBOARD_MODE_TEXT_LOWER, CYD_SCREEN_WIDTH_PX * 0.75, 24, keyboard_config->printer_name, false);
 }
 
@@ -196,9 +198,8 @@ static void btn_printer_add(lv_event_t * e)
     global_config_add_new_printer();
 }
 
-void create_printer_ui(PrinterConfiguration * config, lv_obj_t * root)
+void create_printer_ui(int index, lv_obj_t * root)
 {
-    int index = config - global_config.printer_config;
     auto width = CYD_SCREEN_PANEL_WIDTH_PX - CYD_SCREEN_GAP_PX * 2;
 
     lv_obj_t * data_row_name = lv_create_empty_panel(root);
@@ -279,15 +280,12 @@ void printer_panel_init(lv_obj_t* panel)
 
     lv_obj_set_size(lv_create_empty_panel(inner_panel), 0, 0);
 
-    for (int i = 0; i < PRINTER_CONFIG_COUNT; i++){
-        PrinterConfiguration * config = &global_config.printer_config[i];
-        if (config->ip_configured) {
-            create_printer_ui(&global_config.printer_config[i], inner_panel);
-        }
+    for (int i = 0; i < get_printer_count(); i++){
+        create_printer_ui(i, inner_panel);
     }
 
     // Add Printer Button
-    if (get_printer_count() == PRINTER_CONFIG_COUNT){
+    if (get_printer_count() < PRINTER_CONFIG_COUNT){
         lv_obj_t * btn = lv_btn_create(inner_panel);
         lv_obj_set_size(btn, CYD_SCREEN_PANEL_WIDTH_PX - CYD_SCREEN_GAP_PX * 2, CYD_SCREEN_MIN_BUTTON_HEIGHT_PX);
         lv_obj_add_event_cb(btn, btn_printer_add, LV_EVENT_CLICKED, NULL);
@@ -298,4 +296,5 @@ void printer_panel_init(lv_obj_t* panel)
     }
 
     lv_obj_set_size(lv_create_empty_panel(inner_panel), 0, 0);
+    lv_msg_send(DATA_PRINTER_MINIMAL, NULL);
 }

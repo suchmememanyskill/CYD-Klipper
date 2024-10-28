@@ -7,15 +7,11 @@
 #include "../core/printer_integration.hpp"
 
 static lv_style_t nav_button_style;
-
-static char temp_buffer[10];
-static char z_pos_buffer[10];
-static char time_buffer[10];
-
 static lv_style_t nav_button_text_style;
 
 static void update_printer_data_z_pos(lv_event_t * e) {
     lv_obj_t * label = lv_event_get_target(e);
+    char z_pos_buffer[10];
 
     sprintf(z_pos_buffer, "Z%.2f", get_current_printer_data()->position[2]);
     lv_label_set_text(label, z_pos_buffer);
@@ -23,6 +19,7 @@ static void update_printer_data_z_pos(lv_event_t * e) {
 
 static void update_printer_data_temp(lv_event_t * e) {
     lv_obj_t * label = lv_event_get_target(e);
+    char temp_buffer[10];
 
     sprintf(temp_buffer, "%.0f/%.0f", get_current_printer_data()->temperatures[PrinterTemperatureDeviceIndex::PrinterTemperatureDeviceIndexNozzle1], get_current_printer_data()->temperatures[PrinterTemperatureDeviceIndex::PrinterTemperatureDeviceIndexBed]);
     lv_label_set_text(label, temp_buffer);
@@ -30,6 +27,7 @@ static void update_printer_data_temp(lv_event_t * e) {
 
 static void update_printer_data_time(lv_event_t * e){
     lv_obj_t * label = lv_event_get_target(e);
+    char time_buffer[10];
 
     if (get_current_printer_data()->state == PrinterState::PrinterStateIdle){
         lv_label_set_text(label, "Idle");
@@ -55,6 +53,29 @@ static void update_printer_data_time(lv_event_t * e){
     }
 
     lv_label_set_text(label, time_buffer);
+}
+
+static void update_multi_printer_label(lv_event_t * e) {
+    lv_obj_t * label = lv_event_get_target(e);
+
+    int idle_count = 0;
+    for (int i = 0; i < get_printer_count(); i++)
+    {
+        PrinterDataMinimal* data = get_printer_data_minimal(i);
+        if (data->state == PrinterState::PrinterStateIdle)
+        {
+            idle_count++;
+        }
+    }
+
+    if (idle_count > 0)
+    {
+        lv_label_set_text_fmt(label, "%d idle", idle_count);
+    }
+    else 
+    {
+        lv_label_set_text(label, "Printer");
+    }
 }
 
 static void btn_click_files(lv_event_t * e){
@@ -168,7 +189,7 @@ void nav_buttons_setup(PANEL_TYPE active_panel){
     if (global_config.multi_printer_mode)
     {
         // Printers
-        create_button(LV_SYMBOL_HOME, "Printer", btn_click_printer, NULL, root_panel);
+        create_button(LV_SYMBOL_HOME, "Printer", btn_click_printer, update_multi_printer_label, root_panel);
     }
 
     lv_obj_t * panel = lv_create_empty_panel(lv_scr_act());

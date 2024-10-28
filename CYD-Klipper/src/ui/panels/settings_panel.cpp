@@ -39,8 +39,7 @@ static void reset_wifi_click(lv_event_t * e){
 }
 
 static void reset_ip_click(lv_event_t * e){
-    get_current_printer()->printer_config->ip_configured = false;
-    get_current_printer()->printer_config->auth_configured = false;
+    get_current_printer()->printer_config->setup_complete = false;
     write_global_config();
     ESP.restart();
 }
