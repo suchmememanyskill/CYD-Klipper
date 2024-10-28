@@ -237,9 +237,9 @@ void create_charts(lv_obj_t * root)
     lv_chart_series_t * ser2 = lv_chart_add_series(chart, lv_palette_main(LV_PALETTE_RED), LV_CHART_AXIS_PRIMARY_Y);
     lv_chart_set_all_value(chart, ser2, get_current_printer_data()->temperatures[PrinterTemperatureDeviceIndex::PrinterTemperatureDeviceIndexNozzle1]);
     lv_chart_series_t * ser3 = lv_chart_add_series(chart, lv_palette_main(LV_PALETTE_TEAL), LV_CHART_AXIS_PRIMARY_Y);
-    lv_chart_set_all_value(chart, ser3, get_current_printer_data()->temperatures[PrinterTemperatureDeviceIndex::PrinterTemperatureDeviceIndexBed]);
+    lv_chart_set_all_value(chart, ser3, get_current_printer_data()->target_temperatures[PrinterTemperatureDeviceIndex::PrinterTemperatureDeviceIndexBed]);
     lv_chart_series_t * ser4 = lv_chart_add_series(chart, lv_palette_main(LV_PALETTE_BLUE), LV_CHART_AXIS_PRIMARY_Y);
-    lv_chart_set_all_value(chart, ser4, get_current_printer_data()->target_temperatures[PrinterTemperatureDeviceIndex::PrinterTemperatureDeviceIndexBed]);
+    lv_chart_set_all_value(chart, ser4, get_current_printer_data()->temperatures[PrinterTemperatureDeviceIndex::PrinterTemperatureDeviceIndexBed]);
 
     lv_obj_add_event_cb(chart, set_hotend_target_temp_chart, LV_EVENT_MSG_RECEIVED, ser1);
     lv_obj_add_event_cb(chart, set_hotend_temp_chart, LV_EVENT_MSG_RECEIVED, ser2);

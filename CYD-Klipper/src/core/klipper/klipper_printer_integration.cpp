@@ -187,8 +187,8 @@ bool KlipperPrinter::fetch()
         
         if (status.containsKey("webhooks"))
         {
-            const char *state = status["webhooks"]["state"];
-            const char *message = status["webhooks"]["state_message"];
+            const char* state = status["webhooks"]["state"];
+            const char* message = status["webhooks"]["state_message"];
 
             if (strcmp(state, "ready") == 0 && printer_data.state == PrinterStateError)
             {
@@ -199,7 +199,7 @@ bool KlipperPrinter::fetch()
                 printer_data.state = PrinterStateError;
             }
 
-            if (printer_data.state_message == NULL || strcmp(printer_data.state_message, message))
+            if (message != NULL && (printer_data.state_message == NULL || strcmp(printer_data.state_message, message)))
             {
                 printer_data.state_message = (char *)malloc(strlen(message) + 1);
                 strcpy(printer_data.state_message, message);
@@ -452,7 +452,7 @@ void KlipperPrinter::disconnect()
 Macros KlipperPrinter::get_macros()
 {
     HTTPClient client;
-    Macros macros;
+    Macros macros = {0};
 
     configure_http_client(client, "/printer/gcode/help", true, 1000);
     int http_code = client.GET();
@@ -522,7 +522,7 @@ bool KlipperPrinter::execute_macro(const char* macro)
 PowerDevices KlipperPrinter::get_power_devices()
 {
     HTTPClient client;
-    PowerDevices power_devices;
+    PowerDevices power_devices = {0};
     configure_http_client(client, "/machine/device_power/devices", true, 1000);
 
     int http_code = client.GET();
@@ -590,7 +590,7 @@ typedef struct {
 
 Files KlipperPrinter::get_files()
 {
-    Files files_result;
+    Files files_result = {0};
     HTTPClient client;
     LOG_F(("Heap space pre-file-parse: %d bytes\n", esp_get_free_heap_size()))
     std::list<FileSystemFile> files;
@@ -704,7 +704,7 @@ Thumbnail KlipperPrinter::get_32_32_png_image_thumbnail(const char* gcode_filena
 {
     Thumbnail thumbnail = {0};
     HTTPClient client;
-    configure_http_client(client, "/server/files/thumbnails?filename=", true, 1000);
+    configure_http_client(client, "/server/files/thumbnails?filename=" + urlEncode(gcode_filename), true, 1000);
     char* img_filename_path = NULL;
     unsigned char* data_png = NULL;
 
@@ -725,7 +725,6 @@ Thumbnail KlipperPrinter::get_32_32_png_image_thumbnail(const char* gcode_filena
         deserializeJson(doc, client.getStream());
         auto result = doc["result"].as<JsonArray>();
         const char* chosen_thumb = NULL;
-
         for (auto file : result){
             int width = file["width"];
             int height = file["height"];
@@ -735,9 +734,10 @@ Thumbnail KlipperPrinter::get_32_32_png_image_thumbnail(const char* gcode_filena
             if (width != height || width != 32)
                 continue;
 
+
             if (strcmp(thumbnail + strlen(thumbnail) - 4, ".png"))
                 continue;
-
+            
             chosen_thumb = thumbnail;
             break;
         }
@@ -755,6 +755,7 @@ Thumbnail KlipperPrinter::get_32_32_png_image_thumbnail(const char* gcode_filena
 
     if (img_filename_path == NULL)
     {
+        LOG_LN("No compatible thumbnail found");
         return thumbnail;
     }
 

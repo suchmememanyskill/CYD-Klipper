@@ -83,6 +83,7 @@ static void keyboard_event_ip_entry(lv_event_t * e) {
         if (status == ConnectionStatus::ConnectOk)
         {
             global_config.printer_config[global_config.printer_index].ip_configured = true;
+            global_config.printer_config[global_config.printer_index].setup_complete = true;
             write_global_config();
         }
         else if (status == ConnectionStatus::ConnectAuthRequired)

@@ -9,10 +9,15 @@ static void swap_to_files_menu(lv_event_t * e) {
     nav_buttons_setup(PANEL_FILES);
 }
 
+static void update_data(lv_event_t * e) {
+    lv_msg_send(DATA_PRINTER_DATA, get_current_printer());
+}
+
 void create_state_button(lv_obj_t * root, lv_event_cb_t label, lv_event_cb_t button){
     lv_obj_t * btn = lv_btn_create(root);
     lv_obj_set_size(btn, CYD_SCREEN_PANEL_WIDTH_PX / 2 - CYD_SCREEN_GAP_PX * 3, CYD_SCREEN_MIN_BUTTON_HEIGHT_PX);
     lv_obj_add_event_cb(btn, button, LV_EVENT_CLICKED, NULL);
+    lv_obj_add_event_cb(btn, update_data, LV_EVENT_CLICKED, NULL);
 
     lv_obj_t * label_obj = lv_label_create(btn);
     lv_obj_add_event_cb(label_obj, label, LV_EVENT_MSG_RECEIVED, NULL);
