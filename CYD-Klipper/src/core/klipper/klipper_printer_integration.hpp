@@ -2,6 +2,13 @@
 
 #include "../printer_integration.hpp"
 #include <HTTPClient.h>
+#include <ArduinoJson.h>
+#include <list>
+
+typedef struct {
+    char* name;
+    float modified;
+} FileSystemFile;
 
 class KlipperPrinter : public BasePrinter
 {
@@ -10,6 +17,22 @@ class KlipperPrinter : public BasePrinter
         unsigned char klipper_request_consecutive_fail_count{};
         unsigned int slicer_estimated_print_time_s{};
         unsigned int last_slicer_time_query{};
+        void configure_http_client(HTTPClient &client, String url_part, bool stream, int timeout);
+
+    protected:
+        bool send_emergency_stop();
+        int get_slicer_time_estimate_s();
+        void init_ui_panels();
+
+        int parse_slicer_time_estimate(JsonDocument& in);
+        void parse_state(JsonDocument& in);
+        PrinterDataMinimal parse_state_min(JsonDocument& in);
+        Macros parse_macros(JsonDocument &in);
+        int parse_macros_count(JsonDocument &in);
+        PowerDevices parse_power_devices(JsonDocument &in);
+        int parse_power_devices_count(JsonDocument &in);
+        void parse_file_list(JsonDocument &in, std::list<FileSystemFile> &files, int fetch_limit);
+        char *parse_thumbnails(JsonDocument &in);
 
     public:
         float gcode_offset[3]{};
@@ -51,9 +74,6 @@ class KlipperPrinter : public BasePrinter
         Thumbnail get_32_32_png_image_thumbnail(const char* gcode_filename);
         bool set_target_temperature(PrinterTemperatureDevice device, unsigned int temperature);
         bool send_gcode(const char* gcode, bool wait = true);
-        int get_slicer_time_estimate_s();
-        void configure_http_client(HTTPClient &client, String url_part, bool stream, int timeout);
-        void init_ui_panels();
 };
 
 enum ConnectionStatus {
