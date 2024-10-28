@@ -213,6 +213,7 @@ void erase_one(const String arg)
     }
     else if(arg == "ip")
     {
+        get_current_printer()->printer_config->setup_complete = false;
         get_current_printer()->printer_config->ip_configured = false;
         write_global_config();
     }
@@ -286,6 +287,7 @@ void ip(String argv[])
     strncpy(get_current_printer()->printer_config->klipper_host, argv[1].c_str(), sizeof(global_config.printer_config[0].klipper_host)-1);
     get_current_printer()->printer_config->klipper_port =  argv[2].toInt();
     get_current_printer()->printer_config->ip_configured = true;
+    get_current_printer()->printer_config->setup_complete = true;
     write_global_config();
 }
 
