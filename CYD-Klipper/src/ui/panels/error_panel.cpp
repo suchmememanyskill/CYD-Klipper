@@ -80,7 +80,7 @@ void error_panel_init(lv_obj_t* panel)
 
     if (get_current_printer_data()->error_screen_features & PrinterFeatureContinueError)
     {
-        create_button("Continue", btn_click_error_continue, button_row);
+        create_button("Done", btn_click_error_continue, button_row);
     }
 
     if (get_current_printer_data()->error_screen_features & PrinterFeatureRetryError)

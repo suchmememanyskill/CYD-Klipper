@@ -1,6 +1,6 @@
 #include "bambu_printer_integration.hpp"
 #include <PubSubClient.h>
-#include <WifiClientSecure.h>
+#include "WifiClientSecure.h"
 
 WiFiClientSecure wifi_client;
 PubSubClient client(wifi_client);
