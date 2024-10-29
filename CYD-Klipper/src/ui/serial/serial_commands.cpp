@@ -3,7 +3,6 @@
 #include <Esp.h>
 #include <cstring>
 #include "../../conf/global_config.h"
-#include "../switch_printer.h"
 #include "../../core/printer_integration.hpp"
 
 namespace serial_console {

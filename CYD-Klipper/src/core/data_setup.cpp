@@ -4,6 +4,7 @@
 #include <UrlEncode.h>
 #include "printer_integration.hpp"
 #include "klipper/klipper_printer_integration.hpp"
+#include "bambu/bambu_printer_integration.hpp"
 
 SemaphoreHandle_t freezeRenderThreadSemaphore, freezeRequestThreadSemaphore;
 const long data_update_interval = 780;
@@ -112,6 +113,8 @@ void data_setup()
             {
                 case PrinterType::PrinterTypeKlipper:
                     available_printers[count++] = new KlipperPrinter(i);
+                case PrinterType::PrinterTypeBambuLocal:
+                    available_printers[count++] = new BambuPrinter(i);
             }
         }
     }

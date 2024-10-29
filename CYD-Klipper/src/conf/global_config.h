@@ -21,10 +21,12 @@ enum {
 };
 
 enum PrinterType {
-    PrinterTypeKlipper = 0,
-    PrinterTypeKlipperSerial = 1,
-    PrinterTypeBambu = 2,
-    PrinterTypeOctoprint = 3,
+    PrinterTypeNone = 0,
+    PrinterTypeKlipper = 1,
+    PrinterTypeKlipperSerial = 2,
+    PrinterTypeBambuLocal = 3,
+    PrinterTypeBambuCloud = 3,
+    PrinterTypeOctoprint = 4,
 };
 
 typedef struct {
@@ -49,7 +51,7 @@ typedef struct {
     char printer_name[25];
     char klipper_host[65];
     char klipper_auth[33];
-    unsigned short klipper_port;
+    unsigned int klipper_port;
     
     unsigned char color_scheme;
 

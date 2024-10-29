@@ -269,7 +269,7 @@ void lv_create_popup_message(const char* message, uint16_t timeout_ms)
     lv_obj_set_size(label, CYD_SCREEN_PANEL_WIDTH_PX - CYD_SCREEN_GAP_PX * 6, LV_SIZE_CONTENT);
     lv_label_set_long_mode(label, LV_LABEL_LONG_WRAP);
 
-    timer = lv_timer_create(timer_callback, timeout_ms,  panel);
+    timer = lv_timer_create(timer_callback, timeout_ms > 0 ? timeout_ms : 0xFFFFFFFF,  panel);
 }
 
 lv_obj_t * lv_label_btn_create(lv_obj_t * parent, lv_event_cb_t btn_callback, void* user_data)

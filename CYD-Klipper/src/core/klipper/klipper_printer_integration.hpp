@@ -55,6 +55,7 @@ class KlipperPrinter : public BasePrinter
                 | PrinterTemperatureDeviceNozzle1;
 
             init_ui_panels();
+            printer_data.error_screen_features = PrinterFeatureRestart | PrinterFeatureFirmwareRestart;
         }
 
         bool move_printer(const char* axis, float amount, bool relative);
@@ -76,10 +77,10 @@ class KlipperPrinter : public BasePrinter
         bool send_gcode(const char* gcode, bool wait = true);
 };
 
-enum ConnectionStatus {
+enum KlipperConnectionStatus {
     ConnectFail = 0,
     ConnectOk = 1,
     ConnectAuthRequired = 2,
 };
 
-ConnectionStatus connection_test_klipper(PrinterConfiguration* config);
+KlipperConnectionStatus connection_test_klipper(PrinterConfiguration* config);

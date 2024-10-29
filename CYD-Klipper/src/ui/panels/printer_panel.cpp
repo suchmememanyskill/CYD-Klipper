@@ -5,7 +5,6 @@
 #include "../../core/lv_setup.h"
 #include <stdio.h>
 #include "../nav_buttons.h"
-#include "../switch_printer.h"
 #include "../macros.h"
 
 const char * printer_status[] = {

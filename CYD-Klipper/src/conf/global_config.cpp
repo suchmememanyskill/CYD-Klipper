@@ -81,6 +81,7 @@ void global_config_add_new_printer()
     new_config->setup_complete = false;
     new_config->ip_configured = false;
     new_config->auth_configured = false;
+    new_config->printer_type = PrinterType::PrinterTypeNone;
 
     new_config->printer_name[0] = 0;
     new_config->klipper_host[0] = 0;

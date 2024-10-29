@@ -5,6 +5,7 @@
 
 static char blank[] = { '\0' };
 static unsigned char current_printer_index = 0;
+static unsigned char last_announced_printer_index = 0;
 static unsigned char total_printers;
 static BasePrinter** registered_printers;
 static PrinterDataMinimal* minimal_data_copy;
@@ -24,7 +25,9 @@ PrinterData* BasePrinter::AnnouncePrinterData()
     char* old_print_filename = printer_data_copy->print_filename;
     char* old_popup_message = printer_data_copy->popup_message;
     PrinterState old_state = printer_data_copy->state;
+    bool no_free = current_printer_index != last_announced_printer_index;
 
+    last_announced_printer_index = current_printer_index;
     memcpy(printer_data_copy, &printer_data, sizeof(PrinterData));
 
     if (printer_data_copy->state_message == NULL)
@@ -42,13 +45,13 @@ PrinterData* BasePrinter::AnnouncePrinterData()
         printer_data_copy->popup_message = blank;
     }
     
-    if (old_state_message != printer_data_copy->state_message && old_state_message != NULL && old_state_message != blank)
+    if (old_state_message != printer_data_copy->state_message && old_state_message != NULL && old_state_message != blank && !no_free)
     {
         LOG_F(("Freeing state message '%s' (%x)\n", old_state_message, old_state_message));
         free(old_state_message);
     }
 
-    if (old_print_filename != printer_data_copy->print_filename && old_print_filename != NULL && old_print_filename != blank)
+    if (old_print_filename != printer_data_copy->print_filename && old_print_filename != NULL && old_print_filename != blank && !no_free)
     {
         LOG_F(("Freeing print filename '%s' (%x)\n", old_print_filename, old_print_filename));
         free(old_print_filename);
@@ -59,7 +62,7 @@ PrinterData* BasePrinter::AnnouncePrinterData()
         lv_msg_send(DATA_PRINTER_STATE, get_current_printer());
     }
 
-    if (old_popup_message != printer_data_copy->popup_message && old_popup_message != NULL && old_popup_message != blank)
+    if (old_popup_message != printer_data_copy->popup_message && old_popup_message != NULL && old_popup_message != blank && !no_free)
     {
         LOG_F(("Freeing popup message '%s' (%x)\n", old_popup_message, old_popup_message));
         free(old_popup_message);

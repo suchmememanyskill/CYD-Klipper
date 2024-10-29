@@ -8,7 +8,6 @@
 #include "ui_utils.h"
 #include "panels/panel.h"
 #include "../core/lv_setup.h"
-#include "switch_printer.h"
 #include "macros.h"
 
 void check_if_screen_needs_to_be_disabled(){
@@ -42,7 +41,7 @@ static void on_state_change(void * s, lv_msg_t * m){
 
 static void on_popup_message(void * s, lv_msg_t * m)
 {
-    lv_create_popup_message(get_current_printer_data()->popup_message, 10000);
+    lv_create_popup_message(get_current_printer_data()->popup_message, get_current_printer()->popup_message_timeout_s * 1000);
 }
 
 void main_ui_setup(){

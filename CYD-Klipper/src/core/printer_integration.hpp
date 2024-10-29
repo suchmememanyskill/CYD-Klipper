@@ -13,9 +13,10 @@ enum PrinterFeatures {
     PrinterFeatureEmergencyStop = BIT(7),
     PrinterFeatureExtrude = BIT(8),
     PrinterFeatureRetract = BIT(9),
-    PrinterFeatureLoadFilament = BIT(10),
-    PrinterFeatureUnloadFilament = BIT(11),
+    PrinterFeatureIgnoreError = BIT(10),
+    PrinterFeatureContinueError = BIT(11),
     PrinterFeatureCooldown = BIT(12),
+    PrinterFeatureRetryError = BIT(13),
 };
 
 inline PrinterFeatures operator|(PrinterFeatures a, PrinterFeatures b)
@@ -78,7 +79,6 @@ typedef struct _PrinterData {
         char* popup_message;
         float temperatures[10];
         float target_temperatures[10];
-        PrinterTemperatureDevice AvailableDevices;
         float position[3];
         float elapsed_time_s;
         float printed_time_s;
@@ -94,6 +94,7 @@ typedef struct _PrinterData {
         float pressure_advance;
         float smooth_time;
         int feedrate_mm_per_s;
+        PrinterFeatures error_screen_features;
 } PrinterData;
 
 typedef struct {
@@ -140,6 +141,8 @@ class BasePrinter
         PrinterData printer_data{};
         
     public:
+        short popup_message_timeout_s = 10;
+
         PrinterConfiguration* printer_config{};
         PrinterFeatures supported_features{};
         PrinterTemperatureDevice supported_temperature_devices{};

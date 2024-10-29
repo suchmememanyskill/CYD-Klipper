@@ -105,8 +105,6 @@ bool KlipperPrinter::send_emergency_stop()
 
 bool KlipperPrinter::execute_feature(PrinterFeatures feature)
 {
-    HTTPClient client;
-
     switch (feature)
     {
         case PrinterFeatureRestart:
@@ -168,7 +166,7 @@ bool KlipperPrinter::execute_feature(PrinterFeatures feature)
 
 bool KlipperPrinter::connect()
 {
-    return connection_test_klipper(printer_config) == ConnectionStatus::ConnectOk;
+    return connection_test_klipper(printer_config) == KlipperConnectionStatus::ConnectOk;
 }
 
 bool KlipperPrinter::fetch()
@@ -486,7 +484,7 @@ Thumbnail KlipperPrinter::get_32_32_png_image_thumbnail(const char* gcode_filena
     return thumbnail;
 }
 
-ConnectionStatus connection_test_klipper(PrinterConfiguration* config)
+KlipperConnectionStatus connection_test_klipper(PrinterConfiguration* config)
 {
     HTTPClient client;
 
@@ -504,13 +502,13 @@ ConnectionStatus connection_test_klipper(PrinterConfiguration* config)
 
         if (http_code == 403)
         {
-            return ConnectionStatus::ConnectAuthRequired;
+            return KlipperConnectionStatus::ConnectAuthRequired;
         }
 
-        return http_code == 200 ? ConnectionStatus::ConnectOk : ConnectionStatus::ConnectFail;
+        return http_code == 200 ? KlipperConnectionStatus::ConnectOk : KlipperConnectionStatus::ConnectFail;
     }
     catch (...) {
         LOG_LN("Failed to connect");
-        return ConnectionStatus::ConnectFail;
+        return KlipperConnectionStatus::ConnectFail;
     }
 }
