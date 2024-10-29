@@ -24,12 +24,12 @@ jobs:
         with:
           fetch-depth: 0
           
-      - uses: actions/cache@v3
-        with:
-          path: |
-            ~/.cache/pip
-            ~/.platformio/.cache
-          key: ${{ runner.os }}-pio-cyd-klipper
+      #- uses: actions/cache@v3
+      #  with:
+      #    path: |
+      #      ~/.cache/pip
+      #      ~/.platformio/.cache
+      #    key: ${{ runner.os }}-pio-cyd-klipper
 
       - uses: actions/setup-python@v4
         with:

@@ -113,8 +113,10 @@ void data_setup()
             {
                 case PrinterType::PrinterTypeKlipper:
                     available_printers[count++] = new KlipperPrinter(i);
+                    break;
                 case PrinterType::PrinterTypeBambuLocal:
                     available_printers[count++] = new BambuPrinter(i);
+                    break;
             }
         }
     }
