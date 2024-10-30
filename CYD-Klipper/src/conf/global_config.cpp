@@ -108,7 +108,7 @@ void global_config_add_new_printer()
 
 void global_config_set_printer(int idx)
 {
-    if (idx < 0 || idx >= PRINTER_CONFIG_COUNT)
+    if (idx < 0 || idx >= PRINTER_CONFIG_COUNT || global_config.printer_index == idx)
         return;
 
     global_config.printer_index = idx;

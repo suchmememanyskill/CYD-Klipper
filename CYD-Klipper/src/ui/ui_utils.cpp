@@ -118,6 +118,7 @@ void lv_create_keyboard_text_entry(lv_event_cb_t keyboard_callback, const char* 
     lv_obj_set_style_bg_opa(parent, LV_OPA_50, 0); 
     lv_obj_align(parent, LV_ALIGN_TOP_RIGHT, 0, 0);
     lv_layout_flex_column(parent, LV_FLEX_ALIGN_SPACE_BETWEEN);
+    lv_obj_clear_flag(parent, LV_OBJ_FLAG_SCROLLABLE);
 
     if (contain_in_panel)
     {
@@ -128,7 +129,7 @@ void lv_create_keyboard_text_entry(lv_event_cb_t keyboard_callback, const char* 
         lv_obj_set_size(parent, CYD_SCREEN_WIDTH_PX, CYD_SCREEN_HEIGHT_PX);
     }
 
-    if (title != nullptr)
+    if (title != nullptr && keyboard_mode != LV_KEYBOARD_MODE_NUMBER)
     {
         lv_obj_t * empty_panel = lv_create_empty_panel(parent);
         lv_obj_set_size(empty_panel, 0, 0);
@@ -146,6 +147,12 @@ void lv_create_keyboard_text_entry(lv_event_cb_t keyboard_callback, const char* 
 
     lv_obj_t * ta = lv_textarea_create(parent);
     lv_obj_t * keyboard = lv_keyboard_create(parent);
+
+    if (keyboard_mode == LV_KEYBOARD_MODE_NUMBER)
+    {
+        lv_textarea_set_placeholder_text(ta, title);
+        lv_obj_set_height(keyboard, LV_PCT(75));
+    }
 
     lv_obj_set_width(ta, width);
     lv_textarea_set_max_length(ta, max_length);

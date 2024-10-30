@@ -97,7 +97,7 @@ static void edit_move_increment(int column, float* idx)
     }
 
     selected_column = column;
-    lv_create_keyboard_text_entry(keyboard_cb_edit_move_increment, "Set increment", LV_KEYBOARD_MODE_NUMBER, CYD_SCREEN_PANEL_WIDTH_PX / 2, 6);
+    lv_create_keyboard_text_entry(keyboard_cb_edit_move_increment, "Set increment", LV_KEYBOARD_MODE_NUMBER, LV_PCT(75), 6);
 }
 
 static void x_line_button_press(lv_event_t * e) {
@@ -214,15 +214,15 @@ static void z_line_custom_callback(lv_event_t * e) {
 }
 
 static void x_line_custom(lv_event_t * e) {
-    lv_create_keyboard_text_entry(x_line_custom_callback, "Set X position", LV_KEYBOARD_MODE_NUMBER, CYD_SCREEN_PANEL_WIDTH_PX / 2, 6);
+    lv_create_keyboard_text_entry(x_line_custom_callback, "Set X position", LV_KEYBOARD_MODE_NUMBER, LV_PCT(75), 6);
 }
 
 static void y_line_custom(lv_event_t * e) {
-    lv_create_keyboard_text_entry(y_line_custom_callback, "Set Y position", LV_KEYBOARD_MODE_NUMBER, CYD_SCREEN_PANEL_WIDTH_PX / 2, 6);
+    lv_create_keyboard_text_entry(y_line_custom_callback, "Set Y position", LV_KEYBOARD_MODE_NUMBER, LV_PCT(75), 6);
 }
 
 static void z_line_custom(lv_event_t * e) {
-    lv_create_keyboard_text_entry(z_line_custom_callback, "Set Z position", LV_KEYBOARD_MODE_NUMBER, CYD_SCREEN_PANEL_WIDTH_PX / 2, 6);
+    lv_create_keyboard_text_entry(z_line_custom_callback, "Set Z position", LV_KEYBOARD_MODE_NUMBER, LV_PCT(75), 6);
 }
 
 lv_event_cb_t custom_callbacks[] = {x_line_custom, y_line_custom, z_line_custom};

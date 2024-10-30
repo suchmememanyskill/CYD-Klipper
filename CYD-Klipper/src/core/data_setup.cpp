@@ -104,11 +104,16 @@ void data_setup()
 {
     BasePrinter** available_printers = (BasePrinter**)malloc(sizeof(BasePrinter*) * PRINTER_CONFIG_COUNT);
     int count = 0;
-
+    int true_current_printer_index = 0;
     for (int i = 0; i < PRINTER_CONFIG_COUNT; i++)
     {
         if (global_config.printer_config[i].setup_complete)
         {
+            if (global_config.printer_index == i)
+            {
+                true_current_printer_index = count;;
+            }
+
             switch (global_config.printer_config[i].printer_type)
             {
                 case PrinterType::PrinterTypeKlipper:
@@ -122,6 +127,7 @@ void data_setup()
     }
 
     initialize_printers(available_printers, count);
+    set_current_printer(true_current_printer_index);
     semaphore_init();
     fetch_printer_data();
     freeze_render_thread();
