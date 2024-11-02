@@ -47,6 +47,7 @@ class BambuPrinter : public BasePrinter
             popup_message_timeout_s = -1;
             bambu_misc = 0;
             printer_data.error_screen_features = PrinterFeatureRetryError | PrinterFeatureIgnoreError | PrinterFeatureContinueError;
+            print_start = millis();
         }
 
         bool move_printer(const char* axis, float amount, bool relative);

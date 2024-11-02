@@ -120,37 +120,33 @@ void BambuPrinter::parse_state(JsonDocument& in)
         }
         else if (strcasecmp(state, "running") == 0 || strcasecmp(state, "prepare") == 0)
         {
-            if (print_start <= 0)
-            {
-                print_start = millis();
-            }
-            
             printer_data.state = PrinterState::PrinterStatePrinting;
         }
         else
         {
-            print_start = 0;
             printer_data.state = PrinterState::PrinterStateIdle;
         }
-    }
-
-
-
-    if (printer_data.state == PrinterState::PrinterStatePrinting)
-    {
-        printer_data.elapsed_time_s = (millis() - print_start) / 1000;
     }
 
     if (print.containsKey("mc_remaining_time"))
     {
         printer_data.remaining_time_s = print["mc_remaining_time"];
         printer_data.remaining_time_s *= 60;
+        if (printer_data.remaining_time_s > 300)
+        {
+            print_start = millis() - (printer_data.remaining_time_s / (1 - printer_data.print_progress) * printer_data.print_progress * 1000);
+        }
     }
 
     if (print.containsKey("mc_percent"))
     {
         printer_data.print_progress = print["mc_percent"];
         printer_data.print_progress /= 100;
+    }
+
+    if (printer_data.state == PrinterState::PrinterStatePrinting)
+    {
+        printer_data.elapsed_time_s = (millis() - print_start) / 1000;
     }
 
     if (print.containsKey("layer_num"))
