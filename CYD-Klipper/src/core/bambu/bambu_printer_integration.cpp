@@ -1,6 +1,5 @@
 #include "bambu_printer_integration.hpp"
 #include <PubSubClient.h>
-#include "WifiClientSecure.h"
 
 WiFiClientSecure wifi_client;
 PubSubClient client(wifi_client);
@@ -125,7 +124,7 @@ bool BambuPrinter::connect()
     sprintf(buff, "%d", printer_config->klipper_port);
     if (!client.connect("id", "bblp", buff))
     {
-        LOG_LN(("Bambu: Wrong IP or LAN code."));
+        LOG_LN("Bambu: Wrong IP or LAN code.");
         return false;
     }
 
@@ -134,7 +133,7 @@ bool BambuPrinter::connect()
 
     if (!client.subscribe(auth))
     {
-        LOG_LN(("Bambu: Wrong serial number."));
+        LOG_LN("Bambu: Wrong serial number.");
         return false;
     }
 
@@ -143,7 +142,7 @@ bool BambuPrinter::connect()
 
     if (!client.connected())
     {
-        LOG_LN(("Bambu: Connection lost. Likely wrong serial number."));
+        LOG_LN("Bambu: Connection lost. Likely wrong serial number.");
         return false;
     }
 
@@ -291,7 +290,11 @@ bool BambuPrinter::set_power_device_state(const char* device_name, bool state)
 
 Files BambuPrinter::get_files()
 {
-    Files files = {0};
+    PrinterState state = printer_data.state;
+    disconnect();
+    Files files = parse_files(wifi_client, 20);
+    connect();
+    printer_data.state = state;
     return files;
 }
 
@@ -343,7 +346,7 @@ BambuConnectionStatus connection_test_bambu(PrinterConfiguration* config)
     sprintf(buff, "%d", config->klipper_port);
     if (!connection_test_client.connect("id", "bblp", buff))
     {
-        LOG_LN(("Bambu: Wrong IP or LAN code."));
+        LOG_LN("Bambu: Wrong IP or LAN code.");
         return BambuConnectionStatus::BambuConnectFail;
     }
 
@@ -352,7 +355,7 @@ BambuConnectionStatus connection_test_bambu(PrinterConfiguration* config)
 
     if (!connection_test_client.subscribe(auth))
     {
-        LOG_LN(("Bambu: Wrong serial number."));
+        LOG_LN("Bambu: Wrong serial number.");
         return BambuConnectionStatus::BambuConnectSNFail;
     }
 
@@ -361,7 +364,7 @@ BambuConnectionStatus connection_test_bambu(PrinterConfiguration* config)
 
     if (!connection_test_client.connected())
     {
-        LOG_LN(("Bambu: Connection lost. Likely wrong serial number."));
+        LOG_LN("Bambu: Connection lost. Likely wrong serial number.");
         return BambuConnectionStatus::BambuConnectSNFail;
     }
 

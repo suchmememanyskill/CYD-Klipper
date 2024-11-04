@@ -1,5 +1,6 @@
 #include "bambu_printer_integration.hpp"
 #include <HTTPClient.h>
+#include <list>
 
 #define BIT_X_AXIS_HOMED BIT(0)
 #define BIT_Y_AXIS_HOMED BIT(1)
@@ -201,3 +202,158 @@ void BambuPrinter::parse_state(JsonDocument& in)
     printer_data.extrude_mult = 1;
 }
 
+// Derived from https://github.com/ldab/ESP32_FTPClient/blob/master/src/ESP32_FTPClient.cpp
+bool wifi_client_response_pass(WiFiClientSecure& client)
+{
+    unsigned long _m = millis();
+    bool first_char = true;
+    while (!client.available() && millis() < _m + 500) delay(1);   
+
+    if(!client.available())
+    {
+        LOG_LN("FTPS: No response from server");
+
+        return false;
+    }
+
+    LOG_LN("[FTPS response]");
+    bool response = true;
+    while (client.available()) 
+    {
+        char byte = client.read();
+
+        if (first_char && (byte == '4' || byte == '5'))
+        {
+            LOG_LN("FTPS: Server returned an error");
+            response = false;
+        }
+
+        first_char = false;
+
+        LOG_F(("%c", byte));
+    }
+
+    return response;
+}
+
+bool wifi_client_response_parse(WiFiClientSecure& client, std::list<char*> &files, int max_files)
+{
+    unsigned long _m = millis();
+    while (!client.available() && millis() < _m + 500) delay(1);   
+
+    if(!client.available())
+    {
+        LOG_LN("FTPS: No response from server");
+        return false;
+    }
+
+    LOG_LN("[FTPS response]");
+    char buff[128] = {0};
+    int index = 0;
+    while (client.available()) {
+        int byte = client.read();
+        LOG_F(("%c", byte));
+        buff[index] = byte;
+
+        if (byte == '\n' || byte == '\r' || byte <= 0)
+        {
+            buff[index] = 0;
+            if (index > 10)
+            {
+                char* file = (char*)malloc(index + 1);
+
+                if (file != NULL)
+                {
+                    strcpy(file, buff);
+                    files.push_front(file);
+
+                    if (files.size() > max_files)
+                    {
+                        auto last_entry = files.back();
+
+                        if (last_entry != NULL)
+                            free(last_entry);
+
+                        files.pop_back();
+                    }
+                }
+                else 
+                {
+                    LOG_LN("Failed to allocate memory");
+                }
+            }
+
+            index = 0;
+        }
+        else 
+        {
+            index++;
+        }
+    }
+
+    return true;
+}
+
+bool send_command_without_response(WiFiClientSecure& client, const char* command)
+{
+    client.println(command);
+    LOG_F(("[FTPS Command] %s\n", command));
+    return wifi_client_response_pass(client);
+}
+
+Files BambuPrinter::parse_files(WiFiClientSecure& wifi_client, int max_files)
+{
+    LOG_F(("Heap space pre-file-parse: %d bytes\n", esp_get_free_heap_size()));
+
+    unsigned long timer_request = millis();
+    Files result = {0};
+
+    if (!wifi_client.connect(printer_config->klipper_host, 990))
+    {
+        LOG_LN("Failed to fetch files: connection failed");
+    }
+
+    wifi_client_response_pass(wifi_client);
+    
+    char auth_code_buff[16] = {0};
+    sprintf(auth_code_buff, "PASS %d", printer_config->klipper_port);
+    send_command_without_response(wifi_client, "USER bblp");
+    wifi_client_response_pass(wifi_client);
+    send_command_without_response(wifi_client, auth_code_buff);
+    send_command_without_response(wifi_client, "PASV");
+    send_command_without_response(wifi_client, "NLST");
+    wifi_client.stop();
+
+    if (wifi_client.connect(printer_config->klipper_host, 2024))
+    {
+        unsigned long timer_parse = millis();
+        std::list<char*> files;
+        wifi_client_response_parse(wifi_client, files, max_files);
+        result.available_files = (char**)malloc(sizeof(char*) * files.size());
+        if (result.available_files == NULL)
+        {
+            LOG_LN("Failed to allocate memory");
+
+            for (auto file : files){
+                free(file);
+            }
+
+            return result;
+        }
+
+        for (auto file : files){
+            result.available_files[result.count++] = file;
+        }
+
+        result.success = true;
+        LOG_F(("Heap space post-file-parse: %d bytes\n", esp_get_free_heap_size()))
+        LOG_F(("Got %d files. Request took %dms, parsing took %dms\n", files.size(), timer_parse - timer_request, millis() - timer_parse))
+    }   
+    else 
+    {
+        LOG_LN("Failed to fetch files: data connection failed");
+    }
+
+    wifi_client.stop();
+    return result;
+}

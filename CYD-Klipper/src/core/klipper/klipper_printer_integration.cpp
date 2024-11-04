@@ -329,7 +329,7 @@ Files KlipperPrinter::get_files()
 {
     Files files_result = {0};
     HTTPClient client;
-    LOG_F(("Heap space pre-file-parse: %d bytes\n", esp_get_free_heap_size()))
+    LOG_F(("Heap space pre-file-parse: %d bytes\n", esp_get_free_heap_size()));
     std::list<FileSystemFile> files;
 
     auto timer_request = millis();

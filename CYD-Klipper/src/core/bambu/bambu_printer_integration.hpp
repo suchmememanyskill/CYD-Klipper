@@ -2,6 +2,7 @@
 
 #include "../printer_integration.hpp"
 #include <ArduinoJson.h>
+#include <WifiClientSecure.h>
 
 class BambuPrinter : public BasePrinter
 {
@@ -24,6 +25,7 @@ class BambuPrinter : public BasePrinter
 
     protected:
         void parse_state(JsonDocument& in);
+        Files parse_files(WiFiClientSecure& client, int max_files);
 
     public:
         BambuPrinter(int index) : BasePrinter(index)

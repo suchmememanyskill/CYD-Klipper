@@ -18,11 +18,16 @@ void setup() {
     screen_setup();
     lv_setup();
     LOG_LN("Screen init done");
+    LOG_F(("Free heap: %d bytes\n", esp_get_free_heap_size()));
     
     wifi_init();
+    LOG_F(("Free heap after wifi setup: %d bytes\n", esp_get_free_heap_size()));
     ota_init();
+    LOG_F(("Free heap after ota setup: %d bytes\n", esp_get_free_heap_size()));
     ip_init();
+    LOG_F(("Free heap after ip setup: %d bytes\n", esp_get_free_heap_size()));
     data_setup();
+    LOG_F(("Free heap after data setup: %d bytes\n", esp_get_free_heap_size()));
 
     nav_style_setup();
     main_ui_setup();
