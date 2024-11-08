@@ -301,6 +301,7 @@ bool send_command_without_response(WiFiClientSecure& client, const char* command
     return wifi_client_response_pass(client);
 }
 
+// TODO: This isn't a 'pure' parser implementation. Remove network calls, only do parsing
 Files BambuPrinter::parse_files(WiFiClientSecure& wifi_client, int max_files)
 {
     LOG_F(("Heap space pre-file-parse: %d bytes\n", esp_get_free_heap_size()));

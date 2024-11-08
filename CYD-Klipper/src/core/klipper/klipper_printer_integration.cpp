@@ -226,7 +226,7 @@ PrinterDataMinimal KlipperPrinter::fetch_min()
 
         JsonDocument doc;
         deserializeJson(doc, client.getStream());
-        return parse_state_min(doc);
+        parse_state_min(doc, &data);
     }
     else 
     {

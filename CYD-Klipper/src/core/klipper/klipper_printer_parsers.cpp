@@ -183,11 +183,9 @@ void KlipperPrinter::parse_state(JsonDocument &in)
     }
 }
 
-PrinterDataMinimal KlipperPrinter::parse_state_min(JsonDocument &in)
+void KlipperPrinter::parse_state_min(JsonDocument &in, PrinterDataMinimal* data)
 {
     auto status = in["result"]["status"];
-    PrinterDataMinimal data = {};
-    data.success = true;
 
     if (status.containsKey("webhooks"))
     {
@@ -195,15 +193,15 @@ PrinterDataMinimal KlipperPrinter::parse_state_min(JsonDocument &in)
 
         if (strcmp(state, "shutdown") == 0)
         {
-            data.state = PrinterState::PrinterStateError;
+            data->state = PrinterState::PrinterStateError;
         }
     }
 
-    if (data.state != PrinterStateError)
+    if (data->state != PrinterStateError)
     {
         if (status.containsKey("virtual_sdcard"))
         {
-            data.print_progress = status["virtual_sdcard"]["progress"];
+            data->print_progress = status["virtual_sdcard"]["progress"];
         }
 
         if (status.containsKey("print_stats"))
@@ -212,24 +210,22 @@ PrinterDataMinimal KlipperPrinter::parse_state_min(JsonDocument &in)
 
             if (state == nullptr)
             {
-                data.state = PrinterState::PrinterStateError;
+                data->state = PrinterState::PrinterStateError;
             }
             else if (strcmp(state, "printing") == 0)
             {
-                data.state = PrinterState::PrinterStatePrinting;
+                data->state = PrinterState::PrinterStatePrinting;
             }
             else if (strcmp(state, "paused") == 0)
             {
-                data.state = PrinterState::PrinterStatePaused;
+                data->state = PrinterState::PrinterStatePaused;
             }
             else if (strcmp(state, "complete") == 0 || strcmp(state, "cancelled") == 0 || strcmp(state, "standby") == 0)
             {
-                data.state = PrinterState::PrinterStateIdle;
+                data->state = PrinterState::PrinterStateIdle;
             }
         }
     }
-
-    return data;
 }
 
 Macros KlipperPrinter::parse_macros(JsonDocument &in)
