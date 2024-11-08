@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include "../ui_utils.h"
 #include "../../core/printer_integration.hpp"
+#include "../../core/current_printer.h"
 
 char time_buffer[12];
 
@@ -58,19 +59,19 @@ static void update_printer_data_percentage(lv_event_t * e){
 }
 
 static void btn_click_stop(lv_event_t * e){
-    get_current_printer()->execute_feature(PrinterFeatures::PrinterFeatureStop);
+    current_printer_execute_feature(PrinterFeatures::PrinterFeatureStop);
 }
 
 static void btn_click_pause(lv_event_t * e){
-    get_current_printer()->execute_feature(PrinterFeatures::PrinterFeaturePause);
+    current_printer_execute_feature(PrinterFeatures::PrinterFeaturePause);
 }
 
 static void btn_click_resume(lv_event_t * e){
-    get_current_printer()->execute_feature(PrinterFeatures::PrinterFeatureResume);
+    current_printer_execute_feature(PrinterFeatures::PrinterFeatureResume);
 }
 
 static void btn_click_estop(lv_event_t * e){
-    get_current_printer()->execute_feature(PrinterFeatures::PrinterFeatureEmergencyStop);
+    current_printer_execute_feature(PrinterFeatures::PrinterFeatureEmergencyStop);
 }
 
 void progress_panel_init(lv_obj_t* panel){

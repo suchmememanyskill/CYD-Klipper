@@ -1,7 +1,6 @@
 #include "../macros.h"
 #include "panel.h"
 #include "../nav_buttons.h"
-#include "../../core/data_setup.h"
 #include "../../conf/global_config.h"
 #include "../ui_utils.h"
 #include <HardwareSerial.h>

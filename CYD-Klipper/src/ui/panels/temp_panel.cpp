@@ -3,6 +3,7 @@
 #include <HardwareSerial.h>
 #include "../ui_utils.h"
 #include "../../core/printer_integration.hpp"
+#include "../../core/current_printer.h"
 
 enum temp_target{
     TARGET_HOTEND,
@@ -85,10 +86,10 @@ static void keyboard_callback(lv_event_t * e){
         
     switch (keyboard_target){
         case TARGET_HOTEND:
-            get_current_printer()->set_target_temperature(PrinterTemperatureDevice::PrinterTemperatureDeviceNozzle1, temp);
+            current_printer_set_target_temperature(PrinterTemperatureDevice::PrinterTemperatureDeviceNozzle1, temp);
             break;
         case TARGET_BED:
-            get_current_printer()->set_target_temperature(PrinterTemperatureDevice::PrinterTemperatureDeviceBed, temp);
+            current_printer_set_target_temperature(PrinterTemperatureDevice::PrinterTemperatureDeviceBed, temp);
             break;
         case TARGET_HOTEND_CONFIG_1:
             get_current_printer()->printer_config->hotend_presets[0] = temp;
@@ -132,7 +133,7 @@ static void cooldown_temp(lv_event_t * e){
         return;
     }
     
-    get_current_printer()->execute_feature(PrinterFeatures::PrinterFeatureCooldown);
+    current_printer_execute_feature(PrinterFeatures::PrinterFeatureCooldown);
 }
 
 static void btn_extrude(lv_event_t * e){
@@ -140,7 +141,7 @@ static void btn_extrude(lv_event_t * e){
         return;
     }
 
-    get_current_printer()->execute_feature(PrinterFeatures::PrinterFeatureExtrude);
+    current_printer_execute_feature(PrinterFeatures::PrinterFeatureExtrude);
 }
 
 static void set_temp_via_preset(lv_event_t * e){
@@ -153,7 +154,7 @@ static void set_temp_via_preset(lv_event_t * e){
         return;
     }
 
-    get_current_printer()->set_target_temperature(TARGET_HOTEND_CONFIG_3
+    current_printer_set_target_temperature(TARGET_HOTEND_CONFIG_3
         ? PrinterTemperatureDevice::PrinterTemperatureDeviceNozzle1
         : PrinterTemperatureDevice::PrinterTemperatureDeviceBed
         , value);
@@ -170,7 +171,7 @@ static void btn_retract(lv_event_t * e){
         return;
     }
 
-    get_current_printer()->execute_feature(PrinterFeatures::PrinterFeatureRetract);
+    current_printer_execute_feature(PrinterFeatures::PrinterFeatureRetract);
 }
 
 static void set_chart_range(lv_event_t * e) {

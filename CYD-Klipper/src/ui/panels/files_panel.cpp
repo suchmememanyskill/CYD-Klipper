@@ -1,7 +1,7 @@
 #include "lvgl.h"
 #include "panel.h"
 
-#include "../../core/data_setup.h"
+#include "../../core/current_printer.h"
 #include "../../conf/global_config.h"
 #include <HardwareSerial.h>
 #include "../ui_utils.h"
@@ -15,7 +15,7 @@ static void btn_print_file(lv_event_t * e){
     lv_obj_t * panel = (lv_obj_t*)lv_event_get_user_data(e);
     lv_obj_del(panel);
 
-    get_current_printer()->start_file(selected_file);
+    current_printer_start_file(selected_file);
 }
 
 static void btn_print_file_verify(lv_event_t * e){
@@ -61,10 +61,7 @@ static void btn_print_file_verify(lv_event_t * e){
     lv_label_set_text(label, LV_SYMBOL_OK);
     lv_obj_center(label);
 
-    freeze_request_thread();
-    Thumbnail thumbnail = get_current_printer()->get_32_32_png_image_thumbnail(selected_file);
-    unfreeze_request_thread();
-
+    Thumbnail thumbnail = current_printer_get_32_32_png_image_thumbnail(selected_file);
     lv_obj_t * img = NULL;
 
     if (thumbnail.success)
@@ -93,9 +90,7 @@ static void btn_print_file_verify(lv_event_t * e){
 }
 
 void files_panel_init(lv_obj_t* panel){
-    freeze_request_thread();
-    Files files = get_current_printer()->get_files();
-    unfreeze_request_thread();
+    Files files = current_printer_get_files();
 
     if (!files.success || files.count <= 0){
         lv_obj_t * label = lv_label_create(panel);

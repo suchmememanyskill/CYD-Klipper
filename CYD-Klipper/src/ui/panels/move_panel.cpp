@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include <Esp.h>
 #include "../../core/printer_integration.hpp"
+#include "../../core/current_printer.h"
 
 static bool last_homing_state = false;
 static bool move_edit_mode = false;
@@ -110,7 +111,7 @@ static void x_line_button_press(lv_event_t * e) {
     }
     
     float data = *data_pointer;
-    get_current_printer()->move_printer("X", data, true);
+    current_printer_move_printer("X", data, true);
 }
 
 static void y_line_button_press(lv_event_t * e) {
@@ -123,7 +124,7 @@ static void y_line_button_press(lv_event_t * e) {
     }
 
     float data = *data_pointer;
-    get_current_printer()->move_printer("Y", data, true);
+    current_printer_move_printer("Y", data, true);
 }
 
 static void z_line_button_press(lv_event_t * e) {
@@ -136,7 +137,7 @@ static void z_line_button_press(lv_event_t * e) {
     }
 
     float data = *data_pointer;
-    get_current_printer()->move_printer("Z", data, true);
+    current_printer_move_printer("Z", data, true);
 }
 
 static void x_pos_update(lv_event_t * e){
@@ -167,16 +168,14 @@ static void home_button_click(lv_event_t * e) {
     if (get_current_printer_data()->state == PrinterState::PrinterStatePrinting)
         return;
 
-    freeze_request_thread();
-    get_current_printer()->execute_feature(PrinterFeatures::PrinterFeatureHome);
-    unfreeze_request_thread();
+    current_printer_execute_feature(PrinterFeatures::PrinterFeatureHome);
 } 
 
 static void disable_steppers_click(lv_event_t * e) {
     if (get_current_printer_data()->state == PrinterState::PrinterStatePrinting)
         return;
 
-    get_current_printer()->execute_feature(PrinterFeatures::PrinterFeatureDisableSteppers);
+    current_printer_execute_feature(PrinterFeatures::PrinterFeatureDisableSteppers);
 } 
 
 static void switch_to_stat_panel(lv_event_t * e) {
@@ -197,7 +196,7 @@ static void line_custom_set(const char * axis, const char *text)
     if (pos < 0 || pos > 500)
         return;
 
-    get_current_printer()->move_printer(axis, pos, false);
+    current_printer_move_printer(axis, pos, false);
 }
 
 static void x_line_custom_callback(lv_event_t * e) {

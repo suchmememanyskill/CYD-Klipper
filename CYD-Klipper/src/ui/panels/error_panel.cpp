@@ -1,26 +1,26 @@
 #include "panel.h"
-#include "../../core/data_setup.h"
+#include "../../core/current_printer.h"
 #include "../ui_utils.h"
 #include "../../core/printer_integration.hpp"
 
 static void btn_click_restart(lv_event_t * e){
-    get_current_printer()->execute_feature(PrinterFeatureRestart);
+    current_printer_execute_feature(PrinterFeatureRestart);
 }
 
 static void btn_click_firmware_restart(lv_event_t * e){
-    get_current_printer()->execute_feature(PrinterFeatureFirmwareRestart);
+    current_printer_execute_feature(PrinterFeatureFirmwareRestart);
 }
 
 static void btn_click_error_ignore(lv_event_t * e){
-    get_current_printer()->execute_feature(PrinterFeatureIgnoreError);
+    current_printer_execute_feature(PrinterFeatureIgnoreError);
 }
 
 static void btn_click_error_continue(lv_event_t * e){
-    get_current_printer()->execute_feature(PrinterFeatureContinueError);
+    current_printer_execute_feature(PrinterFeatureContinueError);
 }
 
 static void btn_click_error_retry(lv_event_t * e){
-    get_current_printer()->execute_feature(PrinterFeatureRetryError);
+    current_printer_execute_feature(PrinterFeatureRetryError);
 }
 
 static void set_state_message_text(lv_event_t * e) {

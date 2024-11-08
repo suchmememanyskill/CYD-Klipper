@@ -1,6 +1,7 @@
 #include "macros.h"
 #include "ui_utils.h"
 #include <Esp.h>
+#include "../core/current_printer.h"
 #include "../core/data_setup.h"
 
 typedef struct {
@@ -12,7 +13,7 @@ static void macro_run(lv_event_t * e){
     lv_obj_t * btn = lv_event_get_target(e);
     const char* macro = (const char*)lv_event_get_user_data(e);
     LOG_F(("Macro: %s\n", macro))
-    get_current_printer()->execute_macro(macro);
+    current_printer_execute_macro(macro);
 }
 
 int macros_add_macros_to_panel(lv_obj_t * root_panel, BasePrinter* printer)
@@ -44,7 +45,9 @@ static void power_device_toggle(lv_event_t * e)
     DoubleStorage* device = (DoubleStorage*)lv_event_get_user_data(e);
     LOG_F(("Power Device: %s, State: %d -> %d\n", device->power_device_name, !checked, checked))
 
+    freeze_request_thread();
     device->printer->set_power_device_state(device->power_device_name, checked);
+    unfreeze_request_thread();
 }
 
 int macros_add_power_devices_to_panel(lv_obj_t * root_panel, BasePrinter* printer)
