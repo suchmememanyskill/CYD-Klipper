@@ -4,6 +4,7 @@
 #include <UrlEncode.h>
 #include "printer_integration.hpp"
 #include "klipper/klipper_printer_integration.hpp"
+#include "klipper-serial/serial_klipper_printer_integration.hpp"
 #include "bambu/bambu_printer_integration.hpp"
 
 SemaphoreHandle_t freezeRenderThreadSemaphore, freezeRequestThreadSemaphore;
@@ -121,6 +122,9 @@ void data_setup()
                     break;
                 case PrinterType::PrinterTypeBambuLocal:
                     available_printers[count++] = new BambuPrinter(i);
+                    break;
+                case PrinterType::PrinterTypeKlipperSerial:
+                    available_printers[count++] = new SerialKlipperPrinter(i);
                     break;
             }
         }

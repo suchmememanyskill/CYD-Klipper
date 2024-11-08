@@ -167,7 +167,9 @@ static void home_button_click(lv_event_t * e) {
     if (get_current_printer_data()->state == PrinterState::PrinterStatePrinting)
         return;
 
+    freeze_request_thread();
     get_current_printer()->execute_feature(PrinterFeatures::PrinterFeatureHome);
+    unfreeze_request_thread();
 } 
 
 static void disable_steppers_click(lv_event_t * e) {

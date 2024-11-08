@@ -72,7 +72,7 @@ static void btn_print_file_verify(lv_event_t * e){
         lv_img_dsc_t* img_header = (lv_img_dsc_t*)malloc(sizeof(lv_img_dsc_t));
         lv_obj_on_destroy_free_data(panel, img_header);
 
-        memset(img_header, 0, sizeof(img_header));
+        memset(img_header, 0, sizeof(lv_img_dsc_t));
         img_header->header.w = 32;
         img_header->header.h = 32;
         img_header->data_size = thumbnail.size;

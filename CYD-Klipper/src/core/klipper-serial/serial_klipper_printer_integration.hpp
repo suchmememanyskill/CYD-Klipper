@@ -4,9 +4,7 @@ class SerialKlipperPrinter : public KlipperPrinter
 {
     public:
         SerialKlipperPrinter(int index) : KlipperPrinter(index)
-        {
-
-        }
+        {}
 
         bool connect();
         bool fetch();
@@ -21,3 +19,5 @@ class SerialKlipperPrinter : public KlipperPrinter
         Thumbnail get_32_32_png_image_thumbnail(const char* gcode_filename);
         bool send_gcode(const char* gcode, bool wait = true);
 };
+
+KlipperConnectionStatus connection_test_serial_klipper(PrinterConfiguration* config);

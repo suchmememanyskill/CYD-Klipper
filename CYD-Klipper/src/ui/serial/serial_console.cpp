@@ -8,6 +8,7 @@
 
 namespace serial_console
 {
+    bool global_disable_serial_console = false;
 
     /*
      * read_string_until: Non-blocking replacement for Serial.readStringUntil()..
@@ -26,7 +27,7 @@ namespace serial_console
         {
             --cnt;
 
-            // backspace
+            // backspaceF
             if (c == 8)
             {
                 if (index > 0)
@@ -131,6 +132,9 @@ namespace serial_console
     // main "engine": non-blockingly read until newline found, parse, execute.
     void run()
     {
+        if (global_disable_serial_console)
+            return;
+
         static char cmdline[MAX_COMDLINE_SIZE + 1] = {0};
         if (!read_string_until('\n', cmdline, MAX_COMDLINE_SIZE))
             return;

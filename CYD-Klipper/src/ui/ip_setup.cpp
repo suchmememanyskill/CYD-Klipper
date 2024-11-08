@@ -11,6 +11,7 @@
 #include "../core/klipper/klipper_printer_integration.hpp"
 #include "../core/bambu/bambu_printer_integration.hpp"
 #include "../core/screen_driver.h"
+#include "../core/klipper-serial/serial_klipper_printer_integration.hpp"
 
 void show_ip_entry();
 void choose_printer_type();
@@ -55,6 +56,26 @@ static void btn_switch_printer(lv_event_t *e){
     set_color_scheme();
     set_invert_display();
     lv_obj_del(lv_obj_get_parent(lv_obj_get_parent(btn)));
+}
+
+long last_request = 0;
+
+void serial_check_connection()
+{
+    if ((millis() - last_request) < 5000)
+    {
+        return;
+    }
+
+    auto result = connection_test_serial_klipper(&global_config.printer_config[global_config.printer_index]);
+    last_request = millis();
+
+    if (result == KlipperConnectionStatus::ConnectOk)
+    {
+        global_config.printer_config[global_config.printer_index].setup_complete = true;
+        strcpy(global_config.printer_config[global_config.printer_index].klipper_host, "Serial");
+        write_global_config();
+    }
 }
 
 void switch_printer_init() {
@@ -338,6 +359,20 @@ void show_ip_entry()
             lv_textarea_set_placeholder_text(port_entry, "Access code");
             lv_textarea_set_placeholder_text(auth_entry, "Printer serial number");
             break;
+        case PrinterType::PrinterTypeKlipperSerial:
+            lv_label_set_text(main_label, "Klipper (Serial) Setup");
+            lv_obj_del(ip_row);
+            lv_obj_del(auth_row);
+            lv_obj_del(keyboard);
+
+            lv_obj_t * bottom_root = lv_create_empty_panel(top_root);
+            lv_obj_set_width(bottom_root, CYD_SCREEN_WIDTH_PX);
+            lv_obj_set_flex_grow(bottom_root, 1);
+            
+            label = lv_label_create(bottom_root);
+            lv_obj_center(label);
+            lv_label_set_text(label, "Connect CYD-Klipper to a host\nrunning the CYD-Klipper server");
+            break;
     }
 }
 
@@ -350,6 +385,12 @@ static void printer_type_klipper(lv_event_t * e)
 static void printer_type_bambu_local(lv_event_t * e)
 {
     global_config.printer_config[global_config.printer_index].printer_type = PrinterType::PrinterTypeBambuLocal;
+    show_ip_entry();
+}
+
+static void printer_type_serial_klipper(lv_event_t * e)
+{
+    global_config.printer_config[global_config.printer_index].printer_type = PrinterType::PrinterTypeKlipperSerial;
     show_ip_entry();
 }
 
@@ -379,6 +420,14 @@ void choose_printer_type()
 
     btn = lv_btn_create(root);
     lv_obj_set_size(btn, CYD_SCREEN_WIDTH_PX - CYD_SCREEN_GAP_PX * 2, CYD_SCREEN_MIN_BUTTON_HEIGHT_PX);
+    lv_obj_add_event_cb(btn, printer_type_serial_klipper, LV_EVENT_CLICKED, NULL);
+
+    label = lv_label_create(btn);
+    lv_label_set_text(label, "Klipper (Serial)");
+    lv_obj_center(label);
+
+    btn = lv_btn_create(root);
+    lv_obj_set_size(btn, CYD_SCREEN_WIDTH_PX - CYD_SCREEN_GAP_PX * 2, CYD_SCREEN_MIN_BUTTON_HEIGHT_PX);
     lv_obj_add_event_cb(btn, printer_type_bambu_local, LV_EVENT_CLICKED, NULL);
 
     label = lv_label_create(btn);
@@ -401,6 +450,11 @@ void ip_init(){
     
     while (!global_config.printer_config[global_config.printer_index].setup_complete)
     {
+        if (global_config.printer_config[global_config.printer_index].printer_type == PrinterType::PrinterTypeKlipperSerial)
+        {
+            serial_check_connection();
+        }
+
         lv_handler();
         serial_console::run();
     }
