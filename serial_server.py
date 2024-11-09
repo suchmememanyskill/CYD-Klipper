@@ -30,7 +30,7 @@ def main():
         # Read a line from the serial port
         if ser.in_waiting > 0:
             line = ser.readline().decode('utf-8').strip()
-            if line.startswith("HTTP_REQUEST"):
+            if line.startswith("HTTP_REQUEST") or line.startswith("HTTP_BINARY"):
                 print(f">>> {line}")
                 # Parse the parameters
                 try:
@@ -38,6 +38,7 @@ def main():
                     timeout_ms, request_type, url_path = int(parts[1]), parts[2], parts[3]
                     
                     ignore_timeout = timeout_ms <= 0
+                    binary = line.startswith("HTTP_BINARY")
 
                     if ignore_timeout:
                         timeout_ms = 1000;
@@ -57,10 +58,19 @@ def main():
 
                     # Send response back over serial
                     if response != None:
-                        status_code = response.status_code
-                        body = response.text.replace('\n', ' ')  # Trim and sanitize body for serial
-                        message = f"{status_code} {body}"
-                        write(message, not ignore_timeout)
+                        if binary:
+                            if response.status_code != 200:
+                                write("00000000", not ignore_timeout)
+                            else:
+                                length = len(response.content)
+                                ser.write(f"{length:>08}".encode('utf-8'))
+                                ser.write(response.content)
+                                print(f"<<< (Binary data of {length} bytes)")
+                        else:
+                            status_code = response.status_code
+                            body = response.text.replace('\n', ' ')  # Trim and sanitize body for serial
+                            message = f"{status_code} {body}"
+                            write(message, not ignore_timeout)
                 except (IndexError, ValueError) as e:
                     write(f"400 Malformed request {str(e)}", not ignore_timeout)
                 except requests.exceptions.ReadTimeout as e:

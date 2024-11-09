@@ -147,7 +147,7 @@ bool KlipperPrinter::execute_feature(PrinterFeatures feature)
                 return false;
             }
 
-            if (get_current_printer()->printer_config->custom_filament_move_macros)
+            if (printer_config->custom_filament_move_macros)
             {
                 return send_gcode("FILAMENT_RETRACT");
             }

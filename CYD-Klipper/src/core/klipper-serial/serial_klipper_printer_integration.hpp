@@ -2,6 +2,9 @@
 
 class SerialKlipperPrinter : public KlipperPrinter
 {
+    protected:
+        bool send_emergency_stop();
+        int get_slicer_time_estimate_s();
     public:
         SerialKlipperPrinter(int index) : KlipperPrinter(index)
         {}

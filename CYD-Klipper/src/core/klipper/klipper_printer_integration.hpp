@@ -21,8 +21,8 @@ class KlipperPrinter : public BasePrinter
         unsigned char lock_absolute_relative_mode_swap{};
         unsigned char klipper_request_consecutive_fail_count{};
 
-        bool send_emergency_stop();
-        int get_slicer_time_estimate_s();
+        virtual bool send_emergency_stop();
+        virtual int get_slicer_time_estimate_s();
         void init_ui_panels();
 
         int parse_slicer_time_estimate(JsonDocument& in);
