@@ -81,6 +81,8 @@ typedef struct
     unsigned char* data;
 } BinaryResponse;
 
+// Request: {timeout} {method} {endpoint}
+// Response: {8 char 0's padded body length}{body}
 bool make_binary_request(BinaryResponse* data, int timeout_ms, HttpRequestType requestType, const char* endpoint)
 {
     serial_console::global_disable_serial_console = true;

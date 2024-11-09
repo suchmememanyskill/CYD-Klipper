@@ -6,6 +6,7 @@
 #include "../core/data_setup.h"
 #include "../core/lv_setup.h"
 #include "serial/serial_console.h"
+#include "panels/panel.h"
 
 void wifi_init_inner();
 void wifi_pass_entry(const char* ssid);
@@ -110,6 +111,23 @@ static void wifi_btn_skip_setup(lv_event_t * e){
     global_config.wifi_configuration_skipped = true;
 }
 
+static void wifi_btn_settings(lv_event_t * e){
+    lv_obj_clean(lv_scr_act());
+    lv_obj_t * panel = lv_create_empty_panel(lv_scr_act());
+    lv_obj_set_size(panel, CYD_SCREEN_WIDTH_PX, CYD_SCREEN_HEIGHT_PX);
+    lv_layout_flex_column(panel);
+
+    lv_obj_t * btn = lv_btn_create(panel);
+    lv_obj_add_event_cb(btn, reset_btn_event_handler, LV_EVENT_CLICKED, NULL);
+    lv_obj_set_size(btn, LV_PCT(100), CYD_SCREEN_MIN_BUTTON_HEIGHT_PX);
+
+    lv_obj_t * label = lv_label_create(btn);
+    lv_label_set_text(label, "Return to WiFi Setup");
+    lv_obj_center(label);
+
+    settings_section_device(panel);
+}
+
 void wifi_init_inner(){
     WiFi.disconnect();
     lv_obj_clean(lv_scr_act());
@@ -166,8 +184,16 @@ void wifi_init_inner(){
     lv_obj_set_flex_grow(label, 1);
 
     lv_obj_t * btn = lv_btn_create(top_row);
+    lv_obj_add_event_cb(btn, wifi_btn_settings, LV_EVENT_CLICKED, NULL);
+    lv_obj_set_size(btn, CYD_SCREEN_MIN_BUTTON_WIDTH_PX, CYD_SCREEN_MIN_BUTTON_HEIGHT_PX);
+
+    label = lv_label_create(btn);
+    lv_label_set_text(label, LV_SYMBOL_SETTINGS);
+    lv_obj_center(label);
+
+    btn = lv_btn_create(top_row);
     lv_obj_add_event_cb(btn, wifi_btn_skip_setup, LV_EVENT_CLICKED, NULL);
-    lv_obj_set_size(btn, CYD_SCREEN_MIN_BUTTON_WIDTH_PX * 2, CYD_SCREEN_MIN_BUTTON_HEIGHT_PX);
+    lv_obj_set_size(btn, CYD_SCREEN_MIN_BUTTON_WIDTH_PX * 1.5, CYD_SCREEN_MIN_BUTTON_HEIGHT_PX);
 
     label = lv_label_create(btn);
     lv_label_set_text(label, "Skip");
