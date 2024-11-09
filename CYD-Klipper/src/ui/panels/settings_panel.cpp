@@ -34,6 +34,7 @@ static void reset_click(lv_event_t * e){
 
 static void reset_wifi_click(lv_event_t * e){
     global_config.wifi_configured = false;
+    global_config.wifi_configuration_skipped = false;
     write_global_config();
     ESP.restart();
 }

@@ -394,8 +394,16 @@ static void printer_type_serial_klipper(lv_event_t * e)
     show_ip_entry();
 }
 
+static void return_to_wifi_configuration(lv_event_t * e)
+{
+    global_config.wifi_configuration_skipped = false;
+    write_global_config();
+    ESP.restart();
+}
+
 void choose_printer_type()
 {
+    lv_obj_t * btn;
     lv_obj_clean(lv_scr_act());
     global_config.printer_config[global_config.printer_index].ip_configured = false;
     global_config.printer_config[global_config.printer_index].auth_configured = false;
@@ -410,13 +418,16 @@ void choose_printer_type()
     lv_obj_t * label = lv_label_create(root);
     lv_label_set_text(label, "Choose printer type");
 
-    lv_obj_t * btn = lv_btn_create(root);
-    lv_obj_set_size(btn, CYD_SCREEN_WIDTH_PX - CYD_SCREEN_GAP_PX * 2, CYD_SCREEN_MIN_BUTTON_HEIGHT_PX);
-    lv_obj_add_event_cb(btn, printer_type_klipper, LV_EVENT_CLICKED, NULL);
+    if (global_config.wifi_configured)
+    {
+        btn = lv_btn_create(root);
+        lv_obj_set_size(btn, CYD_SCREEN_WIDTH_PX - CYD_SCREEN_GAP_PX * 2, CYD_SCREEN_MIN_BUTTON_HEIGHT_PX);
+        lv_obj_add_event_cb(btn, printer_type_klipper, LV_EVENT_CLICKED, NULL);
 
-    label = lv_label_create(btn);
-    lv_label_set_text(label, "Klipper");
-    lv_obj_center(label);
+        label = lv_label_create(btn);
+        lv_label_set_text(label, "Klipper");
+        lv_obj_center(label);
+    }
 
     btn = lv_btn_create(root);
     lv_obj_set_size(btn, CYD_SCREEN_WIDTH_PX - CYD_SCREEN_GAP_PX * 2, CYD_SCREEN_MIN_BUTTON_HEIGHT_PX);
@@ -426,13 +437,27 @@ void choose_printer_type()
     lv_label_set_text(label, "Klipper (Serial)");
     lv_obj_center(label);
 
-    btn = lv_btn_create(root);
-    lv_obj_set_size(btn, CYD_SCREEN_WIDTH_PX - CYD_SCREEN_GAP_PX * 2, CYD_SCREEN_MIN_BUTTON_HEIGHT_PX);
-    lv_obj_add_event_cb(btn, printer_type_bambu_local, LV_EVENT_CLICKED, NULL);
+    if (global_config.wifi_configured)
+    {
+        btn = lv_btn_create(root);
+        lv_obj_set_size(btn, CYD_SCREEN_WIDTH_PX - CYD_SCREEN_GAP_PX * 2, CYD_SCREEN_MIN_BUTTON_HEIGHT_PX);
+        lv_obj_add_event_cb(btn, printer_type_bambu_local, LV_EVENT_CLICKED, NULL);
 
-    label = lv_label_create(btn);
-    lv_label_set_text(label, "Bambu (Local)");
-    lv_obj_center(label);
+        label = lv_label_create(btn);
+        lv_label_set_text(label, "Bambu (Local)");
+        lv_obj_center(label);
+    }
+
+    if (global_config.wifi_configuration_skipped)
+    {
+        btn = lv_btn_create(root);
+        lv_obj_set_size(btn, CYD_SCREEN_WIDTH_PX - CYD_SCREEN_GAP_PX * 2, CYD_SCREEN_MIN_BUTTON_HEIGHT_PX);
+        lv_obj_add_event_cb(btn, return_to_wifi_configuration, LV_EVENT_CLICKED, NULL);
+
+        label = lv_label_create(btn);
+        lv_label_set_text(label, "Return to WiFi configuration");
+        lv_obj_center(label);
+    }
 }
 
 void ip_init(){

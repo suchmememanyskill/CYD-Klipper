@@ -71,6 +71,7 @@ typedef struct {
             // Internal
             bool screen_calibrated : 1;
             bool wifi_configured : 1;
+            bool wifi_configuration_skipped : 1;
 
             // External
             bool rotate_screen : 1;
