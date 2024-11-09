@@ -3,31 +3,6 @@
 #include <UrlEncode.h>
 #include "../../ui/serial/serial_console.h"
 
-bool is_semaphores_initialized = false;
-SemaphoreHandle_t freeze_serial_thread_semaphore;
-
-void semaphore_init_serial()
-{
-    if (is_semaphores_initialized)
-    {
-        return;
-    }
-
-    freeze_serial_thread_semaphore = xSemaphoreCreateMutex();
-    xSemaphoreGive(freeze_serial_thread_semaphore);
-    is_semaphores_initialized = true;
-}
-
-void freeze_serial_thread()
-{
-    xSemaphoreTake(freeze_serial_thread_semaphore, portMAX_DELAY);
-}
-
-void unfreeze_serial_thread()
-{
-    xSemaphoreGive(freeze_serial_thread_semaphore);
-}
-
 enum HttpRequestType
 {
     HttpPost,
@@ -46,8 +21,6 @@ void clear_serial_buffer()
 // Response: {status code} {body}
 bool make_serial_request(JsonDocument &out, int timeout_ms, HttpRequestType requestType, const char* endpoint)
 {
-    semaphore_init_serial();
-    freeze_serial_thread();
     serial_console::global_disable_serial_console = true;
     temporary_config.debug = false;
     char buff[10];
@@ -56,7 +29,6 @@ bool make_serial_request(JsonDocument &out, int timeout_ms, HttpRequestType requ
     // TODO: Add semaphore here
     if (!Serial.availableForWrite())
     {
-        unfreeze_serial_thread();
         return false;
     }
 
@@ -64,7 +36,6 @@ bool make_serial_request(JsonDocument &out, int timeout_ms, HttpRequestType requ
 
     if (timeout_ms <= 0)
     {
-        unfreeze_serial_thread();
         return true;
     }
     unsigned long _m = millis();
@@ -73,7 +44,6 @@ bool make_serial_request(JsonDocument &out, int timeout_ms, HttpRequestType requ
     if (!Serial.available())
     {
         Serial.println("Timeout...");
-        unfreeze_serial_thread();
         return false;
     }
 
@@ -84,7 +54,7 @@ bool make_serial_request(JsonDocument &out, int timeout_ms, HttpRequestType requ
     {
         Serial.println("Invalid error code");
         clear_serial_buffer();
-        unfreeze_serial_thread();
+        
         return false;
     }
 
@@ -94,18 +64,13 @@ bool make_serial_request(JsonDocument &out, int timeout_ms, HttpRequestType requ
     {
         Serial.println("Non-200 error code");
         clear_serial_buffer();
-        unfreeze_serial_thread();
+        
         return false;
     }
 
     auto result = deserializeJson(out, Serial);
     Serial.printf("Deserialization result: %s\n", result.c_str());
     bool success = result == DeserializationError::Ok;
-
-    if (!success)
-    {
-        unfreeze_serial_thread();
-    }
 
     return success;
 }
@@ -118,8 +83,6 @@ typedef struct
 
 bool make_binary_request(BinaryResponse* data, int timeout_ms, HttpRequestType requestType, const char* endpoint)
 {
-    semaphore_init_serial();
-    freeze_serial_thread();
     serial_console::global_disable_serial_console = true;
     temporary_config.debug = false;
     char buff[10];
@@ -128,7 +91,6 @@ bool make_binary_request(BinaryResponse* data, int timeout_ms, HttpRequestType r
     // TODO: Add semaphore here
     if (!Serial.availableForWrite() || timeout_ms <= 0)
     {
-        unfreeze_serial_thread();
         return false;
     }
 
@@ -140,7 +102,7 @@ bool make_binary_request(BinaryResponse* data, int timeout_ms, HttpRequestType r
     if (!Serial.available())
     {
         Serial.println("Timeout...");
-        unfreeze_serial_thread();
+        
         return false;
     }
 
@@ -151,7 +113,7 @@ bool make_binary_request(BinaryResponse* data, int timeout_ms, HttpRequestType r
     {
         Serial.println("Invalid length");
         clear_serial_buffer();
-        unfreeze_serial_thread();
+        
         return false;
     }
 
@@ -161,7 +123,7 @@ bool make_binary_request(BinaryResponse* data, int timeout_ms, HttpRequestType r
     {
         Serial.println("0 Length");
         clear_serial_buffer();
-        unfreeze_serial_thread();
+        
         return false;
     }
 
@@ -172,13 +134,11 @@ bool make_binary_request(BinaryResponse* data, int timeout_ms, HttpRequestType r
     {
         Serial.println("Failed to allocate memory");
         clear_serial_buffer();
-        unfreeze_serial_thread();
+        
         return false;
     }
 
     bool result = Serial.readBytes((char*)data->data, data_length) == data_length;
-    unfreeze_serial_thread();
-
     if (!result)
     {
         free(data->data);
@@ -191,7 +151,7 @@ bool make_serial_request_nocontent(HttpRequestType requestType, const char* endp
 {
     JsonDocument doc;
     make_serial_request(doc, 0, requestType, endpoint);
-    unfreeze_serial_thread();
+    
     return true;
 }
 
@@ -212,7 +172,6 @@ bool SerialKlipperPrinter::fetch()
 
         klipper_request_consecutive_fail_count = 0;
         parse_state(doc);
-        unfreeze_serial_thread();
     }
     else
     {
@@ -245,7 +204,6 @@ PrinterDataMinimal SerialKlipperPrinter::fetch_min()
     {
         data.state = PrinterState::PrinterStateIdle;
         parse_state_min(doc, &data);
-        unfreeze_serial_thread();
         data.power_devices = get_power_devices_count();
     }
     else 
@@ -264,7 +222,6 @@ Macros SerialKlipperPrinter::get_macros()
     if (make_serial_request(doc, 1000, HttpGet, "/printer/gcode/help"))
     {
         macros = parse_macros(doc);
-        unfreeze_serial_thread();
     }
 
     return macros;
@@ -275,9 +232,7 @@ int SerialKlipperPrinter::get_macros_count()
     JsonDocument doc;
     if (make_serial_request(doc, 1000, HttpGet, "/printer/gcode/help"))
     {
-        int count = parse_macros_count(doc);
-        unfreeze_serial_thread();
-        return count;
+        return parse_macros_count(doc);
     }
 
     return 0; 
@@ -290,7 +245,6 @@ PowerDevices SerialKlipperPrinter::get_power_devices()
     if (make_serial_request(doc, 1000, HttpGet, "/machine/device_power/devices"))
     {
         power_devices = parse_power_devices(doc);
-        unfreeze_serial_thread();
     }
 
     return power_devices;   
@@ -301,9 +255,7 @@ int SerialKlipperPrinter::get_power_devices_count()
     JsonDocument doc;
     if (make_serial_request(doc, 1000, HttpGet, "/machine/device_power/devices"))
     {
-        int count = parse_power_devices_count(doc);
-        unfreeze_serial_thread();
-        return count;
+        return parse_power_devices_count(doc);
     }
 
     return 0;     
@@ -333,8 +285,7 @@ Files SerialKlipperPrinter::get_files()
     }
 
     parse_file_list(doc, files, 20);
-    unfreeze_serial_thread();
-
+    
     files_result.available_files = (char**)malloc(sizeof(char*) * files.size());
 
     if (files_result.available_files == NULL){
@@ -375,7 +326,6 @@ Thumbnail SerialKlipperPrinter::get_32_32_png_image_thumbnail(const char* gcode_
     if (make_serial_request(doc, 1000, HttpGet, request.c_str()))
     {
         img_filename_path = parse_thumbnails(doc);
-        unfreeze_serial_thread();
         doc.clear();
     }
 
@@ -402,14 +352,9 @@ bool SerialKlipperPrinter::send_gcode(const char* gcode, bool wait)
     JsonDocument doc;
     String request = "/printer/gcode/script?script=" + urlEncode(gcode);
 
-    if (!wait)
-    {
-        return make_serial_request_nocontent(HttpGet, request.c_str());
-    }
-
-    bool result = make_serial_request(doc, 5000, HttpGet, request.c_str());
-    unfreeze_serial_thread();
-    return result;
+    return wait
+        ? make_serial_request(doc, 5000, HttpGet, request.c_str())
+        : make_serial_request_nocontent(HttpGet, request.c_str());
 }
 
 bool SerialKlipperPrinter::send_emergency_stop()
@@ -430,10 +375,7 @@ int SerialKlipperPrinter::get_slicer_time_estimate_s()
         return 0;
     }
 
-    int estimate = parse_slicer_time_estimate(doc);
-    unfreeze_serial_thread();
-
-    return estimate;
+    return parse_slicer_time_estimate(doc);
 }
 
 KlipperConnectionStatus connection_test_serial_klipper(PrinterConfiguration* config)
@@ -443,7 +385,6 @@ KlipperConnectionStatus connection_test_serial_klipper(PrinterConfiguration* con
     JsonDocument doc;
     if (make_serial_request(doc, 1000, HttpGet, "/printer/info"))
     {
-        unfreeze_serial_thread();
         return KlipperConnectionStatus::ConnectOk;
     }
 
