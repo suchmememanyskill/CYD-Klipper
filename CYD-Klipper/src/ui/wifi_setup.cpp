@@ -109,6 +109,7 @@ static void wifi_btn_manual_ssid(lv_event_t * e){
 
 static void wifi_btn_skip_setup(lv_event_t * e){
     global_config.wifi_configuration_skipped = true;
+    write_global_config();
 }
 
 static void wifi_btn_settings(lv_event_t * e){

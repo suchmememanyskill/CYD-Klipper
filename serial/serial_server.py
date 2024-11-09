@@ -1,16 +1,93 @@
 import serial
 import requests
+import os
+import serial.tools.list_ports
 import time
 
-# Define serial port and parameters
-SERIAL_PORT = 'COM6'  # Change this to your serial port
+SERIAL_PORT = 'COM6'
 BAUD_RATE = 115200
-HOSTNAME = 'http://localhost'  # Change to your hostname
-PORT = 7125  # Change to your port if necessary
+PROTOCOL = "http"
+HOSTNAME = 'localhost'
+PORT = 80 
 
+def test_request(protocol : str, hostname : str, port : int) -> bool:
+    try:
+        print(f"Sending test request to {hostname}:{port}")
+        response = requests.get(f"{protocol}://{hostname}:{port}/printer/info")
+        return response.status_code == 200
+    except requests.exceptions.RequestException:
+        return False
+
+def find_klipper_host() -> bool:
+    global PROTOCOL, HOSTNAME, PORT
+
+    protocol = PROTOCOL
+    host = HOSTNAME
+    port = PORT
+
+    if "KLIPPER_PROTOCOL" in os.environ:
+        protocol = os.environ["KLIPPER_PROTOCOL"]
+
+    if "KLIPPER_HOST" in os.environ:
+        host = os.environ["KLIPPER_HOST"]
+
+    if "KLIPPER_PORT" in os.environ:
+        port = int(os.environ["KLIPPER_PORT"])
+    
+    if test_request(protocol, host, port):
+        HOSTNAME = host
+        PORT = port
+        return True
+
+    port = 80
+
+    if test_request(protocol, host, port):
+        HOSTNAME = host
+        PORT = port
+        return True
+
+    port = 7125
+
+    if test_request(protocol, host, port):
+        HOSTNAME = host
+        PORT = port
+        return True
+
+    print("Could not find Klipper host. Please specify the hostname and port using the KLIPPER_HOST and KLIPPER_PORT environment variables.")
+    return False
+
+def find_esp32() -> bool:
+    global SERIAL_PORT
+
+    if "ESP32_SERIAL" in os.environ:
+        SERIAL_PORT = os.environ["ESP32_SERIAL"]
+
+        if os.path.exists(SERIAL_PORT):
+            return True
+        else:
+            print(f"Specified serial port {SERIAL_PORT} does not exist.")
+    
+    possible_devices = []
+
+    for port in serial.tools.list_ports.comports():
+        if port.vid == 0x10C4 and port.pid == 0xEA60:
+            possible_devices.append(port)
+        elif port.vid == 0x1A86 and port.pid == 0x7523:
+            possible_devices.append(port)
+    
+    if len(possible_devices) == 1:
+        SERIAL_PORT = possible_devices[0].device
+        return True
+    elif len(possible_devices) > 1:
+        print("Multiple ESP32 devices found. Please specify the serial port using the ESP32_SERIAL environment variable.")
+        return False
+    else:
+        print("No ESP32 devices found. Please specify the serial port using the ESP32_SERIAL environment variable.")
+        return False
+            
 # --------- #
 
-ser = serial.Serial(SERIAL_PORT, BAUD_RATE, timeout=1)
+ser : serial.Serial = None
 
 def truncuate(text : str, length : int = 50):
     length = length - 3
@@ -44,7 +121,7 @@ def main():
                         timeout_ms = 1000;
 
                     # Construct the full URL
-                    full_url = f"{HOSTNAME}:{PORT}{url_path}"
+                    full_url = f"{PROTOCOL}://{HOSTNAME}:{PORT}{url_path}"
                     
                     # Make the HTTP request based on the type
                     response = None
@@ -82,8 +159,25 @@ def main():
                 print(f"[LOG] {line}")
 
 if __name__ == "__main__":
-    try:
-        main()
-    except KeyboardInterrupt:
-        print("\nExiting script.")
-        ser.close()
+    while True:
+        try:
+            if not find_klipper_host():
+                time.sleep(5);
+                continue
+
+            if not find_esp32():
+                time.sleep(5);
+                continue
+
+            ser = serial.Serial(SERIAL_PORT, BAUD_RATE, timeout=1)
+            main()
+        except KeyboardInterrupt:
+            print("\nExiting script.")
+            ser.close()
+            break;
+        except Exception as e:
+            print(f"An error occurred: {str(e)}")
+            ser.close()
+            print("Retrying in 5 seconds...")
+            time.sleep(5)
+            
