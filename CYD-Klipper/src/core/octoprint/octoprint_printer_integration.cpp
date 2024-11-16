@@ -5,6 +5,9 @@
 #include <ArduinoJson.h>
 #include <list>
 
+const char* COMMAND_CONNECT = "{\"command\":\"connect\"}";
+const char* COMMAND_DISCONNECT = "{\"command\":\"disconnect\"}";
+
 void configure_http_client(HTTPClient &client, String url_part, bool stream, int timeout, PrinterConfiguration* printer_config)
 {
     client.useHTTP10(stream);
@@ -21,7 +24,7 @@ void configure_http_client(HTTPClient &client, String url_part, bool stream, int
     }
 }
 
-bool OctoPrinter::make_request(const char* endpoint, HttpRequestType requestType, int timeout_ms, bool stream)
+bool OctoPrinter::get_request(const char* endpoint, int timeout_ms, bool stream)
 {
     HTTPClient client;
 
@@ -35,7 +38,7 @@ bool OctoPrinter::make_request(const char* endpoint, HttpRequestType requestType
     return result >= 200 && result < 300;
 }
 
-bool OctoPrinter::make_request(JsonDocument& doc, const char* endpoint, HttpRequestType requestType, int timeout_ms, bool stream)
+bool OctoPrinter::post_request(const char* endpoint, const char* body, int timeout_ms, bool stream)
 {
     HTTPClient client;
 
@@ -45,14 +48,18 @@ bool OctoPrinter::make_request(JsonDocument& doc, const char* endpoint, HttpRequ
     }
 
     configure_http_client(client, endpoint, stream, timeout_ms, printer_config);
-    int result = client.GET();
 
-    if (result >= 200 && result < 300)
+    if (body[0] == '{' || body[0] == '[')
     {
-        auto result = deserializeJson(doc, client.getStream());
-        return result == DeserializationError::Ok;
+        client.addHeader("Content-Type", "application/json");
     }
 
+    int result = client.POST(body);
+    return result >= 200 && result < 300;
+}
+
+bool OctoPrinter::send_gcode(const char* gcode, bool wait)
+{
     return false;
 }
 
@@ -63,17 +70,77 @@ bool OctoPrinter::move_printer(const char* axis, float amount, bool relative)
 
 bool OctoPrinter::execute_feature(PrinterFeatures feature)
 {
+    switch (feature)
+    {
+        case PrinterFeatureRetryError:
+            if (no_printer)
+            {
+                bool a = post_request("/api/connection", COMMAND_CONNECT);
+                LOG_F(("Retry error: %d\n", a));
+                return a;
+            }
+        default:
+            LOG_F(("Unsupported printer feature %d", feature));
+            break;
+    }
+
     return false;
 }
 
 bool OctoPrinter::connect()
 {
-    return false;
+    return connection_test_octoprint(printer_config) == OctoConnectionStatus::OctoConnectOk;
 }
 
 bool OctoPrinter::fetch()
 {
-    return false;
+    HTTPClient client;
+    HTTPClient client2;
+    configure_http_client(client, "/api/printer", true, 1000, printer_config);
+
+    int http_code = client.GET();
+
+    if (http_code == 200)
+    {
+        no_printer = false;
+        request_consecutive_fail_count = 0;
+        JsonDocument doc;
+        deserializeJson(doc, client.getStream());
+        parse_printer_state(doc);
+
+        doc.clear();
+        configure_http_client(client2, "/api/job", true, 1000, printer_config);
+        if (client2.GET() == 200)
+        {
+            deserializeJson(doc, client2.getStream());
+            parse_job_state(doc);
+        }
+        else
+        {
+            printer_data.state = PrinterStateOffline;
+            return false;
+        }
+    }
+    else if (http_code == 409)
+    {
+        no_printer = true;
+        JsonDocument doc;
+        deserializeJson(doc, client.getStream());
+        parse_error(doc);
+    }
+    else 
+    {
+        request_consecutive_fail_count++;
+        LOG_LN("Failed to fetch printer data");
+
+        if (request_consecutive_fail_count >= 5) 
+        {
+            printer_data.state = PrinterStateOffline;
+            return false;
+        }
+    }
+
+    return true;
 }
 
 PrinterDataMinimal OctoPrinter::fetch_min()
@@ -86,18 +153,50 @@ void OctoPrinter::disconnect()
 
 }
 
+const char* MACRO_AUTOLEVEL = "Auto-Level (G28+G29)";
+const char* MACRO_DISCONNECT = "Disconnect printer";
+
 Macros OctoPrinter::get_macros()
 {
-    return {};
+    if (printer_data.state == PrinterStatePrinting || printer_data.state == PrinterStateOffline)
+    {
+        Macros macros = {0};
+        macros.success = false;
+        return macros;
+    }
+
+    Macros macros = {0};
+    macros.count = 2;
+    macros.macros = (char **)malloc(sizeof(char *) * macros.count);
+    macros.macros[0] = (char *)malloc(strlen(MACRO_AUTOLEVEL) + 1);
+    strcpy(macros.macros[0], MACRO_AUTOLEVEL);
+    macros.macros[1] = (char *)malloc(strlen(MACRO_DISCONNECT) + 1);
+    strcpy(macros.macros[1], MACRO_DISCONNECT);
+    macros.success = true;
+    return macros;
 }
 
 int OctoPrinter::get_macros_count()
 {
-    return 0;
+    return (printer_data.state == PrinterStatePrinting || printer_data.state == PrinterStateOffline) ? 0 : 2;
 }
 
 bool OctoPrinter::execute_macro(const char* macro)
 {
+    if (strcmp(macro, MACRO_AUTOLEVEL) == 0)
+    {
+        return send_gcode("G28\nG29");
+    }
+    else if (strcmp(macro, MACRO_DISCONNECT) == 0)
+    {
+        if (printer_data.state == PrinterStatePrinting || printer_data.state == PrinterStateOffline)
+        {
+            return false;
+        }
+        
+        return post_request("/api/connection", COMMAND_DISCONNECT);
+    }
+
     return false;
 }
 

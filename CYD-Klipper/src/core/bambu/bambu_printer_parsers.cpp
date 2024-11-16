@@ -63,7 +63,7 @@ void BambuPrinter::parse_state(JsonDocument& in)
     if (print.containsKey("nozzle_temper"))
     {
         printer_data.temperatures[PrinterTemperatureDeviceIndexNozzle1] = print["nozzle_temper"];
-        printer_data.can_extrude = printer_data.temperatures[PrinterTemperatureDeviceIndexNozzle1] > 175;
+        printer_data.can_extrude = printer_data.temperatures[PrinterTemperatureDeviceIndexNozzle1] >= MIN_EXTRUDER_EXTRUDE_TEMP;
     }
 
     if (print.containsKey("nozzle_target_temper"))

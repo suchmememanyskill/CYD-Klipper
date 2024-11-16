@@ -5,8 +5,15 @@
 class OctoPrinter : public BasePrinter
 {
     protected:
-        bool make_request(const char* endpoint, HttpRequestType requestType = HttpRequestType::HttpGet, int timeout_ms = 1000, bool stream = true);
-        bool make_request(JsonDocument& doc, const char* endpoint, HttpRequestType requestType = HttpRequestType::HttpGet, int timeout_ms = 1000, bool stream = true);
+        bool no_printer = false;
+        unsigned char request_consecutive_fail_count{};
+
+        void parse_printer_state(JsonDocument& in);
+        void parse_job_state(JsonDocument& in);
+        void parse_error(JsonDocument& in);
+
+        bool get_request(const char* endpoint, int timeout_ms = 1000, bool stream = true);
+        bool post_request(const char* endpoint, const char* body, int timeout_ms = 1000, bool stream = false);
 
     public:
         OctoPrinter(int index) : BasePrinter(index)
@@ -47,6 +54,8 @@ class OctoPrinter : public BasePrinter
 
         Thumbnail get_32_32_png_image_thumbnail(const char* gcode_filename);
         bool set_target_temperature(PrinterTemperatureDevice device, unsigned int temperature);
+
+        bool send_gcode(const char* gcode, bool wait = true);
 };
 
 enum OctoConnectionStatus {

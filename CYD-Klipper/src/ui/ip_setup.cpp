@@ -461,7 +461,7 @@ void choose_printer_type()
     lv_label_set_text(label, "Choose printer type");
 
     create_printer_type_button(root, "Klipper", printer_type_klipper);
-    create_printer_type_button(root, "Klipper (Serial)", printer_type_serial_klipper, false);
+    create_printer_type_button(root, "Klipper (Serial/USB)", printer_type_serial_klipper, false);
     create_printer_type_button(root, "Bambu (Local)", printer_type_bambu_local);
     create_printer_type_button(root, "Octoprint", printer_type_octoprint);
     

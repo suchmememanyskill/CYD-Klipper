@@ -30,7 +30,16 @@ void macros_panel_init(lv_obj_t* panel) {
 
     if (macros_count <= 0){
         label = lv_label_create(root_panel);
-        lv_label_set_text(label, "No macros found.\nMacros with the description\n\"CYD_SCREEN_MACRO\"\nwill show up here.");
+        if (get_current_printer()->printer_config->printer_type == PrinterType::PrinterTypeKlipper
+            || get_current_printer()->printer_config->printer_type == PrinterType::PrinterTypeKlipper)
+        {
+            lv_label_set_text(label, "No macros found.\nMacros with the description\n\"CYD_SCREEN_MACRO\"\nwill show up here.");
+        }
+        else 
+        {
+            lv_label_set_text(label, "No macros found.");
+        }
+        
 
         if (power_count <= 0){
             lv_layout_flex_column(root_panel, LV_FLEX_ALIGN_CENTER);

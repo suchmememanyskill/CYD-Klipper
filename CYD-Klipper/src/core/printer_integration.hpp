@@ -2,6 +2,8 @@
 #include "../conf/global_config.h"
 #include <esp_task_wdt.h>
 
+#define MIN_EXTRUDER_EXTRUDE_TEMP 175
+
 enum PrinterFeatures {
     PrinterFeatureRestart = BIT(0),
     PrinterFeatureFirmwareRestart = BIT(1),
