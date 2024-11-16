@@ -17,7 +17,7 @@
 static void invert_color_switch(lv_event_t * e){
     auto state = lv_obj_get_state(lv_event_get_target(e));
     bool checked = (state & LV_STATE_CHECKED == LV_STATE_CHECKED);
-    get_current_printer()->printer_config->invert_colors = checked;
+    global_config.printer_config[global_config.printer_index].invert_colors = checked;
     write_global_config();
     set_invert_display();
 }
@@ -184,17 +184,6 @@ void settings_section_theming(lv_obj_t* panel)
     lv_label_set_text(label, "Theming");
 
     lv_create_custom_menu_dropdown("Theme", panel, theme_dropdown, "Blue\nGreen\nLime\nGrey\nYellow\nOrange\nRed\nPurple", get_current_printer()->printer_config->color_scheme, NULL, PRINTER_SPECIFIC_SETTING);
-
-#ifndef CYD_SCREEN_DISABLE_INVERT_COLORS
-    lv_create_custom_menu_switch("Invert Colors", panel, invert_color_switch, get_current_printer()->printer_config->invert_colors, NULL, (global_config.multi_printer_mode) ? "Stored per printer" 
-    #ifdef CYD_SCREEN_DRIVER_ESP32_2432S028R
-        "\nIntended for the 2.8\" dual USB model screen" :  "Intended for the 2.8\" dual USB model screen"
-    #else
-       : NULL
-    #endif
-    );
-#endif // CYD_SCREEN_DISABLE_INVERT_COLORS
-
     lv_create_custom_menu_switch("Light Mode", panel, light_mode_switch, get_current_printer()->printer_config->light_mode, NULL, PRINTER_SPECIFIC_SETTING);
 }
 
@@ -250,6 +239,16 @@ void settings_section_device(lv_obj_t* panel)
     }
 
     lv_create_custom_menu_dropdown("Brightness", panel, brightness_dropdown, brightness_options, brightness_settings_index);
+
+#ifndef CYD_SCREEN_DISABLE_INVERT_COLORS
+    lv_create_custom_menu_switch("Invert Colors", panel, invert_color_switch, global_config.printer_config[global_config.printer_index].invert_colors, NULL, (global_config.multi_printer_mode) ? "Stored per printer" 
+    #ifdef CYD_SCREEN_DRIVER_ESP32_2432S028R
+        "\nIntended for the 2.8\" dual USB model screen" :  "Intended for the 2.8\" dual USB model screen"
+    #else
+       : NULL
+    #endif
+    );
+#endif // CYD_SCREEN_DISABLE_INVERT_COLORS
 
 #ifdef CYD_SCREEN_DRIVER_ESP32_2432S028R
     lv_create_custom_menu_switch("Screen Color Fix", panel, dualusb_screen_fix_switch, global_config.display_mode, NULL, "ONLY for the 2.8\" dual USB model screen");

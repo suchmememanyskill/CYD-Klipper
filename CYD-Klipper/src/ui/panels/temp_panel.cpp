@@ -154,7 +154,7 @@ static void set_temp_via_preset(lv_event_t * e){
         return;
     }
 
-    current_printer_set_target_temperature(TARGET_HOTEND_CONFIG_3
+    current_printer_set_target_temperature(target <= TARGET_HOTEND_CONFIG_3
         ? PrinterTemperatureDevice::PrinterTemperatureDeviceNozzle1
         : PrinterTemperatureDevice::PrinterTemperatureDeviceBed
         , value);

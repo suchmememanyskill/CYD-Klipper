@@ -134,6 +134,12 @@ typedef struct {
     unsigned char* png;
 } Thumbnail;
 
+enum HttpRequestType
+{
+    HttpPost,
+    HttpGet
+};
+
 class BasePrinter 
 {
     protected:

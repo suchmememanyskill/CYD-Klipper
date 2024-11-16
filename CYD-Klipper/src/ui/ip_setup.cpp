@@ -12,6 +12,7 @@
 #include "../core/bambu/bambu_printer_integration.hpp"
 #include "../core/screen_driver.h"
 #include "../core/klipper-serial/serial_klipper_printer_integration.hpp"
+#include "../core/octoprint/octoprint_printer_integration.hpp"
 
 void show_ip_entry();
 void choose_printer_type();
@@ -217,10 +218,23 @@ static void keyboard_event_ip_entry(lv_event_t * e) {
                 lv_label_set_text(main_label, "Incorrect IP/Access code");
             }
         }
-    }
-    else
-    {
-        return;
+        else if (type == PrinterType::PrinterTypeOctoprint)
+        {
+            OctoConnectionStatus octo_status = connection_test_octoprint(&global_config.printer_config[global_config.printer_index]);
+            if (octo_status == OctoConnectionStatus::OctoConnectOk)
+            {
+                global_config.printer_config[global_config.printer_index].setup_complete = true;
+                write_global_config();
+            }
+            else if (octo_status == OctoConnectionStatus::OctoConnectKeyFail)
+            {
+                lv_label_set_text(main_label, "Incorrect API key");
+            }
+            else
+            {
+                lv_label_set_text(main_label, "Failed to connect");
+            }
+        }
     }
 }
 
@@ -249,7 +263,6 @@ void show_ip_entry()
     lv_obj_set_flex_grow(button_back, 1);
     lv_obj_add_event_cb(button_back, return_to_choose_printer_type, LV_EVENT_CLICKED, NULL);
 
-    
     lv_obj_t * label = lv_label_create(button_back);
     lv_label_set_text(label, LV_SYMBOL_LEFT);
     lv_obj_center(label);
@@ -359,6 +372,13 @@ void show_ip_entry()
             lv_textarea_set_placeholder_text(port_entry, "Access code");
             lv_textarea_set_placeholder_text(auth_entry, "Printer serial number");
             break;
+        case PrinterType::PrinterTypeOctoprint:
+            lv_label_set_text(main_label, "Octoprint Setup");
+            lv_textarea_set_max_length(port_entry, 5);
+            lv_textarea_set_placeholder_text(host_entry, "Octoprint Host");
+            lv_textarea_set_placeholder_text(port_entry, "Port");
+            lv_textarea_set_placeholder_text(auth_entry, "API key");
+            break;
         case PrinterType::PrinterTypeKlipperSerial:
             lv_label_set_text(main_label, "Klipper (Serial) Setup");
             lv_obj_del(ip_row);
@@ -394,11 +414,33 @@ static void printer_type_serial_klipper(lv_event_t * e)
     show_ip_entry();
 }
 
+static void printer_type_octoprint(lv_event_t * e)
+{
+    global_config.printer_config[global_config.printer_index].printer_type = PrinterType::PrinterTypeOctoprint;
+    show_ip_entry();
+}
+
 static void return_to_wifi_configuration(lv_event_t * e)
 {
     global_config.wifi_configuration_skipped = false;
     write_global_config();
     ESP.restart();
+}
+
+static inline void create_printer_type_button(lv_obj_t * root, const char * label, lv_event_cb_t event, bool require_wifi = true)
+{
+    if (require_wifi && !global_config.wifi_configured)
+    {
+        return;
+    }
+
+    lv_obj_t * btn = lv_btn_create(root);
+    lv_obj_set_size(btn, CYD_SCREEN_WIDTH_PX - CYD_SCREEN_GAP_PX * 2, CYD_SCREEN_MIN_BUTTON_HEIGHT_PX);
+    lv_obj_add_event_cb(btn, event, LV_EVENT_CLICKED, NULL);
+
+    lv_obj_t * label_obj = lv_label_create(btn);
+    lv_label_set_text(label_obj, label);
+    lv_obj_center(label_obj);
 }
 
 void choose_printer_type()
@@ -418,45 +460,14 @@ void choose_printer_type()
     lv_obj_t * label = lv_label_create(root);
     lv_label_set_text(label, "Choose printer type");
 
-    if (global_config.wifi_configured)
-    {
-        btn = lv_btn_create(root);
-        lv_obj_set_size(btn, CYD_SCREEN_WIDTH_PX - CYD_SCREEN_GAP_PX * 2, CYD_SCREEN_MIN_BUTTON_HEIGHT_PX);
-        lv_obj_add_event_cb(btn, printer_type_klipper, LV_EVENT_CLICKED, NULL);
-
-        label = lv_label_create(btn);
-        lv_label_set_text(label, "Klipper");
-        lv_obj_center(label);
-    }
-
-    btn = lv_btn_create(root);
-    lv_obj_set_size(btn, CYD_SCREEN_WIDTH_PX - CYD_SCREEN_GAP_PX * 2, CYD_SCREEN_MIN_BUTTON_HEIGHT_PX);
-    lv_obj_add_event_cb(btn, printer_type_serial_klipper, LV_EVENT_CLICKED, NULL);
-
-    label = lv_label_create(btn);
-    lv_label_set_text(label, "Klipper (Serial)");
-    lv_obj_center(label);
-
-    if (global_config.wifi_configured)
-    {
-        btn = lv_btn_create(root);
-        lv_obj_set_size(btn, CYD_SCREEN_WIDTH_PX - CYD_SCREEN_GAP_PX * 2, CYD_SCREEN_MIN_BUTTON_HEIGHT_PX);
-        lv_obj_add_event_cb(btn, printer_type_bambu_local, LV_EVENT_CLICKED, NULL);
-
-        label = lv_label_create(btn);
-        lv_label_set_text(label, "Bambu (Local)");
-        lv_obj_center(label);
-    }
-
+    create_printer_type_button(root, "Klipper", printer_type_klipper);
+    create_printer_type_button(root, "Klipper (Serial)", printer_type_serial_klipper, false);
+    create_printer_type_button(root, "Bambu (Local)", printer_type_bambu_local);
+    create_printer_type_button(root, "Octoprint", printer_type_octoprint);
+    
     if (global_config.wifi_configuration_skipped)
     {
-        btn = lv_btn_create(root);
-        lv_obj_set_size(btn, CYD_SCREEN_WIDTH_PX - CYD_SCREEN_GAP_PX * 2, CYD_SCREEN_MIN_BUTTON_HEIGHT_PX);
-        lv_obj_add_event_cb(btn, return_to_wifi_configuration, LV_EVENT_CLICKED, NULL);
-
-        label = lv_label_create(btn);
-        lv_label_set_text(label, "Return to WiFi configuration");
-        lv_obj_center(label);
+        create_printer_type_button(root, "Return to WiFi configuration", return_to_wifi_configuration, false);
     }
 }
 

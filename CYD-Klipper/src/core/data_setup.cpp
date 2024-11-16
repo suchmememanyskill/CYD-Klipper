@@ -6,6 +6,7 @@
 #include "klipper/klipper_printer_integration.hpp"
 #include "klipper-serial/serial_klipper_printer_integration.hpp"
 #include "bambu/bambu_printer_integration.hpp"
+#include "octoprint/octoprint_printer_integration.hpp"
 
 SemaphoreHandle_t freezeRenderThreadSemaphore, freezeRequestThreadSemaphore;
 const long data_update_interval = 780;
@@ -125,6 +126,9 @@ void data_setup()
                     break;
                 case PrinterType::PrinterTypeKlipperSerial:
                     available_printers[count++] = new SerialKlipperPrinter(i);
+                    break;
+                case PrinterType::PrinterTypeOctoprint:
+                    available_printers[count++] = new OctoPrinter(i);
                     break;
             }
         }

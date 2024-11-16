@@ -3,12 +3,6 @@
 #include <UrlEncode.h>
 #include "../../ui/serial/serial_console.h"
 
-enum HttpRequestType
-{
-    HttpPost,
-    HttpGet
-};
-
 void clear_serial_buffer()
 {
     while (Serial.available())
