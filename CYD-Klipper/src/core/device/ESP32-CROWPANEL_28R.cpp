@@ -75,15 +75,6 @@ void screen_setup()
     tft.setRotation(1);
     tft.setTouch( calData );
 
-    if (global_config.display_mode) {
-        // <3 https://github.com/witnessmenow/ESP32-Cheap-Yellow-Display/blob/main/cyd.md#the-display-doesnt-look-as-good
-        tft.writecommand(ILI9341_GAMMASET); //Gamma curve selected
-        tft.writedata(2);
-        delay(120);
-        tft.writecommand(ILI9341_GAMMASET); //Gamma curve selected
-        tft.writedata(1);
-    }
-
     ledcSetup(0, 5000, 12);
     ledcAttachPin(TFT_BL, 0);
 
