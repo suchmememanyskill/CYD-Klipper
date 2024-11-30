@@ -9,25 +9,20 @@
 #include <TFT_eSPI.h>
 #include "../../conf/global_config.h"
 #include "lvgl.h"
-#include <XPT2046_Touchscreen.h>
 #include <TFT_eSPI.h>
 #include "../lv_setup.h"
 
-#define XPT2046_IRQ 36
-#define XPT2046_MOSI 32
-#define XPT2046_MISO 39
-#define XPT2046_CLK 25
-#define XPT2046_CS 33
 #define CPU_FREQ_HIGH 240
 #define CPU_FREQ_LOW 80
-
-SPIClass touchscreen_spi = SPIClass(HSPI);
-XPT2046_Touchscreen touchscreen(XPT2046_CS, XPT2046_IRQ);
+#define TOUCH_THRESHOLD 600
 
 static lv_disp_draw_buf_t draw_buf;
 static lv_color_t buf[CYD_SCREEN_HEIGHT_PX * CYD_SCREEN_WIDTH_PX / 10];
+uint16_t calData[5] = { 189, 3416, 359, 3439, 1};
 
 TFT_eSPI tft = TFT_eSPI();
+
+uint16_t touchX, touchY;
 
 void screen_setBrightness(byte brightness)
 {
@@ -53,12 +48,11 @@ void screen_lv_flush(lv_disp_drv_t *disp, const lv_area_t *area, lv_color_t *col
 
 void screen_lv_touchRead(lv_indev_drv_t *indev_driver, lv_indev_data_t *data)
 {
-    if (touchscreen.tirqTouched() && touchscreen.touched())
+    if (tft.getTouch( &touchX, &touchY, TOUCH_THRESHOLD))
     {
-        TS_Point p = touchscreen.getPoint();
         data->state = LV_INDEV_STATE_PR;
-        data->point.x = p.x;
-        data->point.y = p.y;
+        data->point.x = touchX;
+        data->point.y = touchY;
     }
     else
     {
@@ -72,13 +66,15 @@ void set_invert_display(){
 
 void screen_setup()
 {
-    touchscreen_spi.begin(XPT2046_CLK, XPT2046_MISO, XPT2046_MOSI, XPT2046_CS);
-    touchscreen.begin(touchscreen_spi);
-    touchscreen.setRotation(global_config.rotate_screen ? 3 : 1);
-
     lv_init();
 
     tft.init();
+    tft.fillScreen(TFT_BLACK);
+    tft.invertDisplay(false);
+    delay(300);
+
+    tft.setRotation(1);
+    tft.setTouch( calData );
 
     if (global_config.display_mode) {
         // <3 https://github.com/witnessmenow/ESP32-Cheap-Yellow-Display/blob/main/cyd.md#the-display-doesnt-look-as-good
@@ -92,11 +88,8 @@ void screen_setup()
     ledcSetup(0, 5000, 12);
     ledcAttachPin(21, 0);
 
-    tft.setRotation(global_config.rotate_screen ? 3 : 1);
-    tft.fillScreen(TFT_BLACK);
-    set_invert_display();
-    touchscreen_spi.begin(XPT2046_CLK, XPT2046_MISO, XPT2046_MOSI, XPT2046_CS);
-    touchscreen.begin(touchscreen_spi);
+    pinMode(TFT_BL, OUTPUT);
+    digitalWrite(TFT_BL, HIGH);
 
     lv_disp_draw_buf_init(&draw_buf, buf, NULL, CYD_SCREEN_HEIGHT_PX * CYD_SCREEN_WIDTH_PX / 10);
 
