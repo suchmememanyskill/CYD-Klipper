@@ -7,6 +7,7 @@
 
 const char* COMMAND_CONNECT = "{\"command\":\"connect\"}";
 const char* COMMAND_DISCONNECT = "{\"command\":\"disconnect\"}";
+const char* COMMAND_HOME = "{\"command\":\"home\",\"axes\":[\"x\",\"y\",\"z\"]}";
 
 void configure_http_client(HTTPClient &client, String url_part, bool stream, int timeout, PrinterConfiguration* printer_config)
 {
@@ -58,14 +59,61 @@ bool OctoPrinter::post_request(const char* endpoint, const char* body, int timeo
     return result >= 200 && result < 300;
 }
 
+// TODO: Make array in the first place, don't split on \n
 bool OctoPrinter::send_gcode(const char* gcode, bool wait)
 {
-    return false;
+    JsonDocument doc;
+    JsonArray array = doc["commands"].to<JsonArray>();
+    const char* last_line_start = gcode;
+    char out_buff[512];
+
+    for (const char* iter = gcode;; iter++)
+    {
+        if (*iter == '\n' || *iter == '\0')
+        {
+            const char *prev_char = iter - 1;
+
+            if (iter == last_line_start)
+            {
+                continue;
+            }
+
+            char* buff = (char*)malloc(sizeof(char) * (prev_char - gcode) + 1);
+            buff[prev_char - gcode] = '\0';
+            memcpy(buff, last_line_start, prev_char - gcode);
+            last_line_start = iter + 1;
+            array.add(last_line_start);
+        }
+
+        if (*iter == '\0')
+        {
+            break;
+        }
+    }
+
+    if (serializeJson(doc, out_buff, 512) != 512)
+    {
+        return false;
+    }
+
+    return post_request("/api/printer/command/custom", out_buff);
 }
 
 bool OctoPrinter::move_printer(const char* axis, float amount, bool relative)
 {
-    return false;
+    JsonDocument doc;
+    char out_buff[512];
+
+    doc["command"] = "jog";
+    doc[axis] = amount;
+    doc["absolute"] = !relative;
+
+    if (serializeJson(doc, out_buff, 512) != 512)
+    {
+        return false;
+    }
+
+    return post_request("/api/printer/printhead", out_buff);
 }
 
 bool OctoPrinter::execute_feature(PrinterFeatures feature)
@@ -79,6 +127,10 @@ bool OctoPrinter::execute_feature(PrinterFeatures feature)
                 LOG_F(("Retry error: %d\n", a));
                 return a;
             }
+        case PrinterFeatureHome:
+            return post_request("/api/printer/printhead", COMMAND_HOME);
+        case PrinterFeatureDisableSteppers:
+            return send_gcode("M18");
         default:
             LOG_F(("Unsupported printer feature %d", feature));
             break;
