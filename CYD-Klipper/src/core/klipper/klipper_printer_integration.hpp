@@ -8,7 +8,7 @@
 typedef struct {
     char* name;
     float modified;
-} FileSystemFile;
+} KlipperFileSystemFile;
 
 class KlipperPrinter : public BasePrinter
 {
@@ -32,7 +32,7 @@ class KlipperPrinter : public BasePrinter
         int parse_macros_count(JsonDocument &in);
         PowerDevices parse_power_devices(JsonDocument &in);
         int parse_power_devices_count(JsonDocument &in);
-        void parse_file_list(JsonDocument &in, std::list<FileSystemFile> &files, int fetch_limit);
+        void parse_file_list(JsonDocument &in, std::list<KlipperFileSystemFile> &files, int fetch_limit);
         char *parse_thumbnails(JsonDocument &in);
 
     public:

@@ -1,6 +1,12 @@
 #include "../printer_integration.hpp"
 #include <HTTPClient.h>
 #include <ArduinoJson.h>
+#include <list>
+
+typedef struct {
+    char* name;
+    float modified;
+} OctoFileSystemFile;
 
 class OctoPrinter : public BasePrinter
 {
@@ -11,6 +17,7 @@ class OctoPrinter : public BasePrinter
         void parse_printer_state(JsonDocument& in);
         void parse_job_state(JsonDocument& in);
         void parse_error(JsonDocument& in);
+        void OctoPrinter::parse_file_list(JsonDocument &in, std::list<OctoFileSystemFile> &files, int fetch_limit);
 
         bool get_request(const char* endpoint, int timeout_ms = 1000, bool stream = true);
         bool post_request(const char* endpoint, const char* body, int timeout_ms = 1000, bool stream = false);

@@ -102,3 +102,51 @@ void OctoPrinter::parse_error(JsonDocument& in)
         }
     }
 }
+
+void OctoPrinter::parse_file_list(JsonDocument &in, std::list<OctoFileSystemFile> &files, int fetch_limit)
+{
+    auto result = in["files"].as<JsonArray>();
+
+    for (auto file : result)
+    {
+        OctoFileSystemFile f = {0};
+        const char *path = file["path"];
+        float modified = file["date"];
+        auto file_iter = files.begin();
+
+        while (file_iter != files.end())
+        {
+            if ((*file_iter).modified < modified)
+                break;
+
+            file_iter++;
+        }
+
+        if (file_iter == files.end() && files.size() >= fetch_limit)
+            continue;
+
+        f.name = (char *)malloc(strlen(path) + 1);
+        if (f.name == NULL)
+        {
+            LOG_LN("Failed to allocate memory");
+            continue;
+        }
+        strcpy(f.name, path);
+        f.modified = modified;
+
+        if (file_iter != files.end())
+            files.insert(file_iter, f);
+        else
+            files.push_back(f);
+
+        if (files.size() > fetch_limit)
+        {
+            auto last_entry = files.back();
+
+            if (last_entry.name != NULL)
+                free(last_entry.name);
+
+            files.pop_back();
+        }
+    }
+}

@@ -269,6 +269,19 @@ bool OctoPrinter::set_power_device_state(const char* device_name, bool state)
 
 Files OctoPrinter::get_files()
 {
+    HTTPClient client;
+    JsonDocument filter;
+    JsonDocument doc;
+    configure_http_client(client, "/api/files?recursive=true", true, 5000, printer_config);
+
+    filter["files"][0]["path"] = true;
+    filter["files"][0]["date"] = true;
+
+    if (client.GET() == 200)
+    {
+        auto parseResult = deserializeJson(doc, client.getStream(), DeserializationOption::Filter(filter));
+    }
+
     return {};
 }
 

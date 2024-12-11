@@ -310,13 +310,13 @@ int KlipperPrinter::parse_power_devices_count(JsonDocument &in)
     return count;
 }
 
-void KlipperPrinter::parse_file_list(JsonDocument &in, std::list<FileSystemFile> &files, int fetch_limit)
+void KlipperPrinter::parse_file_list(JsonDocument &in, std::list<KlipperFileSystemFile> &files, int fetch_limit)
 {
     auto result = in["result"].as<JsonArray>();
 
     for (auto file : result)
     {
-        FileSystemFile f = {0};
+        KlipperFileSystemFile f = {0};
         const char *path = file["path"];
         float modified = file["modified"];
         auto file_iter = files.begin();
