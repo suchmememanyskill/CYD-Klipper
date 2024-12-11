@@ -59,7 +59,6 @@ bool OctoPrinter::post_request(const char* endpoint, const char* body, int timeo
     return result >= 200 && result < 300;
 }
 
-// TODO: Make array in the first place, don't split on \n
 bool OctoPrinter::send_gcode(const char* gcode, bool wait)
 {
     JsonDocument doc;
@@ -73,16 +72,15 @@ bool OctoPrinter::send_gcode(const char* gcode, bool wait)
         {
             const char *prev_char = iter - 1;
 
-            if (iter == last_line_start)
+            if (iter != last_line_start)
             {
-                continue;
+                char* buff = (char*)malloc(sizeof(char) * ((prev_char - last_line_start) + 1));
+                buff[prev_char - last_line_start] = '\0';
+                memcpy(buff, last_line_start, prev_char - last_line_start);
+                array.add(buff);
             }
 
-            char* buff = (char*)malloc(sizeof(char) * (prev_char - gcode) + 1);
-            buff[prev_char - gcode] = '\0';
-            memcpy(buff, last_line_start, prev_char - gcode);
             last_line_start = iter + 1;
-            array.add(last_line_start);
         }
 
         if (*iter == '\0')
@@ -94,6 +92,11 @@ bool OctoPrinter::send_gcode(const char* gcode, bool wait)
     if (serializeJson(doc, out_buff, 512) != 512)
     {
         return false;
+    }
+
+    for (char* alloc : array)
+    {
+        free(alloc);
     }
 
     return post_request("/api/printer/command/custom", out_buff);
