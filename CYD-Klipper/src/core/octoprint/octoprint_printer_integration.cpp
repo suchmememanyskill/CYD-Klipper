@@ -8,6 +8,7 @@
 const char* COMMAND_CONNECT = "{\"command\":\"connect\"}";
 const char* COMMAND_DISCONNECT = "{\"command\":\"disconnect\"}";
 const char* COMMAND_HOME = "{\"command\":\"home\",\"axes\":[\"x\",\"y\",\"z\"]}";
+const char* COMMAND_PRINT = "{\"command\":\"select\",\"print\":true}";
 
 void configure_http_client(HTTPClient &client, String url_part, bool stream, int timeout, PrinterConfiguration* printer_config)
 {
@@ -108,7 +109,7 @@ bool OctoPrinter::move_printer(const char* axis, float amount, bool relative)
     doc[axis] = amount;
     doc["absolute"] = !relative;
 
-    if (serializeJson(doc, out_buff, 512) != 512)
+    if (serializeJson(doc, out_buff, 512) >= 512)
     {
         return false;
     }
@@ -267,27 +268,69 @@ bool OctoPrinter::set_power_device_state(const char* device_name, bool state)
     return false;
 }
 
+#define OCTO_FILE_FETCH_LIMIT 20
+
 Files OctoPrinter::get_files()
 {
+    LOG_F(("Heap space pre-file-parse: %d bytes\n", esp_get_free_heap_size()));
+
+    Files files_result = {0};
     HTTPClient client;
     JsonDocument filter;
-    JsonDocument doc;
-    configure_http_client(client, "/api/files?recursive=true", true, 5000, printer_config);
+    std::list<OctoFileSystemFile> files;
 
     filter["files"][0]["path"] = true;
     filter["files"][0]["date"] = true;
+    filter["files"][0]["origin"] = true;
 
-    if (client.GET() == 200)
+    auto timer_request = millis();
+    configure_http_client(client, "/api/files?recursive=true", true, 5000, printer_config);
+
+    int http_code = client.GET();
+    auto timer_parse = millis();
+
+    if (http_code == 200)
     {
+        JsonDocument doc;
         auto parseResult = deserializeJson(doc, client.getStream(), DeserializationOption::Filter(filter));
+        LOG_F(("Json parse: %s\n", parseResult.c_str()))
+        parse_file_list(doc, files, OCTO_FILE_FETCH_LIMIT);
     }
+    else 
+    {
+        return files_result;
+    }
+
+    files_result.available_files = (char**)malloc(sizeof(char*) * files.size());
+
+    if (files_result.available_files == NULL){
+        LOG_LN("Failed to allocate memory");
+
+        for (auto file : files){
+            free(file.name);
+        }
+
+        return files_result;
+    }
+
+    for (auto file : files){
+        files_result.available_files[files_result.count++] = file.name;
+    }
+
+    files_result.success = true;
+
+    LOG_F(("Heap space post-file-parse: %d bytes\n", esp_get_free_heap_size()))
+    LOG_F(("Got %d files. Request took %dms, parsing took %dms\n", files.size(), timer_parse - timer_request, millis() - timer_parse))
+    return files_result;   
 
     return {};
 }
 
 bool OctoPrinter::start_file(const char* filename)
 {
-    return false;
+    char buff[512];
+    sprintf("/api/files/local/%s", filename);
+    return post_request(buff, COMMAND_PRINT);
 }
 
 Thumbnail OctoPrinter::get_32_32_png_image_thumbnail(const char* gcode_filename)
@@ -297,7 +340,26 @@ Thumbnail OctoPrinter::get_32_32_png_image_thumbnail(const char* gcode_filename)
 
 bool OctoPrinter::set_target_temperature(PrinterTemperatureDevice device, unsigned int temperature)
 {
-    return false;
+    JsonDocument doc;
+    char out_buff[512];
+
+    doc["command"] = "target";
+
+    if (device == PrinterTemperatureDevice::PrinterTemperatureDeviceNozzle1)
+    {
+        doc["targets"]["tool0"] = temperature;
+    }
+    else 
+    {
+        doc["target"] = temperature;
+    }
+
+    if (serializeJson(doc, out_buff, 512) >= 512)
+    {
+        return false;
+    }
+
+    return post_request(device == PrinterTemperatureDevice::PrinterTemperatureDeviceBed ? "/api/printer/bed" : "/api/printer/tool", out_buff);
 }
 
 OctoConnectionStatus connection_test_octoprint(PrinterConfiguration* config)

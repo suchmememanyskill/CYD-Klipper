@@ -338,11 +338,16 @@ Files KlipperPrinter::get_files()
     int http_code = client.GET();
     auto timer_parse = millis();
 
-    if (http_code == 200){
+    if (http_code == 200)
+    {
         JsonDocument doc;
         auto parseResult = deserializeJson(doc, client.getStream());
         LOG_F(("Json parse: %s\n", parseResult.c_str()))
         parse_file_list(doc, files, KLIPPER_FILE_FETCH_LIMIT);
+    }
+    else 
+    {
+        return files_result;
     }
 
     files_result.available_files = (char**)malloc(sizeof(char*) * files.size());
