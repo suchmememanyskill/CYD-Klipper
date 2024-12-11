@@ -61,23 +61,22 @@ bool OctoPrinter::post_request(const char* endpoint, const char* body, int timeo
 
 bool OctoPrinter::send_gcode(const char* gcode, bool wait)
 {
+    char* gcode_copy = (char*)malloc(sizeof(char) * (strlen(gcode) + 1));
+    size_t out_buff_size = sizeof(char) * (strlen(gcode) * 2 + 51);
+    char* out_buff = (char*)malloc(out_buff_size);
+    strcpy(gcode_copy, gcode);
     JsonDocument doc;
     JsonArray array = doc["commands"].to<JsonArray>();
-    const char* last_line_start = gcode;
-    char out_buff[512];
+    const char* last_line_start = gcode_copy;
 
-    for (const char* iter = gcode;; iter++)
+    for (char* iter = gcode_copy;; iter++)
     {
         if (*iter == '\n' || *iter == '\0')
         {
-            const char *prev_char = iter - 1;
-
             if (iter != last_line_start)
             {
-                char* buff = (char*)malloc(sizeof(char) * ((prev_char - last_line_start) + 1));
-                buff[prev_char - last_line_start] = '\0';
-                memcpy(buff, last_line_start, prev_char - last_line_start);
-                array.add(buff);
+                *iter = '\0';
+                array.add(last_line_start);
             }
 
             last_line_start = iter + 1;
@@ -89,17 +88,15 @@ bool OctoPrinter::send_gcode(const char* gcode, bool wait)
         }
     }
 
-    if (serializeJson(doc, out_buff, 512) != 512)
+    if (serializeJson(doc, out_buff, out_buff_size) == out_buff_size)
     {
         return false;
     }
 
-    for (char* alloc : array)
-    {
-        free(alloc);
-    }
-
-    return post_request("/api/printer/command/custom", out_buff);
+    free(gcode_copy);
+    bool result = post_request("/api/printer/command/custom", out_buff);
+    free(out_buff);
+    return result;
 }
 
 bool OctoPrinter::move_printer(const char* axis, float amount, bool relative)
