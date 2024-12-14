@@ -26,7 +26,7 @@ void configure_http_client(HTTPClient &client, String url_part, bool stream, int
     }
 }
 
-bool OctoPrinter::get_request(const char* endpoint, int timeout_ms, bool stream)
+bool OctoPrinter::get_request(const char* endpoint, int timeout_ms)
 {
     HTTPClient client;
 
@@ -35,12 +35,12 @@ bool OctoPrinter::get_request(const char* endpoint, int timeout_ms, bool stream)
         timeout_ms = 500;
     }
 
-    configure_http_client(client, endpoint, stream, timeout_ms, printer_config);
+    configure_http_client(client, endpoint, false, timeout_ms, printer_config);
     int result = client.GET();
     return result >= 200 && result < 300;
 }
 
-bool OctoPrinter::post_request(const char* endpoint, const char* body, int timeout_ms, bool stream)
+bool OctoPrinter::post_request(const char* endpoint, const char* body, int timeout_ms)
 {
     HTTPClient client;
 
@@ -49,7 +49,7 @@ bool OctoPrinter::post_request(const char* endpoint, const char* body, int timeo
         timeout_ms = 500;
     }
 
-    configure_http_client(client, endpoint, stream, timeout_ms, printer_config);
+    configure_http_client(client, endpoint, false, timeout_ms, printer_config);
 
     if (body[0] == '{' || body[0] == '[')
     {

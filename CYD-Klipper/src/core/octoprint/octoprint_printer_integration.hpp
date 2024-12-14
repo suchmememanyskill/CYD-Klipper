@@ -19,8 +19,8 @@ class OctoPrinter : public BasePrinter
         void parse_error(JsonDocument& in);
         void OctoPrinter::parse_file_list(JsonDocument &in, std::list<OctoFileSystemFile> &files, int fetch_limit);
 
-        bool get_request(const char* endpoint, int timeout_ms = 1000, bool stream = true);
-        bool post_request(const char* endpoint, const char* body, int timeout_ms = 1000, bool stream = false);
+        bool get_request(const char* endpoint, int timeout_ms = 1000);
+        void init_ui_panels();
 
     public:
         OctoPrinter(int index) : BasePrinter(index)
@@ -39,8 +39,11 @@ class OctoPrinter : public BasePrinter
                 | PrinterTemperatureDeviceNozzle1;
 
             printer_data.error_screen_features = PrinterFeatureRetryError;
+
+            init_ui_panels();
         }
 
+        bool post_request(const char* endpoint, const char* body, int timeout_ms = 1000);
         bool move_printer(const char* axis, float amount, bool relative);
         bool execute_feature(PrinterFeatures feature);
         bool connect();
