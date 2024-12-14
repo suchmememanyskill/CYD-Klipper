@@ -9,6 +9,11 @@ const char* COMMAND_CONNECT = "{\"command\":\"connect\"}";
 const char* COMMAND_DISCONNECT = "{\"command\":\"disconnect\"}";
 const char* COMMAND_HOME = "{\"command\":\"home\",\"axes\":[\"x\",\"y\",\"z\"]}";
 const char* COMMAND_PRINT = "{\"command\":\"select\",\"print\":true}";
+const char* COMMAND_CANCEL_PRINT = "{\"command\":\"cancel\"}";
+const char* COMMAND_PAUSE_PRINT = "{\"command\":\"pause\",\"action\":\"pause\"}";
+const char* COMMAND_RESUME_PRINT = "{\"command\":\"pause\",\"action\":\"resume\"}";
+const char* COMMAND_EXTRUDE = "{\"command\":\"extrude\",\"amount\":25}";
+const char* COMMAND_RETRACT = "{\"command\":\"extrude\",\"amount\":-25}";
 
 void configure_http_client(HTTPClient &client, String url_part, bool stream, int timeout, PrinterConfiguration* printer_config)
 {
@@ -132,6 +137,19 @@ bool OctoPrinter::execute_feature(PrinterFeatures feature)
             return post_request("/api/printer/printhead", COMMAND_HOME);
         case PrinterFeatureDisableSteppers:
             return send_gcode("M18");
+        case PrinterFeaturePause:
+            return post_request("/api/job", COMMAND_PAUSE_PRINT);
+        case PrinterFeatureResume:
+            return post_request("/api/job", COMMAND_RESUME_PRINT);
+        case PrinterFeatureStop:
+            return post_request("/api/job", COMMAND_CANCEL_PRINT);
+        case PrinterFeatureCooldown:
+            return set_target_temperature(PrinterTemperatureDeviceNozzle1, 0)
+            && set_target_temperature(PrinterTemperatureDeviceBed, 0);
+        case PrinterFeatureExtrude:
+            return post_request("/api/printer/tool", COMMAND_EXTRUDE);
+        case PrinterFeatureRetract:
+            return post_request("/api/printer/tool", COMMAND_RETRACT);
         default:
             LOG_F(("Unsupported printer feature %d", feature));
             break;
