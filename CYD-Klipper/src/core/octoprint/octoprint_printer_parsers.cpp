@@ -2,11 +2,9 @@
 #include "octoprint_printer_integration.hpp"
 #include <ArduinoJson.h>
 
-void OctoPrinter::parse_printer_state(JsonDocument& in)
+PrinterState OctoPrinter::parse_printer_state(JsonDocument& in)
 {
     auto flags = in["state"]["flags"];
-    auto text = in["state"]["text"];
-
     bool cancelling = flags["cancelling"];
     bool closedOrError = flags["closedOrError"];
     bool error = flags["error"];
@@ -21,25 +19,32 @@ void OctoPrinter::parse_printer_state(JsonDocument& in)
 
     if (printing || resuming)
     {
-        printer_data.state = PrinterState::PrinterStatePrinting;
+        return PrinterState::PrinterStatePrinting;
     }
     else if (pausing || paused)
     {
-        printer_data.state = PrinterState::PrinterStatePaused;
+        return PrinterState::PrinterStatePaused;
     }
     else if (cancelling || finishing || ready)
     {
-        printer_data.state = PrinterState::PrinterStateIdle;
+        return PrinterState::PrinterStateIdle;
     }
-    else
+
+    return PrinterState::PrinterStateError;
+}
+
+void OctoPrinter::parse_printer_status(JsonDocument& in)
+{
+    auto text = in["state"]["text"];
+    printer_data.state = parse_printer_state(in);
+
+    if (printer_data.state == PrinterState::PrinterStateError)
     {
         if (text != NULL && (printer_data.state_message == NULL || strcmp(printer_data.state_message, text)))
         {
             printer_data.state_message = (char *)malloc(strlen(text) + 1);
             strcpy(printer_data.state_message, text);
         }
-
-        printer_data.state = PrinterState::PrinterStateError;
     }
 
     auto temperature = in["temperature"];
@@ -86,6 +91,12 @@ void OctoPrinter::parse_job_state(JsonDocument& in)
     printer_data.elapsed_time_s = progress["printTime"];
     printer_data.printed_time_s = progress["printTime"];
     printer_data.remaining_time_s = progress["printTimeLeft"];
+}
+
+float OctoPrinter::parse_job_state_progress(JsonDocument& in)
+{
+    float completion = in["progress"]["completion"];
+    return completion / 100;
 }
 
 void OctoPrinter::parse_error(JsonDocument& in)

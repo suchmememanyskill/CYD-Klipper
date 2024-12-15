@@ -177,7 +177,7 @@ bool OctoPrinter::fetch()
         request_consecutive_fail_count = 0;
         JsonDocument doc;
         deserializeJson(doc, client.getStream());
-        parse_printer_state(doc);
+        parse_printer_status(doc);
 
         doc.clear();
         configure_http_client(client2, "/api/job", true, 1000, printer_config);
@@ -216,12 +216,56 @@ bool OctoPrinter::fetch()
 
 PrinterDataMinimal OctoPrinter::fetch_min()
 {
-    return {};
+    PrinterDataMinimal min = {};
+    min.success = true;
+    min.print_progress = 0;
+    min.power_devices = 0;
+    min.state = PrinterState::PrinterStateOffline;
+    
+    {
+        HTTPClient client;
+        int http_code = 0;
+        configure_http_client(client, "/api/printer", true, 1000, printer_config);
+        int http_code = client.GET();
+
+        if (http_code == 200)
+        {
+            JsonDocument doc;
+            deserializeJson(doc, client.getStream());
+            min.state = parse_printer_state(doc);
+        }
+        else if (http_code == 409)
+        {
+            min.state = PrinterState::PrinterStateError;
+            return min;
+        }
+        else 
+        {
+            return min;
+        }
+    }
+
+    {
+        HTTPClient client;
+        configure_http_client(client, "/api/job", true, 1000, printer_config);
+
+        if (client.GET() == 200)
+        {
+            JsonDocument doc;
+            deserializeJson(doc, client.getStream());
+            min.print_progress = parse_job_state_progress(doc);
+        }
+        else 
+        {
+            min.state = PrinterState::PrinterStateError;
+        }
+    }
+
+    return min;
 }
 
 void OctoPrinter::disconnect()
 {
-
 }
 
 const char* MACRO_AUTOLEVEL = "Auto-Level (G28+G29)";

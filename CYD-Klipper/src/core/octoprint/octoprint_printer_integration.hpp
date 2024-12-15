@@ -14,10 +14,12 @@ class OctoPrinter : public BasePrinter
         bool no_printer = false;
         unsigned char request_consecutive_fail_count{};
 
-        void parse_printer_state(JsonDocument& in);
+        void parse_printer_status(JsonDocument& in);
+        PrinterState parse_printer_state(JsonDocument& in);
         void parse_job_state(JsonDocument& in);
+        float parse_job_state_progress(JsonDocument& in);
         void parse_error(JsonDocument& in);
-        void OctoPrinter::parse_file_list(JsonDocument &in, std::list<OctoFileSystemFile> &files, int fetch_limit);
+        void parse_file_list(JsonDocument &in, std::list<OctoFileSystemFile> &files, int fetch_limit);
 
         bool get_request(const char* endpoint, int timeout_ms = 1000);
         void init_ui_panels();
