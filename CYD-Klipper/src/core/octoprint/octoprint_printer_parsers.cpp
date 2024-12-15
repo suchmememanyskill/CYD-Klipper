@@ -120,13 +120,15 @@ void OctoPrinter::parse_file_list(JsonDocument &in, std::list<OctoFileSystemFile
 
     for (auto file : result)
     {
-        if (!strcmp("local", file["origin"]))
+        const char *path = file["path"];
+        if (strcmp("local", file["origin"]))
         {
+            LOG_F(("Skipping non-local file %s\n", path))
             continue;
         }
 
         OctoFileSystemFile f = {0};
-        const char *path = file["path"];
+        
         float modified = file["date"];
         auto file_iter = files.begin();
 

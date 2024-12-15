@@ -74,7 +74,7 @@ void serial_check_connection()
     if (result == KlipperConnectionStatus::ConnectOk)
     {
         global_config.printer_config[global_config.printer_index].setup_complete = true;
-        strcpy(global_config.printer_config[global_config.printer_index].klipper_host, "Serial");
+        strcpy(global_config.printer_config[global_config.printer_index].printer_host, "Serial");
         write_global_config();
     }
 }
@@ -100,7 +100,7 @@ void switch_printer_init() {
 
     for (int i = 0; i < PRINTER_CONFIG_COUNT; i++){
         PrinterConfiguration * config = &global_config.printer_config[i];
-        const char* printer_name = (config->printer_name[0] == 0) ? config->klipper_host : config->printer_name;
+        const char* printer_name = (config->printer_name[0] == 0) ? config->printer_host : config->printer_name;
 
         if (i == global_config.printer_index && config->setup_complete)
         {
@@ -122,7 +122,7 @@ static void host_update(lv_event_t * e)
 {
     lv_obj_t * ta = lv_event_get_target(e);
     const char* text = lv_textarea_get_text(ta);
-    strcpy(global_config.printer_config[global_config.printer_index].klipper_host, text);
+    strcpy(global_config.printer_config[global_config.printer_index].printer_host, text);
     global_config.printer_config[global_config.printer_index].ip_configured = text[0] != '\0';
 }
 
@@ -140,7 +140,7 @@ static void auth_update(lv_event_t * e)
 {
     lv_obj_t * ta = lv_event_get_target(e);
     const char* text = lv_textarea_get_text(ta);
-    strcpy(global_config.printer_config[global_config.printer_index].klipper_auth, text);
+    strcpy(global_config.printer_config[global_config.printer_index].printer_auth, text);
     global_config.printer_config[global_config.printer_index].auth_configured = text[0] != '\0';
 }
 
@@ -165,6 +165,10 @@ static void keyboard_event_ip_entry(lv_event_t * e) {
         else if (lv_obj_has_flag(ta, LV_OBJ_FLAG_USER_2))
         {
             lv_keyboard_set_mode(kb, LV_KEYBOARD_MODE_USER_2);
+        }
+        else if (lv_obj_has_flag(ta, LV_OBJ_FLAG_USER_3))
+        {
+            lv_keyboard_set_mode(kb, LV_KEYBOARD_MODE_TEXT_LOWER);
         }
         else
         {
@@ -309,7 +313,7 @@ void show_ip_entry()
     {
         char buff[10] = {0};
         sprintf(buff, "%d", global_config.printer_config[global_config.printer_index].klipper_port);
-        lv_textarea_set_text(host_entry, global_config.printer_config[global_config.printer_index].klipper_host);
+        lv_textarea_set_text(host_entry, global_config.printer_config[global_config.printer_index].printer_host);
         lv_textarea_set_text(port_entry, buff);
     }
     else 
@@ -327,18 +331,18 @@ void show_ip_entry()
             global_config.printer_config[global_config.printer_index].klipper_port = 80;
         }
         
-        global_config.printer_config[global_config.printer_index].klipper_host[0] = '\0';
+        global_config.printer_config[global_config.printer_index].printer_host[0] = '\0';
         
     }
 
     if (global_config.printer_config[global_config.printer_index].auth_configured)
     {
-        lv_textarea_set_text(auth_entry, global_config.printer_config[global_config.printer_index].klipper_auth);
+        lv_textarea_set_text(auth_entry, global_config.printer_config[global_config.printer_index].printer_auth);
     }
     else
     {
         lv_textarea_set_text(auth_entry, "");
-        global_config.printer_config[global_config.printer_index].klipper_auth[0] = '\0';
+        global_config.printer_config[global_config.printer_index].printer_auth[0] = '\0';
     }
 
     lv_obj_add_event_cb(host_entry, host_update, LV_EVENT_VALUE_CHANGED, NULL);
@@ -373,6 +377,9 @@ void show_ip_entry()
             lv_textarea_set_placeholder_text(auth_entry, "Printer serial number");
             break;
         case PrinterType::PrinterTypeOctoprint:
+            lv_obj_clear_flag(auth_entry, LV_OBJ_FLAG_USER_2);
+            lv_obj_add_flag(auth_entry, LV_OBJ_FLAG_USER_3);
+            lv_textarea_set_max_length(auth_entry, 48);
             lv_label_set_text(main_label, "Octoprint Setup");
             lv_textarea_set_max_length(port_entry, 5);
             lv_textarea_set_placeholder_text(host_entry, "Octoprint Host");

@@ -309,7 +309,7 @@ Files BambuPrinter::parse_files(WiFiClientSecure& wifi_client, int max_files)
     unsigned long timer_request = millis();
     Files result = {0};
 
-    if (!wifi_client.connect(printer_config->klipper_host, 990))
+    if (!wifi_client.connect(printer_config->printer_host, 990))
     {
         LOG_LN("Failed to fetch files: connection failed");
     }
@@ -325,7 +325,7 @@ Files BambuPrinter::parse_files(WiFiClientSecure& wifi_client, int max_files)
     send_command_without_response(wifi_client, "NLST");
     wifi_client.stop();
 
-    if (wifi_client.connect(printer_config->klipper_host, 2024))
+    if (wifi_client.connect(printer_config->printer_host, 2024))
     {
         unsigned long timer_parse = millis();
         std::list<char*> files;

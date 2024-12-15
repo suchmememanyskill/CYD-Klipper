@@ -14,10 +14,10 @@ void KlipperPrinter::configure_http_client(HTTPClient &client, String url_part, 
         client.setConnectTimeout(timeout);
     }
 
-    client.begin("http://" + String(printer_config->klipper_host) + ":" + String(printer_config->klipper_port) + url_part);
+    client.begin("http://" + String(printer_config->printer_host) + ":" + String(printer_config->klipper_port) + url_part);
 
     if (printer_config->auth_configured) {
-        client.addHeader("X-Api-Key", printer_config->klipper_auth);
+        client.addHeader("X-Api-Key", printer_config->printer_auth);
     }
 }
 
@@ -495,10 +495,10 @@ KlipperConnectionStatus connection_test_klipper(PrinterConfiguration* config)
 
     client.setTimeout(1000);
     client.setConnectTimeout(1000);
-    client.begin("http://" + String(config->klipper_host) + ":" + String(config->klipper_port) + "/printer/info");
+    client.begin("http://" + String(config->printer_host) + ":" + String(config->klipper_port) + "/printer/info");
 
     if (config->auth_configured) {
-        client.addHeader("X-Api-Key", config->klipper_auth);
+        client.addHeader("X-Api-Key", config->printer_auth);
     }
 
     int http_code;

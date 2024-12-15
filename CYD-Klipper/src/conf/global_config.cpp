@@ -84,8 +84,8 @@ void global_config_add_new_printer()
     new_config->printer_type = PrinterType::PrinterTypeNone;
 
     new_config->printer_name[0] = 0;
-    new_config->klipper_host[0] = 0;
-    new_config->klipper_auth[0] = 0;
+    new_config->printer_host[0] = 0;
+    new_config->printer_auth[0] = 0;
     new_config->klipper_port = 0;
 
     new_config->color_scheme = old_config->color_scheme;
@@ -144,8 +144,8 @@ void set_printer_config_index(int index)
         new_config->auth_configured = false;
 
         new_config->printer_name[0] = 0;
-        new_config->klipper_host[0] = 0;
-        new_config->klipper_auth[0] = 0;
+        new_config->printer_host[0] = 0;
+        new_config->printer_auth[0] = 0;
         new_config->klipper_port = 0;
 
         new_config->color_scheme = old_config->color_scheme;

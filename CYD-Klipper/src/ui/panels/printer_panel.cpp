@@ -22,7 +22,7 @@ static void update_printer_name_text(lv_event_t * e)
     lv_obj_t * label = lv_event_get_target(e);
     int config_index = (int)lv_event_get_user_data(e);
     BasePrinter* printer = get_printer(config_index);
-    lv_label_set_text(label, printer->printer_config->printer_name[0] == 0 ? printer->printer_config->klipper_host : printer->printer_config->printer_name);
+    lv_label_set_text(label, printer->printer_config->printer_name[0] == 0 ? printer->printer_config->printer_host : printer->printer_config->printer_name);
 }
 
 static void update_printer_status_text(lv_event_t * e) 

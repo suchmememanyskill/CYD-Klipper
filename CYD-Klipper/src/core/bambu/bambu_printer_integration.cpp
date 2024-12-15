@@ -40,7 +40,7 @@ bool BambuPrinter::publish_mqtt_command(const char* command)
     }
 
     char auth[48] = {0};
-    sprintf(auth, "device/%s/request", printer_config->klipper_auth);
+    sprintf(auth, "device/%s/request", printer_config->printer_auth);
 
     return client.publish(auth, command);
 }
@@ -117,7 +117,7 @@ bool BambuPrinter::connect()
 {
     wifi_client.setInsecure();
     client.setBufferSize(4096);
-    client.setServer(printer_config->klipper_host, 8883);
+    client.setServer(printer_config->printer_host, 8883);
     current_printer = this;
     client.setCallback(NULL);
     char buff[10] = {0};
@@ -129,7 +129,7 @@ bool BambuPrinter::connect()
     }
 
     char auth[48] = {0};
-    sprintf(auth, "device/%s/report", printer_config->klipper_auth);
+    sprintf(auth, "device/%s/report", printer_config->printer_auth);
 
     if (!client.subscribe(auth))
     {
@@ -341,7 +341,7 @@ BambuConnectionStatus connection_test_bambu(PrinterConfiguration* config)
     WiFiClientSecure connection_test_wifi_client;
     PubSubClient connection_test_client(connection_test_wifi_client);
     connection_test_wifi_client.setInsecure();
-    connection_test_client.setServer(config->klipper_host, 8883);
+    connection_test_client.setServer(config->printer_host, 8883);
     char buff[10] = {0};
     sprintf(buff, "%d", config->klipper_port);
     if (!connection_test_client.connect("id", "bblp", buff))
@@ -351,7 +351,7 @@ BambuConnectionStatus connection_test_bambu(PrinterConfiguration* config)
     }
 
     char auth[48] = {0};
-    sprintf(auth, "device/%s/report", config->klipper_auth);
+    sprintf(auth, "device/%s/report", config->printer_auth);
 
     if (!connection_test_client.subscribe(auth))
     {

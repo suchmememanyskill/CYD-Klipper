@@ -4,7 +4,7 @@
 #include "lvgl.h"
 
 #define CONFIG_VERSION 7
-#define PRINTER_CONFIG_COUNT 8
+#define PRINTER_CONFIG_COUNT 6
 #define DISPLAY_SECRETS 0
 
 enum {
@@ -49,8 +49,8 @@ typedef struct {
     };
 
     char printer_name[25];
-    char klipper_host[65];
-    char klipper_auth[33];
+    char printer_host[65];
+    char printer_auth[65];
     unsigned int klipper_port;
     
     unsigned char color_scheme;

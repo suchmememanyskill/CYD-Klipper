@@ -24,10 +24,10 @@ void configure_http_client(HTTPClient &client, String url_part, bool stream, int
         client.setConnectTimeout(timeout);
     }
 
-    client.begin("http://" + String(printer_config->klipper_host) + ":" + String(printer_config->klipper_port) + url_part);
+    client.begin("http://" + String(printer_config->printer_host) + ":" + String(printer_config->klipper_port) + url_part);
 
     if (printer_config->auth_configured) {
-        client.addHeader("X-Api-Key", printer_config->klipper_auth);
+        client.addHeader("X-Api-Key", printer_config->printer_auth);
     }
 }
 
@@ -54,6 +54,7 @@ bool OctoPrinter::post_request(const char* endpoint, const char* body, int timeo
         timeout_ms = 500;
     }
 
+    LOG_F(("POST >>> %s %s\n", endpoint, body));
     configure_http_client(client, endpoint, false, timeout_ms, printer_config);
 
     if (body[0] == '{' || body[0] == '[')
@@ -61,8 +62,10 @@ bool OctoPrinter::post_request(const char* endpoint, const char* body, int timeo
         client.addHeader("Content-Type", "application/json");
     }
 
-    int result = client.POST(body);
-    return result >= 200 && result < 300;
+    int http_code = client.POST(body);
+    bool result = http_code >= 200 && http_code < 300;
+    LOG_F(("<<< %d\n", http_code));
+    return result;
 }
 
 bool OctoPrinter::send_gcode(const char* gcode, bool wait)
@@ -77,7 +80,8 @@ bool OctoPrinter::send_gcode(const char* gcode, bool wait)
 
     for (char* iter = gcode_copy;; iter++)
     {
-        if (*iter == '\n' || *iter == '\0')
+        char cur_iter = *iter;
+        if (cur_iter == '\n' || cur_iter == '\0')
         {
             if (iter != last_line_start)
             {
@@ -88,7 +92,7 @@ bool OctoPrinter::send_gcode(const char* gcode, bool wait)
             last_line_start = iter + 1;
         }
 
-        if (*iter == '\0')
+        if (cur_iter == '\0')
         {
             break;
         }
@@ -100,7 +104,7 @@ bool OctoPrinter::send_gcode(const char* gcode, bool wait)
     }
 
     free(gcode_copy);
-    bool result = post_request("/api/printer/command/custom", out_buff);
+    bool result = post_request("/api/printer/command", out_buff);
     free(out_buff);
     return result;
 }
@@ -109,9 +113,11 @@ bool OctoPrinter::move_printer(const char* axis, float amount, bool relative)
 {
     JsonDocument doc;
     char out_buff[512];
+    out_buff[0] = tolower(axis[0]);
+    out_buff[1] = '\0';
 
     doc["command"] = "jog";
-    doc[axis] = amount;
+    doc[out_buff] = amount;
     doc["absolute"] = !relative;
 
     if (serializeJson(doc, out_buff, 512) >= 512)
@@ -390,7 +396,7 @@ Files OctoPrinter::get_files()
 bool OctoPrinter::start_file(const char* filename)
 {
     char buff[512];
-    sprintf("/api/files/local/%s", filename);
+    sprintf(buff, "/api/files/local/%s", filename);
     return post_request(buff, COMMAND_PRINT);
 }
 

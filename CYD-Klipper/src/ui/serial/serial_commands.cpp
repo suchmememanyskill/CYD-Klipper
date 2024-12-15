@@ -16,6 +16,11 @@ namespace serial_console {
   - optionally add handling the new preference to sets() and settings() if it modifies global_config
 */
 
+PrinterConfiguration* get_current_printer_config()
+{
+    return &global_config.printer_config[global_config.printer_index];
+}
+
 HANDLER commandHandlers[] = {
     {"help", &help, 1},
     {"reset", &reset, 1},
@@ -94,20 +99,20 @@ void sets(String argv[])
         Serial.printf("erase ssid\n");
     }
 
-    if(get_current_printer()->printer_config->ip_configured)
+    if(get_current_printer_config()->ip_configured)
     {
-        Serial.printf("ip %s %d\n",get_current_printer()->printer_config->klipper_host, get_current_printer()->printer_config->klipper_port);
+        Serial.printf("ip %s %d\n",get_current_printer_config()->printer_host, get_current_printer_config()->klipper_port);
     }
     else
     {
         Serial.printf("erase ip\n");
     }
 
-    if(get_current_printer()->printer_config->auth_configured)
+    if(get_current_printer_config()->auth_configured)
     {
         Serial.printf("key %s\n",
 #if DISPLAY_SECRETS
-        get_current_printer()->printer_config->klipper_auth
+        get_current_printer_config()->printer_auth
 #else
         "[redacted]"
 #endif    
@@ -135,9 +140,9 @@ void sets(String argv[])
 void settings(String argv[])
 {
 
-    if(get_current_printer()->printer_config->printer_name[0] != 0)
+    if(get_current_printer_config()->printer_name[0] != 0)
     {
-        Serial.printf("Current printer# %d name: %s",global_config.printer_index, get_current_printer()->printer_config->printer_name);
+        Serial.printf("Current printer# %d name: %s",global_config.printer_index, get_current_printer_config()->printer_name);
     }
     else
     {
@@ -162,20 +167,20 @@ void settings(String argv[])
         Serial.printf("Wifi not configured\n");
     }
 
-    if(get_current_printer()->printer_config->ip_configured)
+    if(get_current_printer_config()->ip_configured)
     {
-        Serial.printf("Moonraker address: %s:%d\n",get_current_printer()->printer_config->klipper_host, get_current_printer()->printer_config->klipper_port);
+        Serial.printf("Moonraker address: %s:%d\n",get_current_printer_config()->printer_host, get_current_printer_config()->klipper_port);
     }
     else
     {
         Serial.printf("Moonraker address not configured\n");
     }
 
-    if(get_current_printer()->printer_config->auth_configured)
+    if(get_current_printer_config()->auth_configured)
     {
         Serial.printf("Moonraker API key: %s\n",
 #if DISPLAY_SECRETS
-        get_current_printer()->printer_config->klipper_auth
+        get_current_printer_config()->printer_auth
 #else
         "[redacted]"
 #endif        
@@ -205,15 +210,15 @@ void erase_one(const String arg)
 {
     if(arg == "key")
     {
-        get_current_printer()->printer_config->auth_configured = false;
+        get_current_printer_config()->auth_configured = false;
         // overwrite the key to make it unrecoverable for 3rd parties
-        memset(get_current_printer()->printer_config->klipper_auth,0,32);
+        memset(get_current_printer_config()->printer_auth,0,64);
         write_global_config();
     }
     else if(arg == "ip")
     {
-        get_current_printer()->printer_config->setup_complete = false;
-        get_current_printer()->printer_config->ip_configured = false;
+        get_current_printer_config()->setup_complete = false;
+        get_current_printer_config()->ip_configured = false;
         write_global_config();
     }
     else if(arg == "touch")
@@ -252,14 +257,8 @@ void erase(String argv[])
 
 void key(String argv[])
 {
-    if (argv[1].length() != 32)
-    {
-      Serial.println("Key must be 32 characters");
-      return;
-    }
-
-    get_current_printer()->printer_config->auth_configured = true;
-    strncpy(get_current_printer()->printer_config->klipper_auth, argv[1].c_str(), sizeof(global_config.printer_config[0].klipper_auth));
+    get_current_printer_config()->auth_configured = true;
+    strncpy(get_current_printer_config()->printer_auth, argv[1].c_str(), sizeof(global_config.printer_config[0].printer_auth));
     write_global_config();
 }
 
@@ -283,10 +282,10 @@ void ssid(String argv[])
 
 void ip(String argv[])
 {
-    strncpy(get_current_printer()->printer_config->klipper_host, argv[1].c_str(), sizeof(global_config.printer_config[0].klipper_host)-1);
-    get_current_printer()->printer_config->klipper_port =  argv[2].toInt();
-    get_current_printer()->printer_config->ip_configured = true;
-    get_current_printer()->printer_config->setup_complete = true;
+    strncpy(get_current_printer_config()->printer_host, argv[1].c_str(), sizeof(global_config.printer_config[0].printer_host)-1);
+    get_current_printer_config()->klipper_port =  argv[2].toInt();
+    get_current_printer_config()->ip_configured = true;
+    get_current_printer_config()->setup_complete = true;
     write_global_config();
 }
 
