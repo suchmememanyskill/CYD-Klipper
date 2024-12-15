@@ -7,7 +7,11 @@ fi
 
 set -e
 
+chmod a+x ./run.sh
+
 # Install dependencies
+python3 -m venv ./env
+source ./env/bin/activate
 pip3 install -r requirements.txt
 
 # Create systemd unit file
@@ -17,7 +21,7 @@ echo "Description=CYD Klipper serial server" >> ~/.config/systemd/user/cyd-klipp
 echo "After=network.target" >> ~/.config/systemd/user/cyd-klipper-serial.service
 echo "" >> ~/.config/systemd/user/cyd-klipper-serial.service
 echo "[Service]" >> ~/.config/systemd/user/cyd-klipper-serial.service
-echo "ExecStart=python3 $(pwd)/serial_server.py" >> ~/.config/systemd/user/cyd-klipper-serial.service
+echo "ExecStart=$(pwd)/run.sh" >> ~/.config/systemd/user/cyd-klipper-serial.service
 echo "WorkingDirectory=$(pwd)" >> ~/.config/systemd/user/cyd-klipper-serial.service
 echo "Restart=always" >> ~/.config/systemd/user/cyd-klipper-serial.service
 echo "" >> ~/.config/systemd/user/cyd-klipper-serial.service
