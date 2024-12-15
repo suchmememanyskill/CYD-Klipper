@@ -269,7 +269,7 @@ Files SerialKlipperPrinter::get_files()
     files_result.success = false;
     JsonDocument doc;
     LOG_F(("Heap space pre-file-parse: %d bytes\n", esp_get_free_heap_size()));
-    std::list<FileSystemFile> files;
+    std::list<KlipperFileSystemFile> files;
 
     auto timer_request = millis();
     bool result = make_serial_request(doc, 5000, HttpGet, "/server/files/list");

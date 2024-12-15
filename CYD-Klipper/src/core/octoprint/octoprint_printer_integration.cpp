@@ -224,7 +224,6 @@ PrinterDataMinimal OctoPrinter::fetch_min()
     
     {
         HTTPClient client;
-        int http_code = 0;
         configure_http_client(client, "/api/printer", true, 1000, printer_config);
         int http_code = client.GET();
 
