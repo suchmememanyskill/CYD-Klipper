@@ -106,6 +106,6 @@ static PrinterUiPanel klipper_ui_panels[4] {
 
 void OctoPrinter::init_ui_panels()
 {
-    custom_menus_count = 4;
+    custom_menus_count = 3;
     custom_menus = klipper_ui_panels;
 }
