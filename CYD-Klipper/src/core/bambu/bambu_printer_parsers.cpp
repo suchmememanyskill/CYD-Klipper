@@ -83,21 +83,23 @@ void BambuPrinter::parse_state(JsonDocument& in)
 
     if (print.containsKey("spd_lvl"))
     {
-        speed_profile = print["spd_lvl"];
+        int speed_profile_int = print["spd_lvl"]
+        speed_profile = (BambuSpeedProfile)speed_profile_int;
 
         switch (speed_profile)
         {
-            case 1:
+            case BambuSpeedProfileSilent:
                 printer_data.speed_mult = 0.5f;
                 break;
-            case 2:
+            case BambuSpeedProfileNormal:
                 printer_data.speed_mult = 1.0f;
                 break;
-            case 3:
+            case BambuSpeedProfileSport:
                 printer_data.speed_mult = 1.24f;
                 break;
-            case 4:
+            case BambuSpeedProfileLudicrous:
                 printer_data.speed_mult = 1.66f;
+                break;
         }
     }
 

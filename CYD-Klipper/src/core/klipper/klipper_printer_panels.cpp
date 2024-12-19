@@ -1,6 +1,7 @@
 #include "klipper_printer_integration.hpp"
 #include "lvgl.h"
 #include "../../ui/ui_utils.h"
+#include "../common/constants.h"
 #include <stdio.h>
 
 static void set_fan_speed_text(lv_event_t * e) {
@@ -12,22 +13,14 @@ static void set_fan_speed_text(lv_event_t * e) {
 
 static void set_fan_speed(lv_event_t * e){
     int speed = (int)lv_event_get_user_data(e);
+    int actual_speed = fan_percent_to_byte(speed);
     KlipperPrinter* printer = (KlipperPrinter*)get_current_printer(); // TODO: pass by ref
     char gcode[16];
-    sprintf(gcode, "M106 S%d", speed);
+    sprintf(gcode, "M106 S%d", actual_speed);
     printer->send_gcode(gcode);
 }
 
-const char* fan_speeds[] = { "0%", "15%", "25%", "35%" };
-const int fan_speeds_values[] = { 0, 38, 64, 90 };
-
-const char* fan_speeds_2[] = { "50%", "75%", "100%"};
-const int fan_speeds_values_2[] = { 128, 192, 255 };
-
-lv_button_column_t fan_speed_columns[] = {
-    { set_fan_speed, fan_speeds, (const void**)fan_speeds_values, 4},
-    { set_fan_speed, fan_speeds_2, (const void**)fan_speeds_values_2, 3}
-};
+FAN_SPEED_COLUMN(set_fan_speed, fan_speed_columns)
 
 static void set_zoffset_text(lv_event_t * e) {
     lv_obj_t * label = lv_event_get_target(e);

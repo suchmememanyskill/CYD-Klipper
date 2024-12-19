@@ -4,13 +4,21 @@
 #include <ArduinoJson.h>
 #include <WifiClientSecure.h>
 
+enum BambuSpeedProfile 
+{
+    BambuSpeedProfileSilent = 1,
+    BambuSpeedProfileNormal = 2,
+    BambuSpeedProfileSport = 3,
+    BambuSpeedProfileLudicrous = 4,
+}
+
 class BambuPrinter : public BasePrinter
 {
     private:
         unsigned int last_error = 0; 
         unsigned int ignore_error = 0; 
         bool publish_mqtt_command(const char* command);
-        unsigned char speed_profile = 2;
+        BambuSpeedProfile speed_profile = 2;
         unsigned long print_start;
 
         union {
@@ -25,6 +33,7 @@ class BambuPrinter : public BasePrinter
 
     protected:
         void parse_state(JsonDocument& in);
+        void init_ui_panels();
         Files parse_files(WiFiClientSecure& client, int max_files);
 
     public:

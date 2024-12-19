@@ -2,6 +2,7 @@
 #include "lvgl.h"
 #include "../../ui/ui_utils.h"
 #include <stdio.h>
+#include "../common/constants.h"
 
 const char* COMMAND_EXTRUDE_MULT = "{\"command\":\"flowrate\",\"factor\":%d}";
 
@@ -51,19 +52,18 @@ bool get_range(lv_event_t * e, int min, int max, int* out)
 
 static void set_fan_speed(lv_event_t * e)
 {
-    int fan_speed = 0;
-    if (get_range(e, 0, 100, &fan_speed))
-    {
-        int actual_fan_speed = fan_speed * 255 / 100;
-        char buff[16];
-        sprintf(buff, "M106 S%d", actual_fan_speed);
-        ((OctoPrinter*)get_current_printer())->send_gcode(buff);
-    }
+    int speed = (int)lv_event_get_user_data(e);
+    int actual_fan_speed = fan_percent_to_byte(speed);
+    char buff[16];
+    sprintf(buff, "M106 S%d", actual_fan_speed);
+    ((OctoPrinter*)get_current_printer())->send_gcode(buff);
 }
 
-static void open_fan_speed_keypad(lv_event_t * e)
+FAN_SPEED_COLUMN(set_fan_speed, fan_speed_columns)
+
+static void open_fan_speed_panel(lv_event_t * e)
 {
-    lv_create_keyboard_text_entry(set_fan_speed, "New fan speed %", LV_KEYBOARD_MODE_NUMBER);
+    lv_create_fullscreen_button_matrix_popup(lv_scr_act(), set_fan_speed_text, fan_speed_columns, 3);
 }
 
 static void set_speed_mult(lv_event_t * e)
@@ -99,7 +99,7 @@ static void open_extrude_mult_keypad(lv_event_t * e)
 }
 
 static PrinterUiPanel klipper_ui_panels[4] {
-    { .set_label = (void*)set_fan_speed_text, .open_panel = (void*)open_fan_speed_keypad },
+    { .set_label = (void*)set_fan_speed_text, .open_panel = (void*)open_fan_speed_panel },
     { .set_label = (void*)set_speed_mult_text, .open_panel = (void*)open_speed_mult_keypad },
     { .set_label = (void*)set_extruder_mult_text, .open_panel = (void*)open_extrude_mult_keypad },
 };
