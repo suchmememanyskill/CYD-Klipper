@@ -20,7 +20,7 @@ static void set_fan_speed(lv_event_t * e){
     printer->send_gcode(gcode);
 }
 
-FAN_SPEED_COLUMN(set_fan_speed, fan_speed_columns)
+FAN_SPEED_COLUMN(set_fan_speed, klipper_fan_speed_columns)
 
 static void set_zoffset_text(lv_event_t * e) {
     lv_obj_t * label = lv_event_get_target(e);
@@ -145,7 +145,7 @@ lv_button_column_t extrude_mult_columns[] = {
 };
 
 static void open_fan_speed_panel(lv_event_t * e){
-    lv_create_fullscreen_button_matrix_popup(lv_scr_act(), set_fan_speed_text, fan_speed_columns, 2);
+    lv_create_fullscreen_button_matrix_popup(lv_scr_act(), set_fan_speed_text, klipper_fan_speed_columns, 2);
 }
 
 static void open_zoffset_panel(lv_event_t * e){

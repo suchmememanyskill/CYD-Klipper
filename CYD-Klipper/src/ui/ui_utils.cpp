@@ -90,7 +90,8 @@ void lv_create_fullscreen_button_matrix_popup(lv_obj_t * root, lv_event_cb_t tit
 
         for (int j = 0; j < columns[i].length; j++){
             lv_obj_t * btn = lv_btn_create(column);
-            lv_obj_set_size(btn, column_width, CYD_SCREEN_MIN_BUTTON_HEIGHT_PX);
+            lv_obj_set_width(btn, column_width);
+            lv_obj_set_flex_grow(btn, 1);
             lv_obj_add_event_cb(btn, columns[i].event, LV_EVENT_CLICKED, (void*)columns[i].data[j]);
 
             label = lv_label_create(btn);

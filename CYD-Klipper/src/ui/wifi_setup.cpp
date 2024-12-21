@@ -120,6 +120,7 @@ static void wifi_btn_settings(lv_event_t * e){
 
     lv_obj_t * btn = lv_btn_create(panel);
     lv_obj_add_event_cb(btn, reset_btn_event_handler, LV_EVENT_CLICKED, NULL);
+    lv_obj_set_style_radius(btn, 0, 0);
     lv_obj_set_size(btn, LV_PCT(100), CYD_SCREEN_MIN_BUTTON_HEIGHT_PX);
 
     lv_obj_t * label = lv_label_create(btn);

@@ -59,11 +59,11 @@ static void set_fan_speed(lv_event_t * e)
     ((OctoPrinter*)get_current_printer())->send_gcode(buff);
 }
 
-FAN_SPEED_COLUMN(set_fan_speed, fan_speed_columns)
+FAN_SPEED_COLUMN(set_fan_speed, octo_fan_speed_columns)
 
 static void open_fan_speed_panel(lv_event_t * e)
 {
-    lv_create_fullscreen_button_matrix_popup(lv_scr_act(), set_fan_speed_text, fan_speed_columns, 3);
+    lv_create_fullscreen_button_matrix_popup(lv_scr_act(), set_fan_speed_text, octo_fan_speed_columns, 3);
 }
 
 static void set_speed_mult(lv_event_t * e)

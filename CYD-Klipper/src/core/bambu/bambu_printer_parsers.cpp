@@ -6,6 +6,18 @@
 #define BIT_Y_AXIS_HOMED BIT(1)
 #define BIT_Z_AXIS_HOMED BIT(2)
 
+float convert_fan_speed(const char* in)
+{
+    if (in == NULL || strlen(in) <= 0)
+    {
+        return 0;
+    }
+
+    int part_value = atoi(in);
+    float percentage = (part_value / 15.0f) * 100;
+    return round(percentage / 10) / 10;
+}
+
 void BambuPrinter::parse_state(JsonDocument& in)
 {
     if (!in.containsKey("print"))
@@ -83,7 +95,7 @@ void BambuPrinter::parse_state(JsonDocument& in)
 
     if (print.containsKey("spd_lvl"))
     {
-        int speed_profile_int = print["spd_lvl"]
+        int speed_profile_int = print["spd_lvl"];
         speed_profile = (BambuSpeedProfile)speed_profile_int;
 
         switch (speed_profile)
@@ -199,6 +211,21 @@ void BambuPrinter::parse_state(JsonDocument& in)
             printer_data.print_filename = (char *)malloc(strlen(filename) + 1);
             strcpy(printer_data.print_filename, filename);
         }
+    }
+
+    if (print.containsKey("cooling_fan_speed"))
+    {
+        printer_data.fan_speed = convert_fan_speed(print["cooling_fan_speed"]);
+    }
+
+    if (print.containsKey("big_fan1_speed"))
+    {
+        aux_fan_speed = convert_fan_speed(print["big_fan1_speed"]);
+    }
+
+    if (print.containsKey("big_fan2_speed"))
+    {
+        chamber_fan_speed = convert_fan_speed(print["big_fan2_speed"]);
     }
 
     printer_data.extrude_mult = 1;

@@ -10,15 +10,13 @@ enum BambuSpeedProfile
     BambuSpeedProfileNormal = 2,
     BambuSpeedProfileSport = 3,
     BambuSpeedProfileLudicrous = 4,
-}
+};
 
 class BambuPrinter : public BasePrinter
 {
     private:
         unsigned int last_error = 0; 
         unsigned int ignore_error = 0; 
-        bool publish_mqtt_command(const char* command);
-        BambuSpeedProfile speed_profile = 2;
         unsigned long print_start;
 
         union {
@@ -37,6 +35,10 @@ class BambuPrinter : public BasePrinter
         Files parse_files(WiFiClientSecure& client, int max_files);
 
     public:
+        float aux_fan_speed;
+        float chamber_fan_speed;
+        BambuSpeedProfile speed_profile = BambuSpeedProfileNormal;
+
         BambuPrinter(int index) : BasePrinter(index)
         {
             supported_features = PrinterFeatureHome
@@ -59,6 +61,8 @@ class BambuPrinter : public BasePrinter
             bambu_misc = 0;
             printer_data.error_screen_features = PrinterFeatureRetryError | PrinterFeatureIgnoreError | PrinterFeatureContinueError;
             print_start = millis();
+
+            init_ui_panels();
         }
 
         bool move_printer(const char* axis, float amount, bool relative);
@@ -79,6 +83,7 @@ class BambuPrinter : public BasePrinter
         bool set_target_temperature(PrinterTemperatureDevice device, unsigned int temperature);
         bool send_gcode(const char* gcode, bool wait = true);
         void receive_data(unsigned char* data, unsigned int length);
+        bool publish_mqtt_command(const char* command);
 };
 
 enum BambuConnectionStatus {
