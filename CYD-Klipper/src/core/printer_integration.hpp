@@ -150,6 +150,7 @@ class BasePrinter
         
     public:
         short popup_message_timeout_s = 10;
+        bool no_confirm_print_file = false;
 
         PrinterConfiguration* printer_config{};
         PrinterFeatures supported_features{};

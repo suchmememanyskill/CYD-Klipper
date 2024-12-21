@@ -19,16 +19,6 @@ class BambuPrinter : public BasePrinter
         unsigned int ignore_error = 0; 
         unsigned long print_start;
 
-        union {
-            struct {
-                bool chamber_light_available : 1;
-                bool chamber_light_on : 1;
-                bool work_light_available : 1;
-                bool work_light_on : 1;
-            };
-            unsigned char bambu_misc;
-        };
-
     protected:
         void parse_state(JsonDocument& in);
         void init_ui_panels();
@@ -38,6 +28,17 @@ class BambuPrinter : public BasePrinter
         float aux_fan_speed;
         float chamber_fan_speed;
         BambuSpeedProfile speed_profile = BambuSpeedProfileNormal;
+
+        union {
+            struct {
+                bool chamber_light_available : 1;
+                bool chamber_light_on : 1;
+                bool work_light_available : 1;
+                bool work_light_on : 1;
+                bool has_ams : 1;
+            };
+            unsigned char bambu_misc;
+        };
 
         BambuPrinter(int index) : BasePrinter(index)
         {
@@ -63,6 +64,7 @@ class BambuPrinter : public BasePrinter
             print_start = millis();
 
             init_ui_panels();
+            no_confirm_print_file = true;
         }
 
         bool move_printer(const char* axis, float amount, bool relative);

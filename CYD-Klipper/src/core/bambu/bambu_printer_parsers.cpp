@@ -228,6 +228,15 @@ void BambuPrinter::parse_state(JsonDocument& in)
         chamber_fan_speed = convert_fan_speed(print["big_fan2_speed"]);
     }
 
+    if (print.containsKey("ams_exist_bits"))
+    {
+        const char* ams_exists = print["ams_exist_bits"];
+        if (!strcmp(ams_exists, "0"))
+        {
+            has_ams = true;
+        }
+    }
+
     printer_data.extrude_mult = 1;
 }
 

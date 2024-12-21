@@ -11,14 +11,23 @@
 
 const char* selected_file = NULL;
 
-static void btn_print_file(lv_event_t * e){
+static void btn_print_file(lv_event_t * e)
+{
     lv_obj_t * panel = (lv_obj_t*)lv_event_get_user_data(e);
     lv_obj_del(panel);
 
     current_printer_start_file(selected_file);
 }
 
-static void btn_print_file_verify(lv_event_t * e){
+static void btn_print_file_verify_instant(lv_event_t * e)
+{
+    lv_obj_t * btn = lv_event_get_target(e);
+    selected_file = (char*)lv_event_get_user_data(e);
+    current_printer_start_file(selected_file);
+}
+
+static void btn_print_file_verify(lv_event_t * e)
+{
     if (get_current_printer_data()->state != PrinterState::PrinterStateIdle){
         return;
     }
@@ -111,10 +120,12 @@ void files_panel_init(lv_obj_t* panel){
         lv_obj_t * btn = lv_list_add_btn(list, LV_SYMBOL_FILE, files.available_files[i]);
         lv_obj_set_style_bg_opa(btn, LV_OPA_TRANSP, 0);
               
-        if (global_config.full_filenames){
+        if (global_config.full_filenames)
+        {
             lv_label_set_long_mode(lv_obj_get_child(btn, 1), LV_LABEL_LONG_WRAP);
         }
-        lv_obj_add_event_cb(btn, btn_print_file_verify, LV_EVENT_CLICKED, (void*)(files.available_files[i]));
+
+        lv_obj_add_event_cb(btn, (get_current_printer()->no_confirm_print_file) ? btn_print_file_verify_instant : btn_print_file_verify, LV_EVENT_CLICKED, (void*)(files.available_files[i]));
         lv_obj_on_destroy_free_data(btn, files.available_files[i]);
     }
 

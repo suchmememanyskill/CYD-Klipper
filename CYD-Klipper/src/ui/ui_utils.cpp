@@ -181,8 +181,10 @@ void lv_create_custom_menu_entry(const char* label_text, lv_obj_t* object, lv_ob
 
     lv_obj_set_parent(object, panel);
 
-    if (set_height)
+    if (set_height) 
+    {
         lv_obj_set_height(object, CYD_SCREEN_MIN_BUTTON_HEIGHT_PX);
+    }
 
     if (comment != NULL)
     {

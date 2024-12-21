@@ -42,6 +42,7 @@ bool BambuPrinter::publish_mqtt_command(const char* command)
     char auth[48] = {0};
     sprintf(auth, "device/%s/request", printer_config->printer_auth);
 
+    LOG_F(("Publishing MQTT Command: %s", command));
     return client.publish(auth, command);
 }
 
@@ -296,11 +297,6 @@ Files BambuPrinter::get_files()
     connect();
     printer_data.state = state;
     return files;
-}
-
-bool BambuPrinter::start_file(const char* filename)
-{
-    return false;
 }
 
 Thumbnail BambuPrinter::get_32_32_png_image_thumbnail(const char* gcode_filename)
