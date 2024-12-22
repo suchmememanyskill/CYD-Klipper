@@ -42,7 +42,7 @@ bool BambuPrinter::publish_mqtt_command(const char* command)
     char auth[48] = {0};
     sprintf(auth, "device/%s/request", printer_config->printer_auth);
 
-    LOG_F(("Publishing MQTT Command: %s", command));
+    LOG_F(("Publishing MQTT Command: %s\n", command));
     return client.publish(auth, command);
 }
 
@@ -117,6 +117,7 @@ bool BambuPrinter::execute_feature(PrinterFeatures feature)
 bool BambuPrinter::connect()
 {
     wifi_client.setInsecure();
+    wifi_client.setTimeout(3);
     client.setBufferSize(4096);
     client.setServer(printer_config->printer_host, 8883);
     current_printer = this;
