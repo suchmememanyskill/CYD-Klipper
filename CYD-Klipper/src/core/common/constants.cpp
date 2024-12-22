@@ -1,6 +1,6 @@
 #include "constants.h"
 
-const char* fan_speeds_col_1[] = { "On", "Off" };
+const char* fan_speeds_col_1[] = { "100%", "0%" };
 const int fan_speeds_col_1_values[] = { 100, 0 };
 
 const char* fan_speeds_col_2[] = { "10%", "20%", "30%", "40%", "50%"};
