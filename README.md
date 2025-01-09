@@ -2,9 +2,10 @@
 [![Donations](https://img.shields.io/badge/Support%20on-Ko--Fi-red)](https://ko-fi.com/suchmememanyskill)
 
 # CYD-Klipper
-An implementation of a wireless Klipper status display on an ESP32 + screen. Uses Moonraker to fetch data.
+An implementation of a wireless Klipper, Bambu and Octoprint status display on an ESP32 + screen. Uses Moonraker to fetch data.
 
 A simple and cheap solution to use a dedicated screen with Klipper, a 3d printing Firmware.
+Also now with Bambu Lab and Octoprint printers!
 
 ![showcase_image](readme/PXL_20231113_171629383.jpg)
 
@@ -24,6 +25,7 @@ A ESP32-2432S028R is required to run this project. You can find out where to buy
 - Toggle Moonraker power devices
 - OTA updates
 - Serial console over USB (115200 8n1, echo off, LF/LF)
+- Supports Klipper, Octoprint and Bambu printers.
 
 ### Install
 
