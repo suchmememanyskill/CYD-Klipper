@@ -25,7 +25,7 @@ void BambuPrinter::parse_state(JsonDocument& in)
         return;
     }
 
-    auto print = in["print"];
+    JsonObject print = in["print"];
 
     if (print.containsKey("print_error"))
     {
@@ -176,7 +176,7 @@ void BambuPrinter::parse_state(JsonDocument& in)
 
     if (print.containsKey("lights_report"))
     {
-        for (auto lights : print["lights_report"].as<JsonArray>())
+        for (JsonObject lights : print["lights_report"].as<JsonArray>())
         {
             if (lights.containsKey("node") && lights.containsKey("mode"))
             {

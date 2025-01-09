@@ -11,7 +11,7 @@ int KlipperPrinter::parse_slicer_time_estimate(JsonDocument &in)
 
 void KlipperPrinter::parse_state(JsonDocument &in)
 {
-    auto status = in["result"]["status"];
+    JsonObject status = in["result"]["status"];
 
     if (status.containsKey("webhooks"))
     {
@@ -185,7 +185,7 @@ void KlipperPrinter::parse_state(JsonDocument &in)
 
 void KlipperPrinter::parse_state_min(JsonDocument &in, PrinterDataMinimal* data)
 {
-    auto status = in["result"]["status"];
+    JsonObject status = in["result"]["status"];
 
     if (status.containsKey("webhooks"))
     {
@@ -230,7 +230,7 @@ void KlipperPrinter::parse_state_min(JsonDocument &in, PrinterDataMinimal* data)
 
 Macros KlipperPrinter::parse_macros(JsonDocument &in)
 {
-    auto result = in["result"].as<JsonObject>();
+    JsonObject result = in["result"];
     Macros macros = {0};
     macros.macros = (char **)malloc(sizeof(char *) * 32);
     macros.count = 0;
@@ -259,7 +259,7 @@ Macros KlipperPrinter::parse_macros(JsonDocument &in)
 
 int KlipperPrinter::parse_macros_count(JsonDocument &in)
 {
-    auto result = in["result"].as<JsonObject>();
+    JsonObject result = in["result"];
 
     int count = 0;
 
@@ -278,13 +278,13 @@ int KlipperPrinter::parse_macros_count(JsonDocument &in)
 PowerDevices KlipperPrinter::parse_power_devices(JsonDocument &in)
 {
     PowerDevices power_devices = {0};
-    auto result = in["result"]["devices"].as<JsonArray>();
+    JsonArray result = in["result"]["devices"];
     power_devices.power_devices = (char **)malloc(sizeof(char *) * 16);
     power_devices.power_states = (bool *)malloc(sizeof(bool) * 16);
     power_devices.count = 0;
     power_devices.success = true;
 
-    for (auto i : result)
+    for (JsonObject i : result)
     {
         const char *device_name = i["device"];
         const char *device_state = i["status"];
@@ -299,10 +299,10 @@ PowerDevices KlipperPrinter::parse_power_devices(JsonDocument &in)
 
 int KlipperPrinter::parse_power_devices_count(JsonDocument &in)
 {
-    auto result = in["result"]["devices"].as<JsonArray>();
+    JsonArray result = in["result"]["devices"];
     int count = 0;
 
-    for (auto i : result)
+    for (JsonObject i : result)
     {
         count++;
     }
@@ -312,9 +312,9 @@ int KlipperPrinter::parse_power_devices_count(JsonDocument &in)
 
 void KlipperPrinter::parse_file_list(JsonDocument &in, std::list<KlipperFileSystemFile> &files, int fetch_limit)
 {
-    auto result = in["result"].as<JsonArray>();
+    JsonArray result = in["result"];
 
-    for (auto file : result)
+    for (JsonObject file : result)
     {
         KlipperFileSystemFile f = {0};
         const char *path = file["path"];
@@ -360,9 +360,9 @@ void KlipperPrinter::parse_file_list(JsonDocument &in, std::list<KlipperFileSyst
 
 char *KlipperPrinter::parse_thumbnails(JsonDocument &in)
 {
-    auto result = in["result"].as<JsonArray>();
+    JsonArray result = in["result"];
     const char *chosen_thumb = NULL;
-    for (auto file : result)
+    for (JsonObject file : result)
     {
         int width = file["width"];
         int height = file["height"];

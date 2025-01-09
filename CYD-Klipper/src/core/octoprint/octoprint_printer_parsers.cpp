@@ -4,7 +4,7 @@
 
 PrinterState OctoPrinter::parse_printer_state(JsonDocument& in)
 {
-    auto flags = in["state"]["flags"];
+    JsonObject flags = in["state"]["flags"];
     bool cancelling = flags["cancelling"];
     bool closedOrError = flags["closedOrError"];
     bool error = flags["error"];
@@ -35,7 +35,7 @@ PrinterState OctoPrinter::parse_printer_state(JsonDocument& in)
 
 void OctoPrinter::parse_printer_status(JsonDocument& in)
 {
-    auto text = in["state"]["text"];
+    const char* text = in["state"]["text"];
     printer_data.state = parse_printer_state(in);
 
     if (printer_data.state == PrinterState::PrinterStateError)
@@ -47,7 +47,7 @@ void OctoPrinter::parse_printer_status(JsonDocument& in)
         }
     }
 
-    auto temperature = in["temperature"];
+    JsonObject temperature = in["temperature"];
 
     if (temperature.containsKey("bed"))
     {
@@ -67,7 +67,7 @@ void OctoPrinter::parse_printer_status(JsonDocument& in)
 
 void OctoPrinter::parse_job_state(JsonDocument& in)
 {
-    auto job = in["job"];
+    JsonObject job = in["job"];
 
     if (job.containsKey("file"))
     {
@@ -80,12 +80,12 @@ void OctoPrinter::parse_job_state(JsonDocument& in)
         }
     }
 
-    if (job.containsKey("filament") && job["filament"] != NULL && job["filament"].containsKey("tool0"))
+    if (job.containsKey("filament") && job["filament"].as<JsonObject>() != NULL && job["filament"].containsKey("tool0"))
     {
         printer_data.filament_used_mm = job["filament"]["tool0"]["length"];
     }
 
-    auto progress = in["progress"];
+    JsonObject progress = in["progress"];
     float completion = progress["completion"];
     printer_data.print_progress = completion / 100;
     printer_data.elapsed_time_s = progress["printTime"];
@@ -116,9 +116,9 @@ void OctoPrinter::parse_error(JsonDocument& in)
 
 void OctoPrinter::parse_file_list(JsonDocument &in, std::list<OctoFileSystemFile> &files, int fetch_limit)
 {
-    auto result = in["files"].as<JsonArray>();
+    JsonArray result = in["files"];
 
-    for (auto file : result)
+    for (JsonObject file : result)
     {
         const char *path = file["path"];
         if (strcmp("local", file["origin"]))
