@@ -1,0 +1,14 @@
+services:
+  printer:
+    container_name: printer
+    ports:
+      - "7125:7125"
+      - "8110:8110"
+    image: ghcr.io/mainsail-crew/virtual-klipper-printer:master
+  webui:
+    container_name: mainsail
+    volumes:
+      - ./config.json:/usr/share/nginx/html/config.json:ro
+    ports:
+      - 6969:80
+    image: ghcr.io/mainsail-crew/mainsail

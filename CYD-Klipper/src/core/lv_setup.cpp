@@ -72,6 +72,7 @@ void lv_touch_intercept(lv_indev_drv_t *indev_driver, lv_indev_data_t *data)
             }
 
             data->state = LV_INDEV_STATE_REL;
+            delay(300); // Some screens don't debounce their signal properly
         }
 
         screen_timer_wake();
@@ -254,10 +255,10 @@ void set_screen_timer_period()
 
 void set_color_scheme()
 {
-    PRINTER_CONFIG *config = get_current_printer_config();
+    PrinterConfiguration *config = &global_config.printer_config[global_config.printer_index];
     lv_disp_t *dispp = lv_disp_get_default();
     lv_color_t main_color = {0};
-    COLOR_DEF color_def = color_defs[config->color_scheme];
+    ColorDefinition color_def = color_defs[config->color_scheme];
 
     if (color_defs[config->color_scheme].primary_color_light > 0){
         main_color = lv_palette_lighten(color_def.primary_color, color_def.primary_color_light);
