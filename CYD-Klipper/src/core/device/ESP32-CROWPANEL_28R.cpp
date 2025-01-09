@@ -58,7 +58,7 @@ void screen_lv_touchRead(lv_indev_drv_t *indev_driver, lv_indev_data_t *data)
 }
 
 void set_invert_display(){
-    tft.invertDisplay(get_current_printer_config()->invert_colors);
+    tft.invertDisplay(global_config.printer_config[global_config.printer_index].invert_colors);
 }
 
 void screen_setup()
