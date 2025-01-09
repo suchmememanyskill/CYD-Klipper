@@ -3,8 +3,8 @@
 
 #include "lvgl.h"
 
-#define CONFIG_VERSION 6
-#define PRINTER_CONFIG_COUNT 8
+#define CONFIG_VERSION 7
+#define PRINTER_CONFIG_COUNT 6
 #define DISPLAY_SECRETS 0
 
 enum {
@@ -20,28 +20,38 @@ enum {
     SHOW_STATS_ON_PROGRESS_PANEL_ALL = 3,
 };
 
-typedef struct _PRINTER_CONFIG {
+enum PrinterType {
+    PrinterTypeNone = 0,
+    PrinterTypeKlipper = 1,
+    PrinterTypeKlipperSerial = 2,
+    PrinterTypeBambuLocal = 3,
+    PrinterTypeBambuCloud = 3,
+    PrinterTypeOctoprint = 4,
+};
+
+typedef struct {
     union {
         unsigned int raw;
         struct {
             // Internal
+            bool setup_complete : 1;
             bool ip_configured : 1;
             bool auth_configured : 1;
+            bool custom_filament_move_macros : 1;
+            PrinterType printer_type : 3;
 
             // External
             bool light_mode : 1;
             bool invert_colors : 1;
             unsigned char remaining_time_calc_mode : 2;
             unsigned char show_stats_on_progress_panel : 2;
-
-            bool custom_filament_move_macros : 1;
         };
     };
 
     char printer_name[25];
-    char klipper_host[65];
-    char klipper_auth[33];
-    unsigned short klipper_port;
+    char printer_host[65];
+    char printer_auth[65];
+    unsigned int klipper_port;
     
     unsigned char color_scheme;
 
@@ -51,9 +61,9 @@ typedef struct _PRINTER_CONFIG {
     unsigned short printer_move_x_steps[3];
     unsigned short printer_move_y_steps[3];
     unsigned short printer_move_z_steps[3];
-} PRINTER_CONFIG;
+} PrinterConfiguration;
 
-typedef struct _GLOBAL_CONFIG {
+typedef struct {
     unsigned char version;
     union {
         unsigned int raw;
@@ -61,6 +71,7 @@ typedef struct _GLOBAL_CONFIG {
             // Internal
             bool screen_calibrated : 1;
             bool wifi_configured : 1;
+            bool wifi_configuration_skipped : 1;
 
             // External
             bool rotate_screen : 1;
@@ -75,7 +86,7 @@ typedef struct _GLOBAL_CONFIG {
         };
     };
 
-    PRINTER_CONFIG printer_config[PRINTER_CONFIG_COUNT];
+    PrinterConfiguration printer_config[PRINTER_CONFIG_COUNT];
 
     float screen_cal_x_offset;
     float screen_cal_x_mult;
@@ -88,24 +99,23 @@ typedef struct _GLOBAL_CONFIG {
     unsigned char brightness;
     unsigned char screen_timeout;
     unsigned char printer_index;
-} GLOBAL_CONFIG;
+} GlobalConfig;
 
 // Volatile/temporary config that doesn't survive a reset
-typedef struct _TEMPORARY_CONFIG {
+typedef struct {
     bool debug : 1;
     bool remote_echo : 1;
-} TEMPORARY_CONFIG;
+} TemporaryConfig;
     
-
-typedef struct _COLOR_DEF {
+typedef struct {
     lv_palette_t primary_color;
     short primary_color_light;
     lv_palette_t secondary_color;
-} COLOR_DEF;
+} ColorDefinition;
 
-extern GLOBAL_CONFIG global_config;
-extern TEMPORARY_CONFIG temporary_config;
-extern COLOR_DEF color_defs[];
+extern GlobalConfig global_config;
+extern TemporaryConfig temporary_config;
+extern ColorDefinition color_defs[];
 
 #define LOG(x) if(temporary_config.debug){ Serial.print(x);}
 #define LOG_LN(x) if(temporary_config.debug){ Serial.println(x);}
@@ -115,9 +125,13 @@ void write_global_config();
 void verify_version();
 void load_global_config();
 
-PRINTER_CONFIG* get_current_printer_config();
-int get_printer_config_count();
-void set_printer_config_index(int index);
-int get_printer_config_free_index();
+void global_config_add_new_printer();
+void global_config_set_printer(int idx);
+void global_config_delete_printer(int idx);
+
+//PRINTER_CONFIG* get_current_printer_config();
+int global_config_get_printer_config_count();
+//void set_printer_config_index(int index);
+//int get_printer_config_free_index();
 
 #endif // !_GLOBAL_CONFIG_INIT

@@ -2,7 +2,7 @@
 #include "ui_utils.h"
 #include "../core/data_setup.h"
 #include "../core/lv_setup.h"
-#include <ErriezCRC32.h>
+#include "../core/printer_integration.hpp"
 
 lv_obj_t* lv_create_empty_panel(lv_obj_t* root) {
     lv_obj_t* panel = lv_obj_create(root); 
@@ -32,6 +32,17 @@ void lv_layout_flex_row(lv_obj_t* obj, lv_flex_align_t allign, lv_coord_t pad_co
 void destroy_event_user_data(lv_event_t * e){
     lv_obj_t * obj = (lv_obj_t *)lv_event_get_user_data(e);
     lv_obj_del(obj);
+}
+
+void destroy_event_free_data(lv_event_t * e)
+{
+    void* data = lv_event_get_user_data(e);
+    free(data);
+}
+
+void lv_obj_on_destroy_free_data(lv_obj_t * element, const void* ptr)
+{
+    lv_obj_add_event_cb(element, destroy_event_free_data, LV_EVENT_DELETE, (void*)ptr);
 }
 
 void lv_create_fullscreen_button_matrix_popup(lv_obj_t * root, lv_event_cb_t title, lv_button_column_t* columns, int column_count){
@@ -79,7 +90,8 @@ void lv_create_fullscreen_button_matrix_popup(lv_obj_t * root, lv_event_cb_t tit
 
         for (int j = 0; j < columns[i].length; j++){
             lv_obj_t * btn = lv_btn_create(column);
-            lv_obj_set_size(btn, column_width, CYD_SCREEN_MIN_BUTTON_HEIGHT_PX);
+            lv_obj_set_width(btn, column_width);
+            lv_obj_set_flex_grow(btn, 1);
             lv_obj_add_event_cb(btn, columns[i].event, LV_EVENT_CLICKED, (void*)columns[i].data[j]);
 
             label = lv_label_create(btn);
@@ -107,6 +119,7 @@ void lv_create_keyboard_text_entry(lv_event_cb_t keyboard_callback, const char* 
     lv_obj_set_style_bg_opa(parent, LV_OPA_50, 0); 
     lv_obj_align(parent, LV_ALIGN_TOP_RIGHT, 0, 0);
     lv_layout_flex_column(parent, LV_FLEX_ALIGN_SPACE_BETWEEN);
+    lv_obj_clear_flag(parent, LV_OBJ_FLAG_SCROLLABLE);
 
     if (contain_in_panel)
     {
@@ -117,7 +130,7 @@ void lv_create_keyboard_text_entry(lv_event_cb_t keyboard_callback, const char* 
         lv_obj_set_size(parent, CYD_SCREEN_WIDTH_PX, CYD_SCREEN_HEIGHT_PX);
     }
 
-    if (title != nullptr)
+    if (title != nullptr && keyboard_mode != LV_KEYBOARD_MODE_NUMBER)
     {
         lv_obj_t * empty_panel = lv_create_empty_panel(parent);
         lv_obj_set_size(empty_panel, 0, 0);
@@ -135,6 +148,12 @@ void lv_create_keyboard_text_entry(lv_event_cb_t keyboard_callback, const char* 
 
     lv_obj_t * ta = lv_textarea_create(parent);
     lv_obj_t * keyboard = lv_keyboard_create(parent);
+
+    if (keyboard_mode == LV_KEYBOARD_MODE_NUMBER)
+    {
+        lv_textarea_set_placeholder_text(ta, title);
+        lv_obj_set_height(keyboard, LV_PCT(75));
+    }
 
     lv_obj_set_width(ta, width);
     lv_textarea_set_max_length(ta, max_length);
@@ -162,8 +181,10 @@ void lv_create_custom_menu_entry(const char* label_text, lv_obj_t* object, lv_ob
 
     lv_obj_set_parent(object, panel);
 
-    if (set_height)
+    if (set_height) 
+    {
         lv_obj_set_height(object, CYD_SCREEN_MIN_BUTTON_HEIGHT_PX);
+    }
 
     if (comment != NULL)
     {
@@ -223,7 +244,6 @@ void lv_create_custom_menu_label(const char *label_text, lv_obj_t* root_panel, c
     lv_create_custom_menu_entry(label_text, label, root_panel, false);
 }
 
-uint32_t message_hash = 0;
 lv_timer_t* timer = NULL;
 
 void on_timer_destroy(lv_event_t * e)
@@ -245,15 +265,6 @@ void lv_create_popup_message(const char* message, uint16_t timeout_ms)
         return;
     }
 
-    uint32_t new_hash = crc32String(message);
-
-    if (new_hash == message_hash) 
-    {
-        return;
-    }
-
-    message_hash = new_hash;
-
     lv_obj_t* panel = lv_obj_create(lv_scr_act()); 
     lv_obj_set_style_pad_all(panel, CYD_SCREEN_GAP_PX, CYD_SCREEN_GAP_PX);
     lv_obj_set_size(panel, CYD_SCREEN_PANEL_WIDTH_PX - CYD_SCREEN_GAP_PX * 2, LV_SIZE_CONTENT);
@@ -268,7 +279,7 @@ void lv_create_popup_message(const char* message, uint16_t timeout_ms)
     lv_obj_set_size(label, CYD_SCREEN_PANEL_WIDTH_PX - CYD_SCREEN_GAP_PX * 6, LV_SIZE_CONTENT);
     lv_label_set_long_mode(label, LV_LABEL_LONG_WRAP);
 
-    timer = lv_timer_create(timer_callback, timeout_ms,  panel);
+    timer = lv_timer_create(timer_callback, timeout_ms > 0 ? timeout_ms : 0xFFFFFFFF,  panel);
 }
 
 lv_obj_t * lv_label_btn_create(lv_obj_t * parent, lv_event_cb_t btn_callback, void* user_data)

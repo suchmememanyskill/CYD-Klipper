@@ -3,7 +3,7 @@
 #include <Esp.h>
 #include <cstring>
 #include "../../conf/global_config.h"
-#include "../switch_printer.h"
+#include "../../core/printer_integration.hpp"
 
 namespace serial_console {
 
@@ -15,6 +15,11 @@ namespace serial_console {
   - add description to help()
   - optionally add handling the new preference to sets() and settings() if it modifies global_config
 */
+
+PrinterConfiguration* get_current_printer_config()
+{
+    return &global_config.printer_config[global_config.printer_index];
+}
 
 HANDLER commandHandlers[] = {
     {"help", &help, 1},
@@ -96,7 +101,7 @@ void sets(String argv[])
 
     if(get_current_printer_config()->ip_configured)
     {
-        Serial.printf("ip %s %d\n",get_current_printer_config()->klipper_host, get_current_printer_config()->klipper_port);
+        Serial.printf("ip %s %d\n",get_current_printer_config()->printer_host, get_current_printer_config()->klipper_port);
     }
     else
     {
@@ -107,7 +112,7 @@ void sets(String argv[])
     {
         Serial.printf("key %s\n",
 #if DISPLAY_SECRETS
-        get_current_printer_config()->klipper_auth
+        get_current_printer_config()->printer_auth
 #else
         "[redacted]"
 #endif    
@@ -164,7 +169,7 @@ void settings(String argv[])
 
     if(get_current_printer_config()->ip_configured)
     {
-        Serial.printf("Moonraker address: %s:%d\n",get_current_printer_config()->klipper_host, get_current_printer_config()->klipper_port);
+        Serial.printf("Moonraker address: %s:%d\n",get_current_printer_config()->printer_host, get_current_printer_config()->klipper_port);
     }
     else
     {
@@ -175,7 +180,7 @@ void settings(String argv[])
     {
         Serial.printf("Moonraker API key: %s\n",
 #if DISPLAY_SECRETS
-        get_current_printer_config()->klipper_auth
+        get_current_printer_config()->printer_auth
 #else
         "[redacted]"
 #endif        
@@ -207,11 +212,12 @@ void erase_one(const String arg)
     {
         get_current_printer_config()->auth_configured = false;
         // overwrite the key to make it unrecoverable for 3rd parties
-        memset(get_current_printer_config()->klipper_auth,0,32);
+        memset(get_current_printer_config()->printer_auth,0,64);
         write_global_config();
     }
     else if(arg == "ip")
     {
+        get_current_printer_config()->setup_complete = false;
         get_current_printer_config()->ip_configured = false;
         write_global_config();
     }
@@ -251,14 +257,8 @@ void erase(String argv[])
 
 void key(String argv[])
 {
-    if (argv[1].length() != 32)
-    {
-      Serial.println("Key must be 32 characters");
-      return;
-    }
-
     get_current_printer_config()->auth_configured = true;
-    strncpy(get_current_printer_config()->klipper_auth, argv[1].c_str(), sizeof(global_config.printer_config[0].klipper_auth));
+    strncpy(get_current_printer_config()->printer_auth, argv[1].c_str(), sizeof(global_config.printer_config[0].printer_auth));
     write_global_config();
 }
 
@@ -282,9 +282,10 @@ void ssid(String argv[])
 
 void ip(String argv[])
 {
-    strncpy(get_current_printer_config()->klipper_host, argv[1].c_str(), sizeof(global_config.printer_config[0].klipper_host)-1);
+    strncpy(get_current_printer_config()->printer_host, argv[1].c_str(), sizeof(global_config.printer_config[0].printer_host)-1);
     get_current_printer_config()->klipper_port =  argv[2].toInt();
     get_current_printer_config()->ip_configured = true;
+    get_current_printer_config()->setup_complete = true;
     write_global_config();
 }
 
@@ -316,15 +317,15 @@ void brightness(String argv[])
 void printer(String argv[])
 {
     int ndx = argv[1].toInt();
-    if(ndx == -1)
+    if(ndx <= -1)
     {
         global_config.multi_printer_mode = false;
-        switch_printer(0);
+        set_current_printer(0);
     }
-    else if( ndx >=0 && ndx < PRINTER_CONFIG_COUNT)
+    else if( ndx >= 0 && ndx < get_printer_count())
     {
         global_config.multi_printer_mode = true;
-        switch_printer(ndx);
+        set_current_printer(ndx);
     }
     else
     {
