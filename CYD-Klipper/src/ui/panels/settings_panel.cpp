@@ -189,11 +189,23 @@ void settings_section_theming(lv_obj_t* panel)
 
 void settings_section_behaviour(lv_obj_t* panel)
 {
+    PrinterType printer_type = get_current_printer()->printer_config->printer_type;
+    bool is_klipper = printer_type == PrinterTypeKlipper || printer_type == PrinterTypeKlipperSerial;
+    bool is_octo = printer_type == PrinterTypeOctoprint;
+    bool is_bambu = printer_type == PrinterTypeBambuLocal;
+
     lv_obj_t * label = lv_label_create(panel);
     lv_label_set_text(label, "\nBehaviour");
     
-    lv_create_custom_menu_dropdown("Estimated Time", panel, estimated_time_dropdown, estimated_time_options, get_current_printer()->printer_config->remaining_time_calc_mode, NULL, PRINTER_SPECIFIC_SETTING);
-    lv_create_custom_menu_dropdown("Stats in Progress Screen", panel, show_stats_on_progress_panel_dropdown, "None\nLayers\nPartial\nAll", get_current_printer()->printer_config->show_stats_on_progress_panel, NULL, PRINTER_SPECIFIC_SETTING);
+    if (is_klipper)
+    {
+        lv_create_custom_menu_dropdown("Estimated Time", panel, estimated_time_dropdown, estimated_time_options, get_current_printer()->printer_config->remaining_time_calc_mode, NULL, PRINTER_SPECIFIC_SETTING);
+        lv_create_custom_menu_dropdown("Stats in Progress Screen", panel, show_stats_on_progress_panel_dropdown, "None\nLayers\nPartial\nAll", get_current_printer()->printer_config->show_stats_on_progress_panel, NULL, PRINTER_SPECIFIC_SETTING);
+    }
+    else if (is_bambu)
+    {
+        lv_create_custom_menu_dropdown("Stats in Progress Screen", panel, show_stats_on_progress_panel_dropdown, "None\nLayers", get_current_printer()->printer_config->show_stats_on_progress_panel, NULL, PRINTER_SPECIFIC_SETTING);
+    }
 
 #ifndef CYD_SCREEN_DISABLE_TIMEOUT
     int wake_timeout_settings_index = 0;
@@ -212,17 +224,22 @@ void settings_section_behaviour(lv_obj_t* panel)
 #endif
 
     lv_create_custom_menu_switch("Multi Printer Mode", panel, multi_printer_switch, global_config.multi_printer_mode);
-    lv_create_custom_menu_switch("Disable M117 Messaging", panel, disable_m117_messaging_switch, global_config.disable_m117_messaging);
-    lv_create_custom_menu_button("Configure Printer IP", panel, reset_ip_click, "Restart");
+    
+    if (is_klipper)
+    {
+        lv_create_custom_menu_switch("Disable M117 Messaging", panel, disable_m117_messaging_switch, global_config.disable_m117_messaging);
 
-    lv_create_custom_menu_switch("Custom Filament Move Macros", panel, filament_move_mode_switch, get_current_printer()->printer_config->custom_filament_move_macros, NULL, 
-        global_config.multi_printer_mode
-            ? "Calls FILAMENT_RETRACT and\nFILAMENT_EXTRUDE in temperature menu\nwhen enabled. Stored per printer."
-            : "Calls FILAMENT_RETRACT and\nFILAMENT_EXTRUDE in temperature menu\nwhen enabled");
+        lv_create_custom_menu_switch("Custom Filament Move Macros", panel, filament_move_mode_switch, get_current_printer()->printer_config->custom_filament_move_macros, NULL, 
+            global_config.multi_printer_mode
+                ? "Calls FILAMENT_RETRACT and\nFILAMENT_EXTRUDE in temperature menu\nwhen enabled. Stored per printer."
+                : "Calls FILAMENT_RETRACT and\nFILAMENT_EXTRUDE in temperature menu\nwhen enabled");
+
+        lv_create_custom_menu_switch("Show Emergency Stop", panel, show_estop_switch, global_config.show_estop);
+    }
 
     lv_create_custom_menu_switch("Sort Macros A->Z", panel, sort_macros_switch, global_config.sort_macros);
-    lv_create_custom_menu_switch("Show Emergency Stop", panel, show_estop_switch, global_config.show_estop);
     lv_create_custom_menu_switch("Show Full Filenames", panel, full_filenames_switch, global_config.full_filenames);
+    lv_create_custom_menu_button("Configure Printer Host", panel, reset_ip_click, "Restart");
 }
 
 void settings_section_device(lv_obj_t* panel)

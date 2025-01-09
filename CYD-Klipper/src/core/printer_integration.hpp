@@ -181,6 +181,7 @@ class BasePrinter
 
         BasePrinter(unsigned char index);
         PrinterData* AnnouncePrinterData();
+        bool supports_feature(PrinterFeatures feature);
 };
 
 #define DATA_PRINTER_STATE 1

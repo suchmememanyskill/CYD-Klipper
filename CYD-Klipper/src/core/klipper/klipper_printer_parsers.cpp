@@ -134,7 +134,7 @@ void KlipperPrinter::parse_state(JsonDocument &in)
             printer_data.print_progress = status["display_status"]["progress"];
             const char *message = status["display_status"]["message"];
 
-            if (message != NULL && (printer_data.popup_message == NULL || strcmp(printer_data.popup_message, message)))
+            if (!global_config.disable_m117_messaging && message != NULL && (printer_data.popup_message == NULL || strcmp(printer_data.popup_message, message)))
             {
                 printer_data.popup_message = (char *)malloc(strlen(message) + 1);
                 strcpy(printer_data.popup_message, message);
@@ -246,12 +246,6 @@ Macros KlipperPrinter::parse_macros(JsonDocument &in)
             strcpy(macro, key);
             macros.macros[macros.count++] = macro;
         }
-    }
-
-    if (global_config.sort_macros)
-    {
-        std::sort(macros.macros, macros.macros + macros.count, [](const char *a, const char *b)
-                  { return strcmp(a, b) < 0; });
     }
 
     return macros;

@@ -79,7 +79,7 @@ void progress_panel_init(lv_obj_t* panel){
     const auto button_size_mult = 1.3f;
 
     // Emergency Stop
-    if (global_config.show_estop){
+    if (global_config.show_estop && (get_current_printer()->supports_feature(PrinterFeatureEmergencyStop))){
         lv_obj_t * btn = lv_btn_create(panel);
         lv_obj_add_event_cb(btn, btn_click_estop, LV_EVENT_CLICKED, NULL);
         

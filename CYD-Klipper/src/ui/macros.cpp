@@ -27,6 +27,12 @@ int macros_add_macros_to_panel(lv_obj_t * root_panel, BasePrinter* printer)
         return 0;
     }
 
+    if (global_config.sort_macros)
+    {
+        std::sort(macros.macros, macros.macros + macros.count, [](const char *a, const char *b)
+                  { return strcmp(a, b) < 0; });
+    }
+
     for (int i = 0; i < macros.count; i++)
     {
         const char* macro = macros.macros[i];
