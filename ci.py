@@ -10,6 +10,7 @@ CYD_PORTS = [
     "esp32-4827S043C-SD",
     "esp32-3248S035C-V",
     #"esp32-4827S043R-SD",
+    "esp32-CROWPANEL-28R",
 ]
 
 ESP_S3_CHIPS = [
