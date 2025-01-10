@@ -83,6 +83,7 @@ typedef struct {
             bool sort_macros : 1;
             bool show_estop : 1;
             bool full_filenames : 1;
+            bool double_size_gcode_img : 1;
         };
     };
 

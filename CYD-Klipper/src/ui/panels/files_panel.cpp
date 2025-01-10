@@ -32,43 +32,22 @@ static void btn_print_file_verify(lv_event_t * e)
         return;
     }
 
-    const auto button_size_mult = 1.3f;
-
-    lv_obj_t * btn = lv_event_get_target(e);
     selected_file = (char*)lv_event_get_user_data(e);
     
     lv_obj_t * panel = lv_obj_create(lv_scr_act());
-    lv_obj_set_style_pad_all(panel, CYD_SCREEN_GAP_PX * 2, 0);
+    lv_obj_set_style_pad_hor(panel, CYD_SCREEN_GAP_PX * 2, 0);
+    lv_obj_set_style_pad_ver(panel, CYD_SCREEN_GAP_PX, 0);
     lv_obj_set_size(panel, CYD_SCREEN_WIDTH_PX - CYD_SCREEN_GAP_PX * 4, CYD_SCREEN_HEIGHT_PX - CYD_SCREEN_GAP_PX * 3);
     lv_obj_align(panel, LV_ALIGN_CENTER, 0, 0);
+    lv_layout_flex_column(panel, LV_FLEX_ALIGN_CENTER);
 
     lv_obj_t * label_print_file = lv_label_create(panel);
     lv_label_set_text(label_print_file, "Print File");
-    lv_obj_align(label_print_file, LV_ALIGN_TOP_LEFT, 0, 0);
 
-    lv_obj_t * label = lv_label_create(panel);
-    lv_label_set_text(label, selected_file);
-    lv_obj_align(label, LV_ALIGN_CENTER, 0, -20);
-    lv_obj_set_width(label, CYD_SCREEN_WIDTH_PX - CYD_SCREEN_GAP_PX * 10);
-    lv_label_set_long_mode(label, LV_LABEL_LONG_WRAP);
-
-    btn = lv_btn_create(panel);
-    lv_obj_align(btn, LV_ALIGN_BOTTOM_LEFT, 0, 0);
-    lv_obj_set_size(btn, CYD_SCREEN_MIN_BUTTON_WIDTH_PX * button_size_mult, CYD_SCREEN_MIN_BUTTON_HEIGHT_PX * button_size_mult);
-    lv_obj_add_event_cb(btn, destroy_event_user_data, LV_EVENT_CLICKED, panel);
-
-    label = lv_label_create(btn);
-    lv_label_set_text(label, LV_SYMBOL_CLOSE);
-    lv_obj_center(label);
-
-    btn = lv_btn_create(panel);
-    lv_obj_align(btn, LV_ALIGN_BOTTOM_RIGHT, 0, 0);
-    lv_obj_set_size(btn, CYD_SCREEN_MIN_BUTTON_WIDTH_PX * button_size_mult, CYD_SCREEN_MIN_BUTTON_HEIGHT_PX * button_size_mult);
-    lv_obj_add_event_cb(btn, btn_print_file, LV_EVENT_CLICKED, panel);
-    
-    label = lv_label_create(btn);
-    lv_label_set_text(label, LV_SYMBOL_OK);
-    lv_obj_center(label);
+    lv_obj_t * top_panel = lv_create_empty_panel(panel);
+    lv_obj_set_width(top_panel, LV_PCT(100));
+    lv_obj_set_flex_grow(top_panel, 1);
+    lv_layout_flex_row(top_panel, LV_FLEX_ALIGN_CENTER);
 
     Thumbnail thumbnail = current_printer_get_32_32_png_image_thumbnail(selected_file);
     lv_obj_t * img = NULL;
@@ -85,17 +64,45 @@ static void btn_print_file_verify(lv_event_t * e)
         img_header->header.cf = LV_IMG_CF_RAW_ALPHA;
         img_header->data = thumbnail.png;
 
-        img = lv_img_create(panel);
+        img = lv_img_create(top_panel);
         lv_img_set_src(img, img_header);
-        lv_obj_align(img, LV_ALIGN_TOP_LEFT, 0, 0);
-
-        lv_obj_t * text_center_panel = lv_create_empty_panel(panel);
-        lv_obj_set_size(text_center_panel, CYD_SCREEN_MIN_BUTTON_WIDTH_PX * 2, 32); 
-        lv_obj_align(text_center_panel, LV_ALIGN_TOP_LEFT, CYD_SCREEN_GAP_PX + 32, 0);
-
-        lv_obj_set_parent(label_print_file, text_center_panel);
-        lv_obj_align(label_print_file, LV_ALIGN_LEFT_MID, 0, 0);
+        lv_img_set_antialias(img, true);
+        lv_img_set_size_mode(img, LV_IMG_SIZE_MODE_REAL);
+        
+        if (global_config.double_size_gcode_img)
+        {
+            lv_img_set_zoom(img, LV_IMG_ZOOM_NONE * 2);
+        }
     }
+
+    lv_obj_t * label = lv_label_create(top_panel);
+    lv_label_set_text(label, selected_file);
+    lv_obj_set_height(label, LV_SIZE_CONTENT);
+    lv_label_set_long_mode(label, LV_LABEL_LONG_WRAP);
+    lv_obj_set_flex_grow(label, 1);
+
+    lv_obj_t* buttons_panel = lv_create_empty_panel(panel);
+    lv_layout_flex_row(buttons_panel);
+    lv_obj_set_size(buttons_panel, LV_PCT(100), CYD_SCREEN_MIN_BUTTON_HEIGHT_PX);
+
+    lv_obj_t* btn = lv_btn_create(buttons_panel);
+    lv_obj_set_flex_grow(btn, 1);
+    lv_obj_set_height(btn, CYD_SCREEN_MIN_BUTTON_HEIGHT_PX);
+    lv_obj_add_event_cb(btn, destroy_event_user_data, LV_EVENT_CLICKED, panel);
+
+    label = lv_label_create(btn);
+    lv_label_set_text(label, LV_SYMBOL_CLOSE " Cancel");
+    lv_obj_center(label);
+
+    btn = lv_btn_create(buttons_panel);
+    lv_obj_set_flex_grow(btn, 1);
+    lv_obj_set_height(btn, CYD_SCREEN_MIN_BUTTON_HEIGHT_PX);
+    lv_obj_add_event_cb(btn, btn_print_file, LV_EVENT_CLICKED, panel);
+    lv_obj_add_event_cb(btn, destroy_event_user_data, LV_EVENT_CLICKED, panel);
+
+    label = lv_label_create(btn);
+    lv_label_set_text(label, LV_SYMBOL_OK " Print");
+    lv_obj_center(label);
 }
 
 void files_panel_init(lv_obj_t* panel){
