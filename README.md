@@ -25,7 +25,8 @@ A ESP32-2432S028R is required to run this project. You can find out where to buy
 - Toggle Moonraker power devices
 - OTA updates
 - Serial console over USB (115200 8n1, echo off, LF/LF)
-- Supports Klipper, Octoprint and Bambu printers.
+- Control Klipper, Octoprint and Bambu printers.
+- Wired Serial/Usb Klipper connection
 
 ### Install
 
