@@ -7,6 +7,7 @@
 #include "../core/lv_setup.h"
 #include "serial/serial_console.h"
 #include "panels/panel.h"
+#include "../core/semaphore.h"
 
 void wifi_init_inner();
 void wifi_pass_entry(const char* ssid);
