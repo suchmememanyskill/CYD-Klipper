@@ -3,12 +3,23 @@
 #include <UrlEncode.h>
 #include "../../ui/serial/serial_console.h"
 
-void clear_serial_buffer()
+void clear_serial_buffer(bool can_rely_on_newline_terminator = true)
 {
-    while (Serial.available())
+    if (can_rely_on_newline_terminator)
     {
-        Serial.read();
-    };
+        if (Serial.available())
+        {
+            while (Serial.read() != '\n')
+                ;
+        }
+    }
+    else 
+    {
+        while (Serial.available())
+        {
+            Serial.read();
+        }
+    }
 }
 
 // Request: {timeout} {method} {endpoint}
@@ -46,7 +57,7 @@ bool make_serial_request(JsonDocument &out, int timeout_ms, HttpRequestType requ
 
     if (buff[0] < '0' || buff[0] > '9')
     {
-        Serial.println("Invalid error code");
+        Serial.printf("Invalid error code, got char '%c'\n", buff[0]);
         clear_serial_buffer();
         
         return false;
@@ -108,7 +119,7 @@ bool make_binary_request(BinaryResponse* data, int timeout_ms, HttpRequestType r
     if (buff[0] < '0' || buff[0] > '9')
     {
         Serial.println("Invalid length");
-        clear_serial_buffer();
+        clear_serial_buffer(false);
         
         return false;
     }
@@ -118,7 +129,7 @@ bool make_binary_request(BinaryResponse* data, int timeout_ms, HttpRequestType r
     if (data_length <= 0)
     {
         Serial.println("0 Length");
-        clear_serial_buffer();
+        clear_serial_buffer(false);
         
         return false;
     }
@@ -129,7 +140,7 @@ bool make_binary_request(BinaryResponse* data, int timeout_ms, HttpRequestType r
     if (data->data == NULL)
     {
         Serial.println("Failed to allocate memory");
-        clear_serial_buffer();
+        clear_serial_buffer(false);
         
         return false;
     }
