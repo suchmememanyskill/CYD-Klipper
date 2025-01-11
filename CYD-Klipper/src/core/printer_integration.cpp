@@ -62,11 +62,18 @@ PrinterData* BasePrinter::AnnouncePrinterData()
         lv_msg_send(DATA_PRINTER_STATE, get_current_printer());
     }
 
-    if (old_popup_message != printer_data_copy->popup_message && old_popup_message != NULL && old_popup_message != blank && !no_free)
+    if (old_popup_message != printer_data_copy->popup_message)
     {
-        LOG_F(("Freeing popup message '%s' (%x)\n", old_popup_message, old_popup_message));
-        free(old_popup_message);
-        lv_msg_send(DATA_PRINTER_POPUP, get_current_printer());
+        if (old_popup_message != NULL && old_popup_message != blank && !no_free)
+        {
+            LOG_F(("Freeing popup message '%s' (%x)\n", old_popup_message, old_popup_message));
+            free(old_popup_message);
+        }
+
+        if (printer_data_copy->popup_message != NULL && printer_data_copy->popup_message != blank)
+        {
+            lv_msg_send(DATA_PRINTER_POPUP, get_current_printer());
+        }
     }
 
     lv_msg_send(DATA_PRINTER_DATA, get_current_printer());
