@@ -42,6 +42,21 @@ If you found this project helpful, please consider a donation [to my Ko-Fi](http
 
 Thank you!
 
+### Where to buy hardware
+All links below are affiliate links. Please also check yourself if there is a cheaper version available than the ones below. I have only linked ones that i have personally bought.
+
+*ESP32-2432S028R (2.8" Resistive, Cheapest)*
+- [USB C + microB version](https://s.click.aliexpress.com/e/_omjsYBJ)
+- [Another USB C + microB version](https://s.click.aliexpress.com/e/_olKBkmz)
+- [microB version](https://s.click.aliexpress.com/e/_oCWhgmN)
+
+*ESP32-2432S032C (3.2" Capacitive)*
+- [Only the capacitive version is supported! USB-C](https://s.click.aliexpress.com/e/_okbSGmd)
+- [IPS version (not that great of a screen), Only the capacitive version is supported! USB-C](https://s.click.aliexpress.com/e/_oFygVwt)
+
+*ESP32-3248S035C (3.5" Capacitive)*
+- [microB version](https://s.click.aliexpress.com/e/_oCqygE9)
+
 ### Screenshots
 (Quite literally shots of the screen. I'm sorry)
 
