@@ -114,7 +114,7 @@
       "arduino",
       "espidf"
     ],
-    "name": "esp32-2432S022C",
+    "name": "esp32-2432S022C-SD-V",
     "upload": {
       "flash_size": "4MB",
       "maximum_ram_size": 327680,
