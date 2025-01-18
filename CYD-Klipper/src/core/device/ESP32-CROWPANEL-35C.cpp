@@ -1,5 +1,6 @@
 // Adapted from https://github.com/OzInFl/Elecrow-3.5-RGB-TFT-SQUARELINE-EXAMPLE
 
+#define CYD_SCREEN_DRIVER_ESP32_CROWPANEL_35C
 #ifdef CYD_SCREEN_DRIVER_ESP32_CROWPANEL_35C
 #include "../screen_driver.h"
 #include "lvgl.h"
@@ -68,7 +69,7 @@ public:
         panel_cfg.dummy_read_pixel = 8;
         panel_cfg.dummy_read_bits = 1;
         panel_cfg.readable = true;
-        panel_cfg.invert = false;
+        panel_cfg.invert = global_config.printer_config[global_config.printer_index].invert_colors ? true : false;
         panel_cfg.rgb_order = false;
         panel_cfg.dlen_16bit = true;
         panel_cfg.bus_shared = true;
@@ -101,11 +102,7 @@ LGFX tft;
 
 void screen_setBrightness(unsigned char brightness)
 {
-    // calculate duty, 4095 from 2 ^ 12 - 1
-    uint32_t duty = (4095 / 255) * brightness;
-
-    // write duty to LEDC
-    ledcWrite(0, duty);
+    // TODO
 }
 
 void set_invert_display()
@@ -151,8 +148,13 @@ void screen_setup()
 
     delay(500);
 
+    pinMode(LCD_BL, OUTPUT);
+    digitalWrite(LCD_BL, HIGH);
+
+/*
     ledcSetup(0, 5000, 12);
     ledcAttachPin(LCD_BL, 0);
+*/
 
     lv_init();
     lv_disp_draw_buf_init(&draw_buf, buf, NULL, CYD_SCREEN_WIDTH_PX * CYD_SCREEN_HEIGHT_PX / 10);
