@@ -147,7 +147,7 @@ void screen_lv_touchRead(lv_indev_drv_t *indev_driver, lv_indev_data_t *data)
 void screen_setup()
 {
     tft.begin();
-    tft.setRotation(global_config.rotate_screen ? 2 : 0);
+    tft.setRotation(global_config.rotate_screen ? 3 : 1);
 
     delay(500);
 
