@@ -16,6 +16,7 @@
 static lv_disp_draw_buf_t draw_buf;
 static lv_color_t buf[CYD_SCREEN_HEIGHT_PX * CYD_SCREEN_WIDTH_PX / 10];
 
+#define BUZZER_PIN 20
 #define LCD_BL 46
 #define SDA_FT6236 38
 #define SCL_FT6236 39
@@ -143,6 +144,9 @@ void screen_lv_touchRead(lv_indev_drv_t *indev_driver, lv_indev_data_t *data)
 
 void screen_setup()
 {
+    pinMode(BUZZER_PIN, OUTPUT);
+    digitalWrite(BUZZER_PIN, HIGH);
+
     tft.begin();
     tft.setRotation(global_config.rotate_screen ? 3 : 1);
 
