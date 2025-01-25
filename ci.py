@@ -11,12 +11,14 @@ CYD_PORTS = [
     "esp32-3248S035C-V",
     #"esp32-4827S043R-SD",
     "esp32-CROWPANEL-28R",
+    "esp32-CROWPANEL-35C",
 ]
 
 ESP_S3_CHIPS = [
     "esp32-8048S043C-SD",
     "esp32-8048S043C-SD-alt",
     "esp32-4827S043C-SD",
+    "esp32-CROWPANEL-35C",
 ]
 
 BASE_DIR = os.getcwd()
@@ -80,7 +82,10 @@ for port in CYD_PORTS:
 
     shutil.copy(os.path.join(os.path.expanduser("~"), ".platformio/packages/framework-arduinoespressif32/tools/partitions/boot_app0.bin"), f"{port_path}/boot_app0.bin")
     os.chdir(port_path)
-    subprocess.run(["python3", "-m", "esptool", "--chip", "esp32", "merge_bin", "-o", "merged_firmware.bin", "--flash_mode", "dio", "--flash_freq", "40m", "--flash_size", "4MB", "0x1000", "bootloader.bin", "0x8000", "partitions.bin", "0xe000", "boot_app0.bin", "0x10000", "firmware.bin"], check=True)
+    if (port in ESP_S3_CHIPS):
+        subprocess.run(["python3", "-m", "esptool", "--chip", "esp32s3", "merge_bin", "-o", "merged_firmware.bin", "--flash_mode", "qio", "--flash_freq", "80m", "--flash_size", "16MB", "0x1000", "bootloader.bin", "0x8000", "partitions.bin", "0xe000", "boot_app0.bin", "0x10000", "firmware.bin"], check=True)
+    else:    
+        subprocess.run(["python3", "-m", "esptool", "--chip", "esp32", "merge_bin", "-o", "merged_firmware.bin", "--flash_mode", "dio", "--flash_freq", "40m", "--flash_size", "4MB", "0x1000", "bootloader.bin", "0x8000", "partitions.bin", "0xe000", "boot_app0.bin", "0x10000", "firmware.bin"], check=True)
 
     os.chdir(BASE_DIR)
 

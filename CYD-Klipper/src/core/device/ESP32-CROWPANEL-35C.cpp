@@ -1,6 +1,5 @@
 // Adapted from https://github.com/OzInFl/Elecrow-3.5-RGB-TFT-SQUARELINE-EXAMPLE
 
-#define CYD_SCREEN_DRIVER_ESP32_CROWPANEL_35C
 #ifdef CYD_SCREEN_DRIVER_ESP32_CROWPANEL_35C
 #include "../screen_driver.h"
 #include "lvgl.h"
@@ -145,7 +144,8 @@ void screen_lv_touchRead(lv_indev_drv_t *indev_driver, lv_indev_data_t *data)
 void screen_setup()
 {
     pinMode(BUZZER_PIN, OUTPUT);
-    digitalWrite(BUZZER_PIN, HIGH);
+    ledcSetup(4, 5000, 8);
+    ledcAttachPin(BUZZER_PIN, 4);
 
     tft.begin();
     tft.setRotation(global_config.rotate_screen ? 3 : 1);
