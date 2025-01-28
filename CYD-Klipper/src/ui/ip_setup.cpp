@@ -375,6 +375,7 @@ void show_ip_entry()
             lv_textarea_set_placeholder_text(host_entry, "Printer IP");
             lv_textarea_set_placeholder_text(port_entry, "Access code");
             lv_textarea_set_placeholder_text(auth_entry, "Printer serial number");
+            lv_obj_add_flag(auth_entry, LV_OBJ_FLAG_USER_3);
             break;
         case PrinterType::PrinterTypeOctoprint:
             lv_obj_clear_flag(auth_entry, LV_OBJ_FLAG_USER_2);
