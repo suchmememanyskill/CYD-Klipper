@@ -1,5 +1,5 @@
-#include "data_setup.h"
 #include "current_printer.h"
+#include "semaphore.h"
 
 bool current_printer_move_printer(const char* axis, float amount, bool relative) 
 {

@@ -3,6 +3,7 @@
 #include <Esp.h>
 #include "../core/current_printer.h"
 #include "../core/data_setup.h"
+#include "../core/semaphore.h"
 
 typedef struct {
     const char* power_device_name;

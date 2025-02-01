@@ -1,5 +1,6 @@
 
 #include "data_setup.h"
+#include "semaphore.h"
 #include <esp_task_wdt.h>
 #include <UrlEncode.h>
 #include "printer_integration.hpp"
@@ -8,31 +9,7 @@
 #include "bambu/bambu_printer_integration.hpp"
 #include "octoprint/octoprint_printer_integration.hpp"
 
-SemaphoreHandle_t freezeRenderThreadSemaphore, freezeRequestThreadSemaphore;
 const long data_update_interval = 780;
-
-void semaphore_init(){
-    freezeRenderThreadSemaphore = xSemaphoreCreateMutex();
-    freezeRequestThreadSemaphore = xSemaphoreCreateMutex();
-    xSemaphoreGive(freezeRenderThreadSemaphore);
-    xSemaphoreGive(freezeRequestThreadSemaphore);
-}
-
-void freeze_request_thread(){
-    xSemaphoreTake(freezeRequestThreadSemaphore, portMAX_DELAY);
-}
-
-void unfreeze_request_thread(){
-    xSemaphoreGive(freezeRequestThreadSemaphore);
-}
-
-void freeze_render_thread(){
-    xSemaphoreTake(freezeRenderThreadSemaphore, portMAX_DELAY);
-}
-
-void unfreeze_render_thread(){
-    xSemaphoreGive(freezeRenderThreadSemaphore);
-}
 
 void fetch_printer_data()
 {

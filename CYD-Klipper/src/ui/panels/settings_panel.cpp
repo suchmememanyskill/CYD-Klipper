@@ -132,6 +132,13 @@ static void full_filenames_switch(lv_event_t* e){
     write_global_config();
 }
 
+static void double_size_gcode_img_switch(lv_event_t* e){
+    auto state = lv_obj_get_state(lv_event_get_target(e));
+    bool checked = (state & LV_STATE_CHECKED == LV_STATE_CHECKED);
+    global_config.double_size_gcode_img = checked;
+    write_global_config();
+}
+
 static void rotate_screen_switch(lv_event_t* e){
     auto state = lv_obj_get_state(lv_event_get_target(e));
     bool checked = (state & LV_STATE_CHECKED == LV_STATE_CHECKED);
@@ -239,6 +246,7 @@ void settings_section_behaviour(lv_obj_t* panel)
 
     lv_create_custom_menu_switch("Sort Macros A->Z", panel, sort_macros_switch, global_config.sort_macros);
     lv_create_custom_menu_switch("Show Full Filenames", panel, full_filenames_switch, global_config.full_filenames);
+    lv_create_custom_menu_switch("2X Size Gcode Image", panel, double_size_gcode_img_switch, global_config.double_size_gcode_img);
     lv_create_custom_menu_button("Configure Printer Host", panel, reset_ip_click, "Restart");
 }
 
