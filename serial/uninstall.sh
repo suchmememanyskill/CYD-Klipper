@@ -17,3 +17,5 @@ else
 
     systemctl --user daemon-reload
 fi
+
+rm -rf ./env

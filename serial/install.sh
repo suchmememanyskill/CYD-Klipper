@@ -8,8 +8,14 @@ if [ "$EUID" -eq 0 ]; then
     fi
     SERVICE_PATH="/etc/systemd/system/cyd-klipper-serial.service"
 else
+    echo "Are you sure you want to run this service as the current user?"
+    read -r -p "Make sure this user is logged in at boot! [y/N] " response
+    response=${response,,}    # tolower
+    if ! [[ "$response" =~ ^(yes|y)$ ]]; then
+        exit
+    fi
     mkdir -p ~/.config/systemd/user
-    SERVICE_PATH="~/.config/systemd/user/cyd-klipper-serial.service"
+    SERVICE_PATH="$HOME/.config/systemd/user/cyd-klipper-serial.service"
 fi
 
 set -e
