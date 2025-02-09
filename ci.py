@@ -34,19 +34,19 @@ def get_manifest(base_path : str, device_name : str):
                 "parts": [
                     {
                         "path": f"{base_path}/bootloader.bin",
-                        "offset": 4096
+                        "offset": 0 if device_name in ESP_S3_CHIPS else 0x1000 
                     },
                     {
                         "path": f"{base_path}/partitions.bin",
-                        "offset": 32768
+                        "offset": 0x8000
                     },
                     {
                         "path": f"{base_path}/boot_app0.bin",
-                        "offset": 57344
+                        "offset": 0xe000
                     },
                     {
                         "path": f"{base_path}/firmware.bin",
-                        "offset": 65536
+                        "offset": 0x10000
                     }
                 ]
             }
@@ -83,7 +83,7 @@ for port in CYD_PORTS:
     shutil.copy(os.path.join(os.path.expanduser("~"), ".platformio/packages/framework-arduinoespressif32/tools/partitions/boot_app0.bin"), f"{port_path}/boot_app0.bin")
     os.chdir(port_path)
     if (port in ESP_S3_CHIPS):
-        subprocess.run(["python3", "-m", "esptool", "--chip", "esp32s3", "merge_bin", "-o", "merged_firmware.bin", "--flash_mode", "qio", "--flash_freq", "80m", "--flash_size", "16MB", "0x1000", "bootloader.bin", "0x8000", "partitions.bin", "0xe000", "boot_app0.bin", "0x10000", "firmware.bin"], check=True)
+        subprocess.run(["python3", "-m", "esptool", "--chip", "esp32s3", "merge_bin", "-o", "merged_firmware.bin", "--flash_mode", "dio", "--flash_freq", "80m", "--flash_size", "16MB", "0x0000", "bootloader.bin", "0x8000", "partitions.bin", "0xe000", "boot_app0.bin", "0x10000", "firmware.bin"], check=True)
     else:    
         subprocess.run(["python3", "-m", "esptool", "--chip", "esp32", "merge_bin", "-o", "merged_firmware.bin", "--flash_mode", "dio", "--flash_freq", "40m", "--flash_size", "4MB", "0x1000", "bootloader.bin", "0x8000", "partitions.bin", "0xe000", "boot_app0.bin", "0x10000", "firmware.bin"], check=True)
 
