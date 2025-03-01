@@ -82,6 +82,8 @@ typedef struct _PrinterData {
         float temperatures[10];
         float target_temperatures[10];
         float position[3];
+        float position_min[3];
+        float position_max[3];
         float elapsed_time_s;
         float printed_time_s;
         float remaining_time_s;

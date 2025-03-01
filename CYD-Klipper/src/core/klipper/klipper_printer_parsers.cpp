@@ -56,6 +56,12 @@ void KlipperPrinter::parse_state(JsonDocument &in)
         {
             const char *homed_axis = status["toolhead"]["homed_axes"];
             printer_data.homed_axis = strcmp(homed_axis, "xyz") == 0;
+
+            for (int i = 0; i < 3; i++)
+            {
+                printer_data.position_min[i] = status["toolhead"]["axis_minimum"][i];
+                printer_data.position_max[i] = status["toolhead"]["axis_maximum"][i];
+            }
         }
 
         if (status.containsKey("gcode_move"))

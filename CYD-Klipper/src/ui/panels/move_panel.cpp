@@ -344,18 +344,24 @@ static void root_panel_state_update(lv_event_t * e){
     if (last_homing_state == get_current_printer_data()->homed_axis)
         return;
 
+    PrinterType printer_type = get_current_printer()->printer_config->printer_type;
+    bool is_klipper = printer_type == PrinterTypeKlipper || printer_type == PrinterTypeKlipperSerial;
+
     lv_obj_t * panel = lv_event_get_target(e);
     last_homing_state = get_current_printer_data()->homed_axis;
 
     lv_obj_clean(panel);
 
-    if (get_current_printer_data()->homed_axis) 
+    if (get_current_printer_data()->homed_axis && is_klipper)
+        move_panel_slider_init(panel);
+    else if (get_current_printer_data()->homed_axis)
         root_panel_steppers_locked(panel);
-    else 
+    else
         root_panel_steppers_unlocked(panel);
 }
 
-void move_panel_init(lv_obj_t* panel){
+void move_panel_init(lv_obj_t* panel)
+{
     if (get_current_printer_data()->state == PrinterState::PrinterStatePrinting){
         stats_panel_init(panel);
         return;
