@@ -18,13 +18,16 @@ void KlipperPrinter::parse_state(JsonDocument &in)
         const char *state = status["webhooks"]["state"];
         const char *message = status["webhooks"]["state_message"];
 
-        if (strcmp(state, "ready") == 0 && printer_data.state == PrinterStateError)
+        if (state != NULL)
         {
-            printer_data.state = PrinterStateIdle;
-        }
-        else if ((strcmp(state, "shutdown") == 0 || strcmp(state, "error") == 0) && printer_data.state != PrinterStateError)
-        {
-            printer_data.state = PrinterStateError;
+            if (strcmp(state, "ready") == 0 && printer_data.state == PrinterStateError)
+            {
+                printer_data.state = PrinterStateIdle;
+            }
+            else if ((strcmp(state, "shutdown") == 0 || strcmp(state, "error") == 0) && printer_data.state != PrinterStateError)
+            {
+                printer_data.state = PrinterStateError;
+            }
         }
 
         if (message != NULL && (printer_data.state_message == NULL || strcmp(printer_data.state_message, message)))
