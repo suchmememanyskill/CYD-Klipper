@@ -251,5 +251,5 @@ void move_panel_slider_init(lv_obj_t* panel)
     create_button(left, switch_to_params_panel_button_click, LV_SYMBOL_SETTINGS " Parameters");
 
     lv_obj_set_style_pad_right(left, 10, 0);
-    lv_obj_set_style_pad_all(panel, 10, 0);
+    lv_obj_set_style_pad_all(sub_panel, 10, 0);
 }
