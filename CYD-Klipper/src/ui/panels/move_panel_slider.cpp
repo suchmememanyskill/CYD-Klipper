@@ -49,8 +49,16 @@ static void z_line_custom(lv_event_t * e)
     lv_create_keyboard_text_entry(z_line_custom_callback, "Set Z position", LV_KEYBOARD_MODE_NUMBER, LV_PCT(75), 6);
 }
 
-static void pos_update(lv_obj_t *obj, const char* target_template, float target)
+static void pos_update(lv_event_t * e, const char* target_template, float target)
 {
+    lv_obj_t* obj = lv_event_get_target(e);
+    lv_obj_t* slider = (lv_obj_t*)lv_event_get_user_data(e);
+
+    if (lv_slider_is_dragged(slider))
+    {
+        return;
+    }
+
     if (lv_obj_check_type(obj, &lv_label_class))
     {
         char pos_buff[12];
@@ -65,17 +73,17 @@ static void pos_update(lv_obj_t *obj, const char* target_template, float target)
 
 static void x_pos_update(lv_event_t * e)
 {
-    pos_update(lv_event_get_target(e), "%.1f " LV_SYMBOL_EDIT, get_current_printer_data()->position[0]);
+    pos_update(e, "%.1f " LV_SYMBOL_EDIT, get_current_printer_data()->position[0]);
 } 
 
 static void y_pos_update(lv_event_t * e)
 {
-    pos_update(lv_event_get_target(e), "%.1f", get_current_printer_data()->position[1]);
+    pos_update(e, "%.1f", get_current_printer_data()->position[1]);
 }
 
 static void z_pos_update(lv_event_t * e)
 {
-    pos_update(lv_event_get_target(e), "%.2f", get_current_printer_data()->position[2]);
+    pos_update(e, "%.2f", get_current_printer_data()->position[2]);
 }
 
 static void x_slider_update(lv_event_t * e)
@@ -102,6 +110,17 @@ static void disable_steppers_button_click(lv_event_t * e)
 {
     current_printer_execute_feature(PrinterFeatures::PrinterFeatureDisableSteppers);
 } 
+
+static void set_label_slider_position(lv_event_t * e)
+{
+    lv_obj_t* slider = lv_event_get_target(e);
+    lv_obj_t* label = (lv_obj_t*)lv_event_get_user_data(e);
+
+    if (lv_slider_is_dragged(slider))
+    {
+        lv_label_set_text_fmt(label, "%d", lv_slider_get_value(slider));
+    }
+}
 
 static void switch_to_params_panel_button_click(lv_event_t * e) 
 {
@@ -131,7 +150,6 @@ static void make_vertical_slider(
     lv_obj_add_event_cb(sub_root, on_edit, LV_EVENT_CLICKED, NULL);
 
     lv_obj_t* top_label = lv_label_create(sub_root);
-    lv_obj_add_event_cb(top_label, position_change, LV_EVENT_MSG_RECEIVED, NULL);
     lv_msg_subsribe_obj(DATA_PRINTER_DATA, top_label, NULL);
 
     lv_obj_t* one_below_label = lv_label_create(sub_root);
@@ -145,11 +163,13 @@ static void make_vertical_slider(
     lv_obj_set_width(slider, CYD_SCREEN_MIN_BUTTON_WIDTH_PX / 2);
     lv_slider_set_range(slider, min, max);
     lv_obj_add_event_cb(slider, on_slider_change, LV_EVENT_RELEASED, NULL);
-    lv_obj_add_event_cb(slider, position_change, LV_EVENT_MSG_RECEIVED, NULL);
+    lv_obj_add_event_cb(slider, position_change, LV_EVENT_MSG_RECEIVED, slider);
+    lv_obj_add_event_cb(slider, set_label_slider_position, LV_EVENT_VALUE_CHANGED, top_label);
     lv_msg_subsribe_obj(DATA_PRINTER_DATA, slider, NULL);
 
     lv_obj_t* last_label = lv_label_create(root);
     lv_label_set_text_fmt(last_label, "%s-", axis);
+    lv_obj_add_event_cb(top_label, position_change, LV_EVENT_MSG_RECEIVED, slider);
 }
 
 static void make_horizontal_slider(
@@ -175,7 +195,6 @@ static void make_horizontal_slider(
     lv_label_set_text_fmt(left_label, "%s-", axis);
 
     lv_obj_t* position_label = lv_label_create(upper);
-    lv_obj_add_event_cb(position_label, position_change, LV_EVENT_MSG_RECEIVED, NULL);
     lv_msg_subsribe_obj(DATA_PRINTER_DATA, position_label, NULL);
 
     lv_obj_t* right_label = lv_label_create(upper);
@@ -185,12 +204,15 @@ static void make_horizontal_slider(
     lv_obj_set_size(slider, LV_PCT(100), CYD_SCREEN_MIN_BUTTON_HEIGHT_PX / 2);
     lv_slider_set_range(slider, min, max);
     lv_obj_add_event_cb(slider, on_slider_change, LV_EVENT_RELEASED, NULL);
-    lv_obj_add_event_cb(slider, position_change, LV_EVENT_MSG_RECEIVED, NULL);
+    lv_obj_add_event_cb(slider, position_change, LV_EVENT_MSG_RECEIVED, slider);
+    lv_obj_add_event_cb(slider, set_label_slider_position, LV_EVENT_VALUE_CHANGED, position_label);
     lv_msg_subsribe_obj(DATA_PRINTER_DATA, slider, NULL);
 
     lv_obj_set_style_pad_bottom(root, 10, 0);
     lv_obj_set_style_pad_bottom(upper, 10, 0);
     lv_obj_set_style_pad_column(upper, 10, 0);
+
+    lv_obj_add_event_cb(position_label, position_change, LV_EVENT_MSG_RECEIVED, slider);
 }
 
 static void create_button(lv_obj_t* parent, lv_event_cb_t on_click, const char* text)
