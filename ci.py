@@ -19,6 +19,7 @@ ESP_S3_CHIPS = [
     "esp32-8048S043C-SD-alt",
     "esp32-4827S043C-SD",
     "esp32-CROWPANEL-35C",
+    "esp32-JC8048W550",
 ]
 
 BASE_DIR = os.getcwd()
