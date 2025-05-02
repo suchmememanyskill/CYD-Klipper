@@ -8,7 +8,7 @@
       font-family: 'Roboto', sans-serif;
     }
 
-        TT {
+    TT {
       font-family: 'Terminal', monospace;
           background-color: #080a0b;
     }
@@ -24,7 +24,8 @@
       max-width: 750px;
     }
 
-    .main > section > :not(:first-child) {
+    .main > section > :not(:first-child),
+    .indent {
       margin-left: 20px;
     }
 
@@ -44,6 +45,17 @@
     #changelog-body {
       white-space: break-spaces;
     }
+
+    .where-to-get details summary::marker
+    {
+      content: '';
+    }
+
+    .where-to-get details[open] summary p 
+    {
+      display: none;
+    }
+
   </style>
   <script type="module" src="https://unpkg.com/esp-web-tools@9/dist/web/install-button.js?module"></script>
   <script src="//code.iconify.design/1/1.0.6/iconify.min.js"></script>
@@ -83,6 +95,34 @@
       <p>If you found this project helpful, please consider a donation to <a href="https://ko-fi.com/suchmememanyskill">my Ko-Fi</a>.<br>It would help out a lot in the development of this project, due to the need to buy the screens.<br>Thank you!</p>
     </section>
 
+    <section class="where-to-get">
+      <details>
+        <summary>
+          <h3><span class="iconify" data-icon="mdi-shopping" style="color:orange; filter: drop-shadow(0 0 0.75rem orange);"></span> Where to buy hardware</h3>
+          <p class="indent">(Click to expand)</p>
+        </summary>
+        <section class="indent">
+          <p>All links below are affiliate links. Please also check yourself if there is a cheaper version available than the ones below. I have only linked ones that i have personally bought.</p>
+          <i>ESP32-2432S028R (2.8" Resistive, Cheapest)</i>
+          <ul>
+            <li><a href="https://s.click.aliexpress.com/e/_omjsYBJ">USB C + microB version</a></li>
+            <li><a href="https://s.click.aliexpress.com/e/_olKBkmz">Another USB C + microB version</a></li>
+            <li><a href="https://s.click.aliexpress.com/e/_oCWhgmN">microB version</a></li>
+          </ul>
+          <i>ESP32-2432S032C (3.2" Capacitive)</i>
+          <ul>
+            <li><a href="https://s.click.aliexpress.com/e/_okbSGmd">Only the capacitive version is supported! USB-C</a></li>
+            <li><a href="https://s.click.aliexpress.com/e/_oFygVwt">IPS version (not that great of a screen), Only the capacitive version is supported! USB-C</a></li>
+          </ul>
+          <i>ESP32-3248S035C (3.5" Capacitive)</i>
+          <ul>
+            <li><a href="https://s.click.aliexpress.com/e/_oCqygE9">microB version</a></li>
+          </ul>
+        </section>
+      </details>
+
+    </section>
+
     <section class="issues">
       <h3><span class="iconify" data-icon="mdi-github" style="color: white; filter: drop-shadow(0 0 0.75rem gray);"></span> Report Issues</h3>
       <p>If you experience any issues with this project, or have any feature requests for the project, please report them on the <a href="https://github.com/suchmememanyskill/CYD-Klipper/issues">issues tab on Github</a>.</p>
@@ -101,6 +141,7 @@
         <option value="esp32-8048S043C-SD">ESP32-8048S043 (4.3" 800x480 Capacitive)</option>
         <option value="esp32-8048S043C-SD-alt">ESP32-8048S043 Alt (4.3" 800x480 Capacitive)</option>
         <option value="esp32-CROWPANEL-28R">ESP32-CROWPANEL-28R (2.8" Resistive)</option>
+        <option value="esp32-JC8048W550">Guition JC8048W550 (5" Capacitive)</option>
         <option value="esp32-CROWPANEL-35C">ESP32-CROWPANEL-35C (3.5" Capacitive)</option>
       </select>
       <span id="install-btn"></span>
