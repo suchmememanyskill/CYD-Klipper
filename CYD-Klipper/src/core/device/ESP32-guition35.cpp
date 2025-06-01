@@ -11,6 +11,7 @@
 #define CPU_FREQ_HIGH 240
 #define CPU_FREQ_LOW 80
 
+
 struct TouchPoint {
   uint8_t gesture;
   uint8_t num;
@@ -34,10 +35,20 @@ Arduino_GFX *gfx = new Arduino_AXS15231B(
     &qspiBus, -1, 2, true,
     LCD_WIDTH, LCD_HEIGHT,
     0, 0, 0, 0);
-static Arduino_Canvas canvas(CYD_SCREEN_WIDTH_PX, CYD_SCREEN_HEIGHT_PX, gfx, 0, 0);
+
+#ifdef CYD_SCREEN_VERTICAL
+    static bool horizontal = false;
+    static Arduino_Canvas canvas(CYD_SCREEN_WIDTH_PX, CYD_SCREEN_HEIGHT_PX, gfx, 0, 0);
+#else
+    static bool horizontal = true;
+    static Arduino_Canvas canvas(CYD_SCREEN_HEIGHT_PX, CYD_SCREEN_WIDTH_PX, gfx, 0, 0);
+
+#endif
 
 static lv_disp_draw_buf_t draw_buf;
 static lv_color_t *buf = nullptr;
+static lv_disp_t *main_disp = nullptr;
+
 
 void screen_setBrightness(uint8_t brightness)
 {
@@ -53,6 +64,7 @@ void screen_lv_flush(lv_disp_drv_t *disp, const lv_area_t *area, lv_color_t *col
     int h = area->y2 - area->y1 + 1;
     canvas.draw16bitRGBBitmap(x, y, (uint16_t *)color_p, w, h);
     canvas.flush();
+
     lv_disp_flush_ready(disp);
 }
 
@@ -166,17 +178,29 @@ void screen_setup()
 
     static lv_disp_drv_t disp_drv;
     lv_disp_drv_init(&disp_drv);
-    disp_drv.hor_res = CYD_SCREEN_WIDTH_PX;
-    disp_drv.ver_res = CYD_SCREEN_HEIGHT_PX;
     disp_drv.flush_cb = screen_lv_flush;
     disp_drv.draw_buf = &draw_buf;
-    lv_disp_drv_register(&disp_drv);
+    
+    disp_drv.hor_res = CYD_SCREEN_WIDTH_PX;
+    disp_drv.ver_res = CYD_SCREEN_HEIGHT_PX;
+    if(horizontal){
+        // disp_drv.ver_res = CYD_SCREEN_WIDTH_PX;
+        // disp_drv.hor_res = CYD_SCREEN_HEIGHT_PX;
+        main_disp = lv_disp_drv_register(&disp_drv);
+        lv_disp_set_rotation(main_disp, LV_DISP_ROT_90);
+    } else {
+        lv_disp_drv_register(&disp_drv);
+    }
+    
+
+    // lv_disp_drv_register(&disp_drv);
+    
 
     static lv_indev_drv_t indev_drv;
     lv_indev_drv_init(&indev_drv);
     indev_drv.type = LV_INDEV_TYPE_POINTER;
     indev_drv.read_cb = screen_lv_touchRead;
     lv_indev_drv_register(&indev_drv);
-}
+}   
 
 #endif // CYD_BOARD_GUITION_35
