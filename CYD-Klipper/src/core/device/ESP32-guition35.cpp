@@ -8,7 +8,6 @@
 #include "../lv_setup.h"
 #include "../../conf/global_config.h"
 #include <Wire.h>
-
 #define CPU_FREQ_HIGH 240
 #define CPU_FREQ_LOW 80
 
@@ -24,50 +23,12 @@ struct TouchPoint {
   uint8_t y_l;
 } __attribute__((packed));
 
-// Reads 1 touch point from AXS15231B controller at I2C addr 0x3B
-bool read_touch(uint16_t &x, uint16_t &y) {
-
-    Wire.beginTransmission(0x3B);
-    uint8_t error = Wire.endTransmission();
-    Serial.printf("I2C test to 0x3B returned: %d\n", error);
-    
-  const uint8_t addr = 0x3B; // confirmed via scanner
-  const uint8_t read_cmd[11] = {
-    0xB5, 0xAB, 0xA5, 0x5A, 0x00, 0x00,
-    0x00, 8, // length of expected reply (MSB, LSB)
-    0x00, 0x00, 0x00
-  };
-
-  Wire.beginTransmission(addr);
-  Wire.write(read_cmd, sizeof(read_cmd));
-  if (Wire.endTransmission(false) != 0) {
-    return false;
-  }
-
-  uint8_t data[8] = {0};
-  if (Wire.requestFrom(addr, (uint8_t)sizeof(data)) != sizeof(data)) {
-    return false;
-  }
-
-  for (uint8_t i = 0; i < sizeof(data); i++) {
-    data[i] = Wire.read();
-  }
-
-  TouchPoint *p = (TouchPoint *)data;
-  if (p->num > 0 && p->num <= 2) {
-    x = ((p->x_h & 0x0F) << 8) | p->x_l;
-    y = ((p->y_h & 0x0F) << 8) | p->y_l;
-    return true;
-  }
-
-  return false;
-}
-
 static Arduino_ESP32QSPI qspiBus(
     LCD_CS, LCD_CLK,
     LCD_D0, LCD_D1,
     LCD_D2, LCD_D3,
     false);
+
 
 Arduino_GFX *gfx = new Arduino_AXS15231B(
     &qspiBus, -1, 0, true,
@@ -95,19 +56,80 @@ void screen_lv_flush(lv_disp_drv_t *disp, const lv_area_t *area, lv_color_t *col
     lv_disp_flush_ready(disp);
 }
 
+// Reads 1 touch point from AXS15231B controller at I2C addr 0x3B
+bool read_touch(uint16_t &x, uint16_t &y) {
+  const uint8_t addr = 0x3B;
+
+  const uint8_t read_cmd[11] = {
+    0xB5, 0xAB, 0xA5, 0x5A, 0x00, 0x00,
+    0x00, 8, // length of expected reply (MSB, LSB)
+    0x00, 0x00, 0x00
+  };
+
+  Wire.beginTransmission(addr);
+  Wire.write(read_cmd, sizeof(read_cmd));
+  if (Wire.endTransmission(false) != 0) {
+    return false;
+  }
+
+  uint8_t data[8] = {0};
+  if (Wire.requestFrom(addr, (uint8_t)sizeof(data)) != sizeof(data)) {
+    return false;
+  }
+
+  for (uint8_t i = 0; i < sizeof(data); i++) {
+    data[i] = Wire.read();
+  }
+
+  TouchPoint *p = (TouchPoint *)data;
+
+  if (p->num > 0 && p->num <= 2) {
+    x = ((p->x_h & 0x0F) << 8) | p->x_l;
+    y = ((p->y_h & 0x0F) << 8) | p->y_l;
+
+    // Clamp to screen bounds
+    if (x >= CYD_SCREEN_WIDTH_PX) x = CYD_SCREEN_WIDTH_PX - 1;
+    if (y >= CYD_SCREEN_HEIGHT_PX) y = CYD_SCREEN_HEIGHT_PX - 1;
+
+    // // Flip coordinates if screen is rotated
+    // if (global_config.rotate_screen) {
+    //   x = CYD_SCREEN_WIDTH_PX - 1 - x;
+    //   y = CYD_SCREEN_HEIGHT_PX - 1 - y;
+    // }
+
+    return true;
+  }
+
+  return false;
+}
+
+
 void screen_lv_touchRead(lv_indev_drv_t * /*indev_driver*/, lv_indev_data_t *data)
 {
   uint16_t x, y;
+    Serial.println("Touch read triggered");
+    Serial.flush();
   if (read_touch(x, y)) {
+    Serial.printf("Touch: x=%d, y=%d\n", x, y);
+
+    Serial.flush();  // ensure it actually sends before a crash
+
+    x = min(x, uint16_t(CYD_SCREEN_WIDTH_PX - 1));
+    y = min(y, uint16_t(CYD_SCREEN_HEIGHT_PX - 1));
+    // Adjust coordinates based on screen rotation
+    if (global_config.rotate_screen) {
+      // Assuming rotation = 2 (180 degrees)
+      x = CYD_SCREEN_WIDTH_PX - x;
+      y = CYD_SCREEN_HEIGHT_PX - y;
+    }
+
     data->state = LV_INDEV_STATE_PR;
     data->point.x = x;
     data->point.y = y;
-    Serial.printf("Touch: x=%d, y=%d\n", x, y);
   } else {
     data->state = LV_INDEV_STATE_REL;
   }
 }
-
 
 void set_invert_display()
 {
@@ -125,6 +147,7 @@ void screen_setup()
     // gfx->begin();
     canvas.begin();
     gfx->invertDisplay(true);  // OK after begin()
+    gfx->setRotation(global_config.rotate_screen ? 0 : 2);
     canvas.fillScreen(0x0000);
     canvas.flush();
 
