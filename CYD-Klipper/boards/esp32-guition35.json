@@ -39,7 +39,7 @@
         "-DLCD_DC=8",            
         "-DTOUCH_SDA=4",
         "-DTOUCH_SCL=8",
-        "-DTOUCH_ADDR=0x14",
+        "-DTOUCH_ADDR=0x3B",
         "-DLCD_BL_PIN=1",
         "-DCYD_BOARD_GUITION_35"
       ],
