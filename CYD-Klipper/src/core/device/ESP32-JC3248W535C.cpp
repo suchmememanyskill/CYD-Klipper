@@ -1,4 +1,4 @@
-#ifdef CYD_BOARD_GUITION_35
+#ifdef CYD_BOARD_JC3248W535C
 
 #include "../screen_driver.h"
 #include <databus/Arduino_ESP32QSPI.h>
@@ -182,4 +182,4 @@ void screen_setup()
     lv_indev_drv_register(&indev_drv);
 }   
 
-#endif // CYD_BOARD_GUITION_35
+#endif // CYD_BOARD_JC3248W535C
