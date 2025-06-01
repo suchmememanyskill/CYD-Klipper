@@ -18,7 +18,6 @@
 #define LV_CONF_H
 
 #include <stdint.h>
-#define LV_USE_PERF_MONITOR 0
 
 /*====================
    COLOR SETTINGS
