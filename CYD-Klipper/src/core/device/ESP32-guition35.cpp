@@ -102,13 +102,6 @@ bool read_touch(uint16_t &x, uint16_t &y) {
     // Clamp to screen bounds
     if (x >= CYD_SCREEN_WIDTH_PX) x = CYD_SCREEN_WIDTH_PX - 1;
     if (y >= CYD_SCREEN_HEIGHT_PX) y = CYD_SCREEN_HEIGHT_PX - 1;
-
-    // // Flip coordinates if screen is rotated
-    // if (global_config.rotate_screen) {
-    //   x = CYD_SCREEN_WIDTH_PX - 1 - x;
-    //   y = CYD_SCREEN_HEIGHT_PX - 1 - y;
-    // }
-
     return true;
   }
 
@@ -119,13 +112,7 @@ bool read_touch(uint16_t &x, uint16_t &y) {
 void screen_lv_touchRead(lv_indev_drv_t * /*indev_driver*/, lv_indev_data_t *data)
 {
   uint16_t x, y;
-    Serial.println("Touch read triggered");
-    Serial.flush();
   if (read_touch(x, y)) {
-    Serial.printf("Touch: x=%d, y=%d\n", x, y);
-
-    Serial.flush();  // ensure it actually sends before a crash
-
     x = min(x, uint16_t(CYD_SCREEN_WIDTH_PX - 1));
     y = min(y, uint16_t(CYD_SCREEN_HEIGHT_PX - 1));
     // Adjust coordinates based on screen rotation
@@ -150,7 +137,6 @@ void set_invert_display()
 
 void screen_setup()
 {
-    Serial.begin(115200);
     pinMode(LCD_BL_PIN, OUTPUT);
     ledcSetup(0, 5000, 12);
     ledcAttachPin(LCD_BL_PIN, 0);
@@ -184,18 +170,11 @@ void screen_setup()
     disp_drv.hor_res = CYD_SCREEN_WIDTH_PX;
     disp_drv.ver_res = CYD_SCREEN_HEIGHT_PX;
     if(horizontal){
-        // disp_drv.ver_res = CYD_SCREEN_WIDTH_PX;
-        // disp_drv.hor_res = CYD_SCREEN_HEIGHT_PX;
         main_disp = lv_disp_drv_register(&disp_drv);
         lv_disp_set_rotation(main_disp, LV_DISP_ROT_90);
     } else {
         lv_disp_drv_register(&disp_drv);
     }
-    
-
-    // lv_disp_drv_register(&disp_drv);
-    
-
     static lv_indev_drv_t indev_drv;
     lv_indev_drv_init(&indev_drv);
     indev_drv.type = LV_INDEV_TYPE_POINTER;
