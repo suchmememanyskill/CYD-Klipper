@@ -41,7 +41,8 @@
         "-DTOUCH_SCL=8",
         "-DTOUCH_ADDR=0x3B",
         "-DLCD_BL_PIN=1",
-        "-DCYD_BOARD_GUITION_35"
+        "-DCYD_BOARD_GUITION_35",
+        "-DCYD_SCREEN_DISABLE_TOUCH_CALIBRATION"
       ],
       "flash_mode": "qio",
 

@@ -31,7 +31,7 @@ static Arduino_ESP32QSPI qspiBus(
 
 
 Arduino_GFX *gfx = new Arduino_AXS15231B(
-    &qspiBus, -1, 0, true,
+    &qspiBus, -1, 2, true,
     LCD_WIDTH, LCD_HEIGHT,
     0, 0, 0, 0);
 static Arduino_Canvas canvas(CYD_SCREEN_WIDTH_PX, CYD_SCREEN_HEIGHT_PX, gfx, 0, 0);
@@ -147,7 +147,7 @@ void screen_setup()
     // gfx->begin();
     canvas.begin();
     gfx->invertDisplay(true);  // OK after begin()
-    gfx->setRotation(global_config.rotate_screen ? 0 : 2);
+    gfx->setRotation(global_config.rotate_screen ? 2 : 0);
     canvas.fillScreen(0x0000);
     canvas.flush();
 
