@@ -5,10 +5,48 @@
 
 #define MAX_COMDLINE_SIZE 80
 #define MAX_WORDS 6
+#define BACKSPACE_CHAR 0x08
+#define ESCAPE_CHAR '\x1b'
+#define CSI_CHAR '['
+#define LEFT_ARROW_CHAR 'D'
+#define RIGHT_ARROW_CHAR 'C'
+#define DELETE_KEY_1_CHAR '3'
+#define DELETE_KEY_2_CHAR '~'
+#define PRINT_CHAR_START 32
+#define PRINT_CHAR_END 126
 
 namespace serial_console
 {
     bool global_disable_serial_console = false;
+
+    /**
+     * @brief Redraws the characters from the current cursor position to the end of the buffer on the serial console.
+     *
+     * This function is used to update the terminal display when characters are inserted or deleted
+     * in the middle of the input buffer. It:
+     *   - Saves the current cursor position
+     *   - Clears the line from the cursor to the end
+     *   - Prints characters from 'cur' to 'len'
+     *   - Restores the original cursor position
+     *
+     * @param cur Current cursor position within the buffer
+     * @param len Current length of the buffer (number of characters entered)
+     * @param buf Character buffer containing the input string
+     */
+    static inline void redraw(const int cur, const int len, char *buf) {
+        if (!temporary_config.remote_echo)
+            return;
+
+        Serial.print("\x1b[s");
+        Serial.print("\x1b[K");
+
+        // Reprint characters from cur to end
+        for (int i = cur; i < len; i++) {
+            Serial.print((char)buf[i]);
+        }
+
+        Serial.print(" \x1b[u");
+    }
 
     /*
      * read_string_until: Non-blocking replacement for Serial.readStringUntil()..
@@ -20,6 +58,7 @@ namespace serial_console
     bool read_string_until(char delimiter, char *result, int max_len)
     {
         static int index = 0;
+        static int cur = 0;
         int c;         // read character, -1 if none
         int cnt = 100; // limit on amount of iterations in one go; we're supposed to be non-blocking!
 
@@ -28,43 +67,75 @@ namespace serial_console
             --cnt;
 
             // backspaceF
-            if (c == 8)
-            {
-                if (index > 0)
-                {
-                    if(temporary_config.remote_echo) Serial.print("\x08 \x08"); // overwrite last character with space and move cursor 1 back.
+            if (c == BACKSPACE_CHAR && cur > 0) {
+                    // shift characters left from cursor position
+                    memmove(&result[cur - 1], &result[cur], index - cur);
                     index--;
+                    cur--;
+                    // move cursor left on terminal and redraw updated string
+                    if(temporary_config.remote_echo) Serial.print("\x1b[D");
+                    redraw(cur, index, result);
+            // handle ANSI escape sequences (arrow keys, delete key)
+            } else if (c == ESCAPE_CHAR) {
+
+                if ((c = Serial.read()) == -1)
+                    break;
+
+                // Expect '[' character
+                if (c != CSI_CHAR)
+                    continue;
+
+                if ((c = Serial.read()) == -1)
+                    break;
+
+                // Left arrow key
+                if (c == LEFT_ARROW_CHAR && cur > 0) {
+                    // move cursor left on terminal
+                    if(temporary_config.remote_echo) Serial.print("\x1b[D");
+                    cur--;
+                // Right arrow key
+                } else if(c == RIGHT_ARROW_CHAR && cur < index) {
+                    // move cursor right on terminal
+                    if(temporary_config.remote_echo) Serial.print("\x1b[C");
+                    cur++;
+                // Delete key
+                } else if(c == DELETE_KEY_1_CHAR) {
+                    if ((c = Serial.read()) == -1)
+                        break;
+                    if (c == DELETE_KEY_2_CHAR && cur < index) {
+                        memmove(&result[cur], &result[cur + 1], index - cur - 1);
+                        index--;
+                        redraw(cur, index, result);
+                    }
                 }
-                continue;
-            }
 
-            if(temporary_config.remote_echo) Serial.print((char)c); // echo
-
-            // Buffer overflow handling:
-            // start treating current buffer as invalid:
-            // - stop collecting more data
-            // - return false on delimeter, flushing everything collected,
-            // - restart collection from scratch after delimeter,
-            // - return control as normal.
-
-            if (index >= max_len - 1)
-            {
-                if (c == delimiter) // got delimeter: flush buffer quietly, restart collection.
-                {
+            // Handle printable characters
+            } else if (c >= PRINT_CHAR_START && c <= PRINT_CHAR_END) {
+                // Append character at the end
+                if (index < max_len - 1 && cur == index) {
+                    if(temporary_config.remote_echo) Serial.print((char)c);
+                    result[index++] = c;
+                    cur++;
+                // Insert character in the middl
+                } else if (index < max_len - 1) {
+                    memmove(&result[cur + 1], &result[cur], index - cur);
+                    result[cur] = c;
+                    index++;
+                    if(temporary_config.remote_echo) Serial.print((char)c);
+                    cur++;
+                    redraw(cur, index, result);
+                } else if (c == delimiter) { // got delimeter: flush buffer quietly, restart collection.
                     index = 0;
+                    cur = 0;
                     return false;
                 }
-                else
-                    continue; // discard any data past the end of the buffer, keep reading
-            }
-
-            result[index++] = c;
-
             // delimiter was found
-            if (c == delimiter)
-            {
+            } else if (c == delimiter) {
+
+                if(temporary_config.remote_echo) Serial.println();
                 result[index] = '\0'; // Null-terminate the string
                 index = 0;
+                cur = 0;
                 return true; // Success: Delimiter found
             }
         }
