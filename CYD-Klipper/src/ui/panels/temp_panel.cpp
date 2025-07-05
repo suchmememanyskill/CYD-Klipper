@@ -161,9 +161,7 @@ static void set_temp_via_preset(lv_event_t * e){
 }
 
 static void btn_toggleable_edit(lv_event_t * e){
-    lv_obj_t * btn = lv_event_get_target(e);
-    auto state = lv_obj_get_state(btn);
-    temp_edit_mode = (state & LV_STATE_CHECKED == LV_STATE_CHECKED);
+    temp_edit_mode = lv_obj_has_state(lv_event_get_target(e), LV_STATE_CHECKED);
 }
 
 static void btn_retract(lv_event_t * e){
