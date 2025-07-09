@@ -47,8 +47,7 @@ int macros_add_macros_to_panel(lv_obj_t * root_panel, BasePrinter* printer)
 
 static void power_device_toggle(lv_event_t * e)
 {
-    auto state = lv_obj_get_state(lv_event_get_target(e));
-    bool checked = (state & LV_STATE_CHECKED == LV_STATE_CHECKED);
+    bool checked = lv_obj_has_state(lv_event_get_target(e), LV_STATE_CHECKED);
     DoubleStorage* device = (DoubleStorage*)lv_event_get_user_data(e);
     LOG_F(("Power Device: %s, State: %d -> %d\n", device->power_device_name, !checked, checked))
 

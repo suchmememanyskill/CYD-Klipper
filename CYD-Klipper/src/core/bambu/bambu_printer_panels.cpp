@@ -161,7 +161,7 @@ struct
     };
 } __internal_bambu_file_state = {};
 
-#define SET_BOOL_STATE(bool_name, func_name) static void func_name (lv_event_t * e) { auto state = lv_obj_get_state(lv_event_get_target(e)); bool_name = (state & LV_STATE_CHECKED == LV_STATE_CHECKED); }
+#define SET_BOOL_STATE(bool_name, func_name) static void func_name (lv_event_t * e) { bool_name = lv_obj_has_state(lv_event_get_target(e), LV_STATE_CHECKED); }
 
 SET_BOOL_STATE(__internal_bambu_file_state.bambu_option_use_ams, set_bambu_option_use_ams)
 SET_BOOL_STATE(__internal_bambu_file_state.bambu_option_timelapse, set_bambu_option_timelapse)

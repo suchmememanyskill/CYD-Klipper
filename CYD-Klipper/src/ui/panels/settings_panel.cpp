@@ -15,8 +15,7 @@
 #endif // REPO_VERSION
 
 static void invert_color_switch(lv_event_t * e){
-    auto state = lv_obj_get_state(lv_event_get_target(e));
-    bool checked = (state & LV_STATE_CHECKED == LV_STATE_CHECKED);
+    bool checked = lv_obj_has_state(lv_event_get_target(e), LV_STATE_CHECKED);
     global_config.printer_config[global_config.printer_index].invert_colors = checked;
     write_global_config();
     set_invert_display();
@@ -46,16 +45,14 @@ static void reset_ip_click(lv_event_t * e){
 }
 
 static void light_mode_switch(lv_event_t * e){
-    auto state = lv_obj_get_state(lv_event_get_target(e));
-    bool checked = (state & LV_STATE_CHECKED == LV_STATE_CHECKED);
+    bool checked = lv_obj_has_state(lv_event_get_target(e), LV_STATE_CHECKED);
     get_current_printer()->printer_config->light_mode = checked;
     write_global_config();
     set_color_scheme();
 }
 
 static void filament_move_mode_switch(lv_event_t * e){
-    auto state = lv_obj_get_state(lv_event_get_target(e));
-    bool checked = (state & LV_STATE_CHECKED == LV_STATE_CHECKED);
+    bool checked = lv_obj_has_state(lv_event_get_target(e), LV_STATE_CHECKED);
     get_current_printer()->printer_config->custom_filament_move_macros = checked;
     write_global_config();
 }
@@ -97,51 +94,44 @@ static void wake_timeout_dropdown(lv_event_t * e){
 }
 
 static void dualusb_screen_fix_switch(lv_event_t* e){
-    auto state = lv_obj_get_state(lv_event_get_target(e));
-    bool checked = (state & LV_STATE_CHECKED == LV_STATE_CHECKED);
+    bool checked = lv_obj_has_state(lv_event_get_target(e), LV_STATE_CHECKED);
     global_config.display_mode = checked;
     write_global_config();
     ESP.restart();
 }
 
 static void disable_m117_messaging_switch(lv_event_t* e){
-    auto state = lv_obj_get_state(lv_event_get_target(e));
-    bool checked = (state & LV_STATE_CHECKED == LV_STATE_CHECKED);
+    bool checked = lv_obj_has_state(lv_event_get_target(e), LV_STATE_CHECKED);
     global_config.disable_m117_messaging = checked;
     write_global_config();
 }
 
 static void sort_macros_switch(lv_event_t* e){
-    auto state = lv_obj_get_state(lv_event_get_target(e));
-    bool checked = (state & LV_STATE_CHECKED == LV_STATE_CHECKED);
+    bool checked = lv_obj_has_state(lv_event_get_target(e), LV_STATE_CHECKED);
     global_config.sort_macros = checked;
     write_global_config();
 }
 
 static void show_estop_switch(lv_event_t* e){
-    auto state = lv_obj_get_state(lv_event_get_target(e));
-    bool checked = (state & LV_STATE_CHECKED == LV_STATE_CHECKED);
+    bool checked = lv_obj_has_state(lv_event_get_target(e), LV_STATE_CHECKED);
     global_config.show_estop = checked;
     write_global_config();
 }
 
 static void full_filenames_switch(lv_event_t* e){
-    auto state = lv_obj_get_state(lv_event_get_target(e));
-    bool checked = (state & LV_STATE_CHECKED == LV_STATE_CHECKED);
+    bool checked = lv_obj_has_state(lv_event_get_target(e), LV_STATE_CHECKED);
     global_config.full_filenames = checked;
     write_global_config();
 }
 
 static void double_size_gcode_img_switch(lv_event_t* e){
-    auto state = lv_obj_get_state(lv_event_get_target(e));
-    bool checked = (state & LV_STATE_CHECKED == LV_STATE_CHECKED);
+    bool checked = lv_obj_has_state(lv_event_get_target(e), LV_STATE_CHECKED);
     global_config.double_size_gcode_img = checked;
     write_global_config();
 }
 
 static void rotate_screen_switch(lv_event_t* e){
-    auto state = lv_obj_get_state(lv_event_get_target(e));
-    bool checked = (state & LV_STATE_CHECKED == LV_STATE_CHECKED);
+    bool checked = lv_obj_has_state(lv_event_get_target(e), LV_STATE_CHECKED);
     global_config.rotate_screen = checked;
     global_config.screen_calibrated = false;
     write_global_config();
@@ -149,8 +139,7 @@ static void rotate_screen_switch(lv_event_t* e){
 }
 
 static void on_during_print_switch(lv_event_t* e){
-    auto state = lv_obj_get_state(lv_event_get_target(e));
-    bool checked = (state & LV_STATE_CHECKED == LV_STATE_CHECKED);
+    bool checked = lv_obj_has_state(lv_event_get_target(e), LV_STATE_CHECKED);
     global_config.on_during_print = checked;
     check_if_screen_needs_to_be_disabled();
     write_global_config();
@@ -161,15 +150,13 @@ static void btn_ota_do_update(lv_event_t * e){
 }
 
 static void auto_ota_update_switch(lv_event_t* e){
-    auto state = lv_obj_get_state(lv_event_get_target(e));
-    bool checked = (state & LV_STATE_CHECKED == LV_STATE_CHECKED);
+    bool checked = lv_obj_has_state(lv_event_get_target(e), LV_STATE_CHECKED);
     global_config.auto_ota_update = checked;
     write_global_config();
 }
 
 static void multi_printer_switch(lv_event_t* e){
-    auto state = lv_obj_get_state(lv_event_get_target(e));
-    bool checked = (state & LV_STATE_CHECKED == LV_STATE_CHECKED);
+    bool checked = lv_obj_has_state(lv_event_get_target(e), LV_STATE_CHECKED);
     global_config.multi_printer_mode = checked;
     write_global_config();
     nav_buttons_setup(PANEL_SETTINGS);
