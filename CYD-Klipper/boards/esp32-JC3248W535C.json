@@ -1,0 +1,69 @@
+{
+    "name": "ESP32-JC3248W535C",
+    "url":  "https://www.aliexpress.com/item/1005007566315926.html",     
+    "vendor": "Guition",
+  
+    "build": {
+      "arduino": {
+        "ldscript": "esp32s3_out.ld",
+        "memory_type": "qio_opi",
+        "partitions": "default_16MB.csv"
+      },
+      "core":     "esp32",
+      "mcu":      "esp32s3",
+      "variant":  "esp32s3",
+  
+      "f_cpu":    "240000000L",  
+      "f_flash":  "80000000L",   
+      "extra_flags": [
+        "-DESP32S3",
+        "-DARDUINO_RUNNING_CORE=1",
+        "-DARDUINO_EVENT_RUNNING_CORE=1",
+        "-DLCD_WIDTH=320",
+        "-DLCD_HEIGHT=480",
+        "-DCYD_SCREEN_GAP_PX=8",
+        "-DCYD_SCREEN_FONT=lv_font_montserrat_14",
+        "-DCYD_SCREEN_FONT_SMALL=lv_font_montserrat_12",
+        "-DCYD_SCREEN_WIDTH_PX=LCD_WIDTH",
+        "-DCYD_SCREEN_HEIGHT_PX=LCD_HEIGHT",
+        "-DCYD_SCREEN_SIDEBAR_SIZE_PX=50",
+        "-DCYD_SCREEN_MIN_BUTTON_HEIGHT_PX=45",
+        "-DCYD_SCREEN_MIN_BUTTON_WIDTH_PX=45",
+        "-DLCD_CS=45",
+        "-DLCD_CLK=47",
+        "-DLCD_D0=21",
+        "-DLCD_D1=48",
+        "-DLCD_D2=40",
+        "-DLCD_D3=39",
+        "-DLCD_RST=-1",           
+        "-DLCD_DC=8",            
+        "-DTOUCH_SDA=4",
+        "-DTOUCH_SCL=8",
+        "-DTOUCH_ADDR=0x3B",
+        "-DLCD_BL_PIN=1",
+        "-DCYD_BOARD_JC3248W535C",
+        "-DCYD_SCREEN_DISABLE_TOUCH_CALIBRATION"
+      ],
+      "flash_mode": "qio",
+
+      "hwids": [
+        [
+          "0X303A",
+          "0x1001"
+        ]
+      ]
+    },
+  
+    "upload": {
+      "flash_size": "16MB",
+      "flash_mode": "qio",
+      "maximum_ram_size": 327680,
+      "maximum_size": 16777216,
+      "require_upload_port": true,
+      "speed": 921600
+    },
+  
+    "frameworks":  ["arduino", "espidf"],
+    "connectivity": ["wifi", "bluetooth"]
+  }
+  
