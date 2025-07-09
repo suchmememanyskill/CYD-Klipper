@@ -132,17 +132,7 @@
       <h3><span class="iconify" data-icon="mdi-download"></span> Install</h3>
       <p>Select your device from the list below and click 'Connect'.<br>Note: You may need to hold the 'BOOT' button on the device while pressing install.<br><br>The 2.8" Resistive and 3.5" Capacitive models are best suited (in my opinion) for CYD-Klipper.<br><br>Note for any resistive models: You can clear touch calibration by holding the BOOT button for 8 seconds while the screen is on.</p>
       <select id="select-install-btn" onchange="setInstallButton(getElementById('select-install-btn').value)">
-        <option value="esp32-2432S024C-SD">ESP32-2432S024 (2.4" Capacitive)</option>
-        <option selected value="esp32-2432S028R">ESP32-2432S028 (2.8" Resistive)</option>
-        <option value="esp32-2432S032C-SD">ESP32-2432S032 (3.2" Capacitive)</option>
-        <option value="esp32-3248S035C">ESP32-3248S035 (3.5" Capacitive)</option>
-        <option value="esp32-3248S035C-V">ESP32-3248S035 (3.5" Capacitive) Vertical Orientation</option>
-        <option value="esp32-4827S043C-SD">ESP32-4827S043 (4.3" 480x270 Capacitive)</option>
-        <option value="esp32-8048S043C-SD">ESP32-8048S043 (4.3" 800x480 Capacitive)</option>
-        <option value="esp32-8048S043C-SD-alt">ESP32-8048S043 Alt (4.3" 800x480 Capacitive)</option>
-        <option value="esp32-CROWPANEL-28R">ESP32-CROWPANEL-28R (2.8" Resistive)</option>
-        <option value="esp32-JC8048W550">Guition JC8048W550 (5" Capacitive)</option>
-        <option value="esp32-CROWPANEL-35C">ESP32-CROWPANEL-35C (3.5" Capacitive)</option>
+            {{%PORTS%}}
       </select>
       <span id="install-btn"></span>
     </section>

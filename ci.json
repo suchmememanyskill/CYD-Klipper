@@ -1,0 +1,61 @@
+{
+    "esp32-2432S024C-SD": {
+        "name": "ESP32-2432S024 (2.4\" Capacitive)",
+        "site": true,
+        "s3": false
+    },
+    "esp32-2432S028R": {
+        "name": "ESP32-2432S028 (2.8\" Resistive)",
+        "site": true,
+        "s3": false,
+        "default": true
+    },
+    "esp32-2432S032C-SD": {
+        "name": "ESP32-2432S032 (3.2\" Capacitive)",
+        "site": true,
+        "s3": false
+    },
+    "esp32-3248S035C": {
+        "name": "ESP32-3248S035 (3.5\" Capacitive)",
+        "site": true,
+        "s3": false
+    },
+    "esp32-3248S035C-V": {
+        "name": "ESP32-3248S035 (3.5\" Capacitive) Vertical Orientation",
+        "site": true,
+        "s3": false
+    },
+    "esp32-4827S043C-SD": {
+        "name": "ESP32-4827S043 (4.3\" 480x270 Capacitive)",
+        "site": true,
+        "s3": true
+    },
+    "esp32-8048S043C-SD": {
+        "name": "ESP32-8048S043 (4.3\" 800x480 Capacitive)",
+        "site": true,
+        "s3": true
+    },
+    "esp32-8048S043C-SD-alt": {
+        "name": "ESP32-8048S043 Alt (4.3\" 800x480 Capacitive)",
+        "site": true,
+        "s3": true
+    },
+    "esp32-CROWPANEL-28R": {
+        "name": "ESP32-CROWPANEL-28R (2.8\" Resistive)",
+        "site": true,
+        "s3": false,
+        "brand": "CrowPanel"
+    },
+    "esp32-CROWPANEL-35C": {
+        "name": "ESP32-CROWPANEL-35C (3.5\" Capacitive)",
+        "site": true,   
+        "s3": true,
+        "brand": "CrowPanel"
+    },
+    "esp32-JC8048W550": {
+        "name": "Guition JC8048W550 (5\" Capacitive)",
+        "site": true,
+        "s3": true,
+        "brand": "Guition"
+    }
+}
