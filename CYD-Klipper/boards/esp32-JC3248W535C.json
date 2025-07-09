@@ -42,7 +42,10 @@
         "-DTOUCH_ADDR=0x3B",
         "-DLCD_BL_PIN=1",
         "-DCYD_BOARD_JC3248W535C",
-        "-DCYD_SCREEN_DISABLE_TOUCH_CALIBRATION"
+        "-DCYD_SCREEN_DISABLE_TOUCH_CALIBRATION",
+        "-DUSER_SETUP_LOADED",
+        "'-D ARDUINO_USB_CDC_ON_BOOT=0'",
+        "-DCYD_SCREEN_VERTICAL=1"
       ],
       "flash_mode": "qio",
 
