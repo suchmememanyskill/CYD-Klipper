@@ -274,6 +274,12 @@ bool SerialKlipperPrinter::set_power_device_state(const char* device_name, bool 
     return make_serial_request_nocontent(HttpGet, request.c_str());
 }
 
+#ifdef CYD_S3
+#define MAX_FILE_LIST_SIZE 200
+#else
+#define MAX_FILE_LIST_SIZE 20
+#endif
+
 Files SerialKlipperPrinter::get_files()
 {
     Files files_result = {0};
@@ -291,7 +297,7 @@ Files SerialKlipperPrinter::get_files()
         return files_result;
     }
 
-    parse_file_list(doc, files, 20);
+    parse_file_list(doc, files, MAX_FILE_LIST_SIZE);
     
     files_result.available_files = (char**)malloc(sizeof(char*) * files.size());
 

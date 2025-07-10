@@ -1,28 +1,5 @@
 import subprocess, os, shutil, json
 
-CYD_PORTS = [
-    "esp32-2432S028R", 
-    "esp32-3248S035C", 
-    "esp32-2432S032C-SD", 
-    "esp32-8048S043C-SD",
-    "esp32-8048S043C-SD-alt", 
-    "esp32-2432S024C-SD", 
-    "esp32-4827S043C-SD",
-    "esp32-3248S035C-V",
-    #"esp32-4827S043R-SD",
-    "esp32-CROWPANEL-28R",
-    "esp32-CROWPANEL-35C",
-    "esp32-JC8048W550",
-]
-
-ESP_S3_CHIPS = [
-    "esp32-8048S043C-SD",
-    "esp32-8048S043C-SD-alt",
-    "esp32-4827S043C-SD",
-    "esp32-CROWPANEL-35C",
-    "esp32-JC8048W550",
-]
-
 BASE_DIR = os.getcwd()
 
 def get_manifest(base_path : str, device_name : str, is_s3 : bool):

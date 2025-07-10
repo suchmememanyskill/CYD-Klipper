@@ -11,7 +11,6 @@
 #define CPU_FREQ_HIGH 240
 #define CPU_FREQ_LOW 80
 
-
 struct TouchPoint {
   uint8_t gesture;
   uint8_t num;

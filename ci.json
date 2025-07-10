@@ -52,6 +52,12 @@
         "s3": true,
         "brand": "CrowPanel"
     },
+    "esp32-JC4827W543C": {
+        "name": "ESP-JC4827W543C (4.3\" Capacitive)",
+        "site": true,
+        "s3": true,
+        "brand": "Guition"
+    },
     "esp32-JC8048W550": {
         "name": "Guition JC8048W550 (5\" Capacitive)",
         "site": true,
