@@ -172,6 +172,8 @@ static void make_vertical_slider(
     lv_obj_add_event_cb(top_label, position_change, LV_EVENT_MSG_RECEIVED, slider);
 }
 
+/* TODO: Make vertical button row with +1, +0.1, -0.1, -1, maybe with MAX - 30 */
+
 static void make_horizontal_slider(
     lv_obj_t* parent, 
     const char* axis, 
