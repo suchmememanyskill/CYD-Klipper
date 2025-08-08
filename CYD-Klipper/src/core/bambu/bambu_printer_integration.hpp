@@ -2,7 +2,7 @@
 
 #include "../printer_integration.hpp"
 #include <ArduinoJson.h>
-#include <WifiClientSecure.h>
+#include <WiFiClientSecure.h>
 
 enum BambuSpeedProfile 
 {
