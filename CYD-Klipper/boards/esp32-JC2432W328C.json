@@ -1,0 +1,86 @@
+{
+    "build": {
+      "arduino": {
+        "ldscript": "esp32_out.ld"
+      },
+      "core": "esp32",
+      "extra_flags": [
+        "-DUSER_SETUP_LOADED=1",
+        "-DILI9341_2_DRIVER=1",
+        "-DTFT_BACKLIGHT_ON=HIGH",
+        "-DTFT_BL=27",
+        "-DTFT_MISO=12",
+        "-DTFT_MOSI=13",
+        "-DTFT_SCLK=14",
+        "-DTFT_CS=15",
+        "-DTFT_DC=2",
+        "-DTFT_RST=-1",
+        "-DLOAD_GCLD=1",
+        "-DSPI_FREQUENCY=15999999",
+        "-DSPI_READ_FREQUENCY=20000000",
+
+        "-DCYD_SCREEN_HEIGHT_PX=240",
+        "-DCYD_SCREEN_WIDTH_PX=320",
+        "-DCYD_SCREEN_GAP_PX=8",
+        "-DCYD_SCREEN_MIN_BUTTON_HEIGHT_PX=35",
+        "-DCYD_SCREEN_MIN_BUTTON_WIDTH_PX=35",
+        "-DCYD_SCREEN_FONT=lv_font_montserrat_14",
+        "-DCYD_SCREEN_FONT_SMALL=lv_font_montserrat_10",
+        "-DCYD_SCREEN_SIDEBAR_SIZE_PX=40",
+        "-DCYD_SCREEN_DRIVER_ESP32_JC2432W328C=1",
+
+        "-DCYD_SCREEN_DISABLE_TOUCH_CALIBRATION=1",
+        "-DCYD_SCREEN_DISABLE_INVERT_COLORS=1",
+
+        "-DTOUCH_CST820=1",
+        "'-D TOUCH_SWAP_XY=true'",
+        "'-D TOUCH_SWAP_X=false'",
+        "'-D TOUCH_SWAP_Y=true'",
+
+        "'-D BOARD_HAS_TF'",
+        "'-D TF_CS=5'",
+        "'-D TF_SPI_MOSI=23'",
+        "'-D TF_SPI_SCLK=18'",
+        "'-D TF_SPI_MISO=19'",
+
+        "'-D BOARD_HAS_RGB_LED'",
+        "'-D RGB_LED_R=4'",
+        "'-D RGB_LED_G=16'",
+        "'-D RGB_LED_B=17'",
+
+        "'-D BOARD_HAS_CDS'",
+        "'-D CDS=34'",
+
+        "'-D BOARD_HAS_SPEAK'",
+        "'-D SPEAK=26'"
+      ],
+      "f_cpu": "240000000L",
+      "f_flash": "40000000L",
+      "flash_mode": "dio",
+      "mcu": "esp32",
+      "variant": "esp32"
+    },
+    "connectivity": [
+      "wifi",
+      "bluetooth",
+      "ethernet",
+      "can"
+    ],
+    "debug": {
+      "openocd_board": "esp-wroom-32.cfg"
+    },
+    "frameworks": [
+      "arduino",
+      "espidf"
+    ],
+    "name": "esp32-jc2432w28c",
+    "upload": {
+      "flash_size": "4MB",
+      "maximum_ram_size": 327680,
+      "maximum_size": 4194304,
+      "require_upload_port": true,
+      "speed": 460800
+    },
+    "url": "https://www.aliexpress.us/item/3256806543392861.html",
+    "vendor": "Guition"
+  }
