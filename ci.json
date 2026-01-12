@@ -63,5 +63,11 @@
         "site": true,
         "s3": true,
         "brand": "Guition"
+    },
+    "esp32-WAVESHARE-ESP32-S3-LCD7": {
+        "name": "Waveshare ESP32-S3-Touch-LCD-7 (7\" Capacitive)",
+        "site": true,
+        "s3": true,
+        "brand": "Waveshare"
     }
 }
